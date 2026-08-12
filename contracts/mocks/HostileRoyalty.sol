@@ -43,6 +43,7 @@ contract HostileRoyalty is ERC721 {
     function royaltyInfo(uint256, uint256 price) external view returns (address, uint256) {
         if (mode == Mode.Greedy) return (creator, price * 2);
         if (mode == Mode.Blackhole) return (address(0), price / 10);
+        // solhint-disable-next-line gas-custom-errors
         revert("royaltyInfo is not available");
     }
 
