@@ -2,81 +2,95 @@
    consign: the look.
 
    Design reference: drinkcollider.com. Taken as a language and rebuilt from
-   nothing: no CSS, markup, copy or asset came across. What was kept is the
-   grammar. Near-black ground, one warm metal accent, heavy geometric display
-   type against small quiet body text, cards with a generous radius and almost
-   no shadow, and a surface that stays smooth rather than textured.
+   nothing: no CSS, markup, copy or asset came across.
 
-   The vocabulary changed because the subject did. Their warm gold sells a
-   drink. Here it is money, and it is the seller's share of it, which is why
-   the accent is also a semantic colour on every scene.
+   What was kept is the grammar, and it is a specific one:
+
+   - Warm cream ground with near-black ink. Not a dark page.
+   - A giant wordmark, edge to edge, cropped by the viewport, that content
+     overlaps rather than clears. This is the signature and everything else is
+     quieter than it.
+   - Hard one-pixel rules and boxed sections. Corners are effectively square.
+     Nothing floats on a soft shadow.
+   - Pill buttons with a thin outline and small uppercase labels.
+   - Small hard-edged chips for anything that is data.
+   - One hot accent, orange, plus two cooler tones lifted from the product art.
+
+   The vocabulary changed because the subject did. Their orange sells a drink.
+   Here it is the seller's share of a sale, so the accent is a semantic colour
+   on every scene rather than decoration.
 
    base.css owns layout and declares colour roles with no hues in them. This
-   file supplies the hues, twice, once per theme.
+   file supplies the hues, twice, once per theme, and overrides the shapes.
    --------------------------------------------------------------------------- */
 
 :root {
-  --ground: #0e0f13;
-  --surface: #16181e;
-  --surface-2: #1d2027;
-  --line: #2a2e38;
-  --text: #f2eee6;
-  --dim: #98938a;
+  --ground: #f7f2ea;
+  --surface: #fffdf9;
+  --surface-2: #efe7d9;
+  --line: rgba(16, 14, 12, 0.2);
+  --rule: #100e0c;
+  --text: #0d0b0a;
+  --dim: #6a635a;
 
-  --accent: #e8b75d;
-  --warn: #d9a441;
-  --bad: #c4553d;
+  --accent: #d9530a;
+  --warn: #d9530a;
+  --bad: #b3311a;
 
-  --glow: rgba(232, 183, 93, 0.08);
-  --shadow: rgba(0, 0, 0, 0.5);
+  --glow: rgba(217, 83, 10, 0.06);
+  --shadow: rgba(30, 22, 14, 0.1);
 
-  /* The three shares of a sale. Each keeps its colour everywhere it appears,
-     so the bar, the ledger rows and the numbers all agree without a legend. */
-  --seller: #e8b75d;
-  --creator: #cd8462;
-  --market: #7fa88f;
+  /* The three shares of a sale. Orange is the seller because it is the
+     largest share and the loudest colour. The other two are lifted from the
+     product art on the reference, which is where its cooler tones live. */
+  --seller: #d9530a;
+  --creator: #6b5bd0;
+  --market: #2f8f76;
 
-  --settled: #7fa88f;
-  --reverted: #c4553d;
+  --settled: #2f7a55;
+  --reverted: #b3311a;
 
-  --glass: rgba(28, 31, 39, 0.62);
-  --glass-line: rgba(255, 255, 255, 0.09);
+  /* Collider's hero panel is a translucent cream plate over an image, with a
+     hard edge and no shadow. That is the only glass here. */
+  --glass: rgba(255, 253, 249, 0.72);
+  --glass-line: rgba(16, 14, 12, 0.22);
 
   --display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --r: 12px;
-  --band: 64rem;
+  --r: 2px;
+  --band: 66rem;
 }
 
-:root[data-theme="light"] {
-  --ground: #faf7f1;
-  --surface: #ffffff;
-  --surface-2: #f3eee4;
-  --line: #e2dacb;
-  --text: #171512;
-  --dim: #6b655b;
+:root[data-theme="dark"] {
+  --ground: #0c0b09;
+  --surface: #141210;
+  --surface-2: #1c1917;
+  --line: rgba(247, 242, 234, 0.22);
+  --rule: #f7f2ea;
+  --text: #f7f2ea;
+  --dim: #989186;
 
-  /* Gold that glows on charcoal is illegible mustard on paper, so the light
-     theme re-picks it rather than reusing it. Same lesson the chess demo
-     learned: a token that carries meaning cannot be derived from appearance. */
-  --accent: #9a6b18;
-  --warn: #a37516;
-  --bad: #a5402a;
+  /* Orange that reads on cream burns on near-black, so the dark theme
+     re-picks it rather than reusing it. A token that carries meaning must not
+     be derived from a token that carries appearance. */
+  --accent: #ff7a2f;
+  --warn: #ff7a2f;
+  --bad: #e2603f;
 
-  --glow: rgba(154, 107, 24, 0.07);
-  --shadow: rgba(60, 48, 26, 0.12);
+  --glow: rgba(255, 122, 47, 0.09);
+  --shadow: rgba(0, 0, 0, 0.5);
 
-  --seller: #9a6b18;
-  --creator: #a85c3c;
-  --market: #4a7259;
+  --seller: #ff7a2f;
+  --creator: #9a8bea;
+  --market: #4fc3a5;
 
-  --settled: #4a7259;
-  --reverted: #a5402a;
+  --settled: #56b98c;
+  --reverted: #e2603f;
 
-  --glass: rgba(255, 255, 255, 0.66);
-  --glass-line: rgba(23, 21, 18, 0.08);
+  --glass: rgba(20, 18, 16, 0.66);
+  --glass-line: rgba(247, 242, 234, 0.2);
 }
 
 /* --------------------------------------------------------------- typography */
@@ -86,14 +100,14 @@
 h2,
 h3 {
   font-family: var(--display);
-  letter-spacing: -0.02em;
 }
 
 .hero-title {
   font-weight: 800;
-  font-size: clamp(2.6rem, 7vw, 4.6rem);
-  line-height: 0.98;
-  max-width: 16ch;
+  font-size: clamp(2.7rem, 7.4vw, 5rem);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  max-width: 15ch;
 }
 
 .hero-title em {
@@ -103,36 +117,88 @@ h3 {
 
 .wordmark {
   font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.lede {
-  max-width: 52ch;
-  font-size: 1.05rem;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
 }
 
 h2 {
-  font-weight: 700;
-  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+  letter-spacing: -0.03em;
 }
 
 h3 {
   font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.lede {
+  max-width: 50ch;
   font-size: 1.05rem;
 }
 
-/* -------------------------------------------------------------------- glass */
+/* --------------------------------------------------- the giant wordmark */
 
-/* One rule, used by every panel on the page. `backdrop-filter` is the whole
-   effect; the hairline and the shadow are what stop it reading as a flat
-   translucent box. */
+/*
+ * The reference's signature: the name at a size the viewport cannot hold, cut
+ * off at both edges, with the content sitting over it rather than below it.
+ *
+ * `overflow: clip` on the band rather than `hidden`, so the page never grows a
+ * horizontal scrollbar on a narrow screen. Pointer events are off because it
+ * is a background that happens to be text, and selecting it by accident while
+ * trying to select a paragraph is annoying.
+ */
+.megaword {
+  position: relative;
+  overflow: clip;
+  margin: 0;
+  line-height: 0.72;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.megaword span {
+  display: block;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(5rem, 21vw, 17rem);
+  letter-spacing: -0.055em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Sits behind the hero panel and is overlapped by it, which is the whole
+   effect. Negative margin pulls the panel up into the letterforms. */
+.hero .megaword {
+  margin: 0 0 -1.6rem;
+}
+
+@media (max-width: 40rem) {
+  .hero .megaword {
+    margin-bottom: -0.7rem;
+  }
+}
+
+/* ------------------------------------------------------------- boxed panels */
+
+/*
+ * Hard rules, square corners, no shadow. The reference boxes its sections with
+ * a single hairline and lets the grid do the work that a card shadow would do
+ * elsewhere.
+ */
 .glass {
+  position: relative;
   background: var(--glass);
   border: 1px solid var(--glass-line);
   border-radius: var(--r);
-  backdrop-filter: blur(16px) saturate(1.3);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
-  box-shadow: 0 1px 2px var(--shadow), 0 12px 32px -20px var(--shadow);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+}
+
+.btn {
+  border-radius: 999px;
 }
 
 /* ------------------------------------------------------------------ reveals */
@@ -144,7 +210,7 @@ h3 {
    reproduce it. */
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(12px);
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
@@ -165,32 +231,40 @@ h3 {
 
 .scene {
   margin: 1.5rem 0 0;
-  padding: 1.5rem;
+  padding: 1.4rem;
 }
 
 .scene-head {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1rem;
-  align-items: baseline;
+  gap: 0.7rem 1rem;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--glass-line);
 }
 
+/* A hard chip, the way the reference labels a price or a badge. */
 .scene-note {
   font-family: var(--mono);
-  font-size: 0.76rem;
-  color: var(--dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+  padding: 0.2rem 0.5rem;
 }
 
-/* The split bar: one sale, three shares, drawn to scale. */
+/* The split bar: one sale, three shares, drawn to scale. Square, ruled, and
+   divided by hairlines rather than by gaps. */
 .split-bar {
   display: flex;
-  height: 3rem;
-  border-radius: 8px;
+  height: 2.9rem;
+  border-radius: var(--r);
   overflow: hidden;
   background: var(--surface-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--rule);
 }
 
 .split-bar span {
@@ -212,43 +286,41 @@ h3 {
 .split-legend {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 0.75rem;
   margin-top: 1rem;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
 }
 
+/* One shared rule between cells, the way a product grid divides itself. */
 .split-legend div {
-  border-left: 3px solid var(--line);
-  padding-left: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 1px solid var(--glass-line);
+}
+
+.split-legend div:first-child {
+  border-left: 0;
 }
 
 .split-legend .k {
   display: block;
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   color: var(--dim);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.15rem;
 }
 
 .split-legend .v {
   font-family: var(--mono);
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
-.split-legend .l-seller {
-  border-color: var(--seller);
-}
 .split-legend .l-seller .v {
   color: var(--seller);
 }
-.split-legend .l-creator {
-  border-color: var(--creator);
-}
 .split-legend .l-creator .v {
   color: var(--creator);
-}
-.split-legend .l-market {
-  border-color: var(--market);
 }
 .split-legend .l-market .v {
   color: var(--market);
@@ -258,22 +330,35 @@ h3 {
 .lanes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-  gap: 1rem;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
 }
 
 .lane {
   padding: 1rem;
-  border-radius: var(--r);
-  border: 1px solid var(--line);
-  background: var(--surface);
+  border-left: 1px solid var(--glass-line);
+}
+
+.lane:first-child {
+  border-left: 0;
+}
+
+@media (max-width: 40rem) {
+  .lane {
+    border-left: 0;
+    border-top: 1px solid var(--glass-line);
+  }
+  .lane:first-child {
+    border-top: 0;
+  }
 }
 
 .lane.is-reverted {
-  border-color: var(--reverted);
+  box-shadow: inset 3px 0 0 var(--reverted);
 }
 
 .lane.is-settled {
-  border-color: var(--settled);
+  box-shadow: inset 3px 0 0 var(--settled);
 }
 
 .lane h3 {
@@ -281,7 +366,7 @@ h3 {
 }
 
 .lane .lane-sub {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--dim);
   margin: 0 0 0.9rem;
 }
@@ -291,18 +376,18 @@ h3 {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .steps li {
   display: grid;
-  grid-template-columns: 1.35rem 1fr;
-  gap: 0.55rem;
+  grid-template-columns: 1.3rem 1fr;
+  gap: 0.5rem;
   align-items: start;
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   line-height: 1.45;
-  opacity: 0.25;
+  opacity: 0.28;
   transition: opacity 0.3s ease;
 }
 
@@ -311,7 +396,7 @@ h3 {
 }
 
 .steps li .mark {
-  width: 1.35rem;
+  width: 1.3rem;
   text-align: center;
   color: var(--dim);
 }
@@ -328,10 +413,10 @@ h3 {
 
 .verdict {
   margin-top: 0.9rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--line);
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--glass-line);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   min-height: 1.2rem;
 }
@@ -357,7 +442,7 @@ h3 {
   align-items: center;
   gap: 0.6rem;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   user-select: none;
 }
 
@@ -370,10 +455,10 @@ h3 {
 
 .switch .track {
   width: 2.6rem;
-  height: 1.5rem;
+  height: 1.45rem;
   border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
+  background: transparent;
+  border: 1px solid var(--rule);
   position: relative;
   transition: background 0.2s ease, border-color 0.2s ease;
   flex: none;
@@ -383,9 +468,9 @@ h3 {
   content: "";
   position: absolute;
   top: 50%;
-  left: 0.18rem;
-  width: 1.05rem;
-  height: 1.05rem;
+  left: 0.16rem;
+  width: 1rem;
+  height: 1rem;
   border-radius: 50%;
   background: var(--dim);
   transform: translateY(-50%);
@@ -393,12 +478,11 @@ h3 {
 }
 
 .switch input:checked + .track {
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
   border-color: var(--accent);
 }
 
 .switch input:checked + .track::after {
-  transform: translate(1.05rem, -50%);
+  transform: translate(1.1rem, -50%);
   background: var(--accent);
 }
 
@@ -407,65 +491,75 @@ h3 {
   outline-offset: 2px;
 }
 
-/* The mutation list. Click a defence to delete it and watch a test go red. */
+/* The mutation list. Click a defence to delete it and watch a test go red.
+   One box, hairline-divided, rather than eight floating cards. */
 .mutations {
   display: grid;
-  gap: 0.5rem;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
 }
 
 .mutation {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.5rem 1rem;
+  gap: 0.35rem 1rem;
   align-items: center;
   width: 100%;
   text-align: left;
-  padding: 0.75rem 0.9rem;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
+  padding: 0.7rem 0.85rem;
+  border: 0;
+  border-top: 1px solid var(--glass-line);
+  background: transparent;
   color: inherit;
   font: inherit;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: background 0.15s ease;
+}
+
+.mutation:first-child {
+  border-top: 0;
 }
 
 .mutation:hover {
-  border-color: var(--accent);
+  background: var(--glow);
 }
 
 .mutation:focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .mutation .what {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .mutation .caught {
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--dim);
   grid-column: 1 / -1;
 }
 
 .mutation .state {
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--settled);
+  color: var(--text);
   white-space: nowrap;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+  padding: 0.15rem 0.4rem;
 }
 
 .mutation.is-broken {
-  border-color: var(--reverted);
-  background: color-mix(in srgb, var(--reverted) 8%, var(--surface));
+  background: var(--glow);
+  box-shadow: inset 3px 0 0 var(--reverted);
 }
 
 .mutation.is-broken .state {
   color: var(--reverted);
+  border-color: var(--reverted);
 }
 
 .mutation.is-broken .caught {
@@ -476,10 +570,19 @@ h3 {
 
 @media (max-width: 40rem) {
   .scene {
-    padding: 1.1rem;
+    padding: 1rem;
   }
 
   .split-bar {
-    height: 2.4rem;
+    height: 2.3rem;
+  }
+
+  .split-legend div {
+    border-left: 0;
+    border-top: 1px solid var(--glass-line);
+  }
+
+  .split-legend div:first-child {
+    border-top: 0;
   }
 }

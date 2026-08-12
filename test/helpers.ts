@@ -4,10 +4,7 @@ import { parseEther } from "viem";
 /** 2.5% to the marketplace. */
 export const FEE_BPS = 250;
 
-/** 5% to the creator, declared by the collection through ERC-2981. */
-export const ROYALTY_BPS = 500n;
-
-/** The asking price every test uses, chosen so all three shares divide exactly. */
+/** The asking price every test uses. */
 export const PRICE = parseEther("1");
 
 export const MAX_SUPPLY = 100n;
@@ -28,10 +25,8 @@ export async function fixture() {
   const collection = await viem.deployContract("ConsignCollection", [
     "Consign Demo",
     "CNSGN",
-    "ipfs://demo/",
     MAX_SUPPLY,
     creator!.account.address,
-    ROYALTY_BPS,
   ]);
 
   const publicClient = await viem.getPublicClient();
@@ -80,6 +75,29 @@ export async function listed(f: Fixture, price: bigint = PRICE): Promise<bigint>
 }
 
 /**
+ * How a sale of `tokenId` at `price` should divide.
+ *
+ * Both rates are read back from the contracts rather than written down here.
+ * The royalty is per token, and the fee is whatever the marketplace is
+ * currently charging, which a test is free to change. A hardcoded figure would
+ * stop testing the sale and start testing the constant, and it did: this
+ * helper used `FEE_BPS` and disagreed with the one test that moves the fee.
+ */
+export async function splitOf(
+  f: Fixture,
+  tokenId: bigint,
+  price: bigint = PRICE,
+  collection: {
+    read: { royaltyInfo: (args: [bigint, bigint]) => Promise<readonly [string, bigint]> };
+  } = f.collection,
+): Promise<{ creator: string; royalty: bigint; fee: bigint; toSeller: bigint }> {
+  const [receiver, royalty] = await collection.read.royaltyInfo([tokenId, price]);
+  const fee = bps(price, BigInt(await f.market.read.feeBps()));
+
+  return { creator: receiver, royalty, fee, toSeller: price - royalty - fee };
+}
+
+/**
  * Assert that a call reverts, and that it reverts for the stated reason.
  *
  * Matching on the name matters more than it looks. A test that only asserts
@@ -101,4 +119,12 @@ export async function rejects(promise: Promise<unknown>, expected: string): Prom
 
 export function bps(amount: bigint, points: bigint): bigint {
   return (amount * points) / 10_000n;
+}
+
+/** Decode a base64 data URI into the string it carries. */
+export function fromDataUri(uri: string): string {
+  const marker = ";base64,";
+  const at = uri.indexOf(marker);
+  if (at === -1) throw new Error(`Not a base64 data URI: ${uri.slice(0, 60)}`);
+  return Buffer.from(uri.slice(at + marker.length), "base64").toString("utf8");
 }

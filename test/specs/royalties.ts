@@ -37,12 +37,13 @@ describe("royalties", () => {
     await f.collection.write.mint([f.seller.account.address]);
     await f.collection.write.approve([f.market.address, 1n], { account: f.seller.account });
 
+    // Read the rate rather than assume it. The collection sets a royalty per
+    // token now, so a hardcoded figure would test the constant, not the sale.
+    const [, expected] = await f.collection.read.royaltyInfo([1n, PRICE]);
     await sellThrough(f, f.collection, 1n);
 
-    assert.equal(
-      await f.market.read.proceedsOf([f.creator.account.address]),
-      bps(PRICE, 500n),
-    );
+    assert.equal(await f.market.read.proceedsOf([f.creator.account.address]), expected);
+    assert.ok(expected > 0n, "and the rate must not be zero, or this proves nothing");
   });
 
   it("caps a collection demanding more than the sale price", async () => {
