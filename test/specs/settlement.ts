@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { parseEther } from "viem";
 
-import { fixture, listed, mintTo, rejects, bps, PRICE, FEE_BPS, ROYALTY_BPS } from "../helpers.js";
+import { fixture, listed, mintTo, rejects, splitOf, PRICE } from "../helpers.js";
 
 /**
  * These are the tests the contract exists for. Each one deletes a defence in
@@ -21,10 +21,9 @@ describe("settlement", () => {
     const after = await f.publicClient.getBalance({ address: f.seller.account.address });
 
     assert.equal(after, before, "the seller's balance must not move until they withdraw");
-    assert.equal(
-      await f.market.read.proceedsOf([f.seller.account.address]),
-      PRICE - bps(PRICE, ROYALTY_BPS) - bps(PRICE, BigInt(FEE_BPS)),
-    );
+
+    const { toSeller } = await splitOf(f, tokenId);
+    assert.equal(await f.market.read.proceedsOf([f.seller.account.address]), toSeller);
   });
 
   it("pays out on withdrawal and zeroes the balance", async () => {

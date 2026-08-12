@@ -2,9 +2,9 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAddress } from "viem";
 
-import { fixture, mintTo, rejects, MAX_SUPPLY, ROYALTY_BPS, PRICE, bps } from "../helpers.js";
+import { fixture, mintTo, rejects, fromDataUri, MAX_SUPPLY, PRICE } from "../helpers.js";
 
-describe("ConsignCollection", () => {
+describe("PlinthCollection", () => {
   it("mints sequential ids starting at one", async () => {
     const f = await fixture();
 
@@ -21,16 +21,6 @@ describe("ConsignCollection", () => {
     await mintTo(f, f.seller.account.address);
 
     await rejects(f.collection.read.ownerOf([0n]), "ERC721NonexistentToken");
-  });
-
-  it("records the owner of a freshly minted token", async () => {
-    const f = await fixture();
-    const tokenId = await mintTo(f, f.seller.account.address);
-
-    assert.equal(
-      getAddress(await f.collection.read.ownerOf([tokenId])),
-      getAddress(f.seller.account.address),
-    );
   });
 
   it("transfers between accounts", async () => {
@@ -50,13 +40,11 @@ describe("ConsignCollection", () => {
 
   it("refuses to mint past the declared supply", async () => {
     const f = await fixture();
-    const small = await f.viem.deployContract("ConsignCollection", [
+    const small = await f.viem.deployContract("PlinthCollection", [
       "Tiny",
       "TINY",
-      "ipfs://tiny/",
       2n,
       f.creator.account.address,
-      ROYALTY_BPS,
     ]);
 
     await small.write.mint([f.seller.account.address]);
@@ -69,74 +57,159 @@ describe("ConsignCollection", () => {
     const f = await fixture();
 
     assert.equal(await f.collection.read.maxSupply(), MAX_SUPPLY);
-    // `maxSupply` is immutable, so there is no setter to call. The assertion
-    // that matters is that the ABI carries no way to move it.
+
     const names = f.collection.abi
       .filter((entry) => entry.type === "function")
       .map((entry) => entry.name);
     assert.ok(!names.some((name) => /setMaxSupply|increaseSupply/i.test(name)));
   });
 
-  it("reports an ERC-2981 royalty proportional to the price", async () => {
+  it("lists every token an address owns", async () => {
+    const f = await fixture();
+    await mintTo(f, f.seller.account.address);
+    await mintTo(f, f.buyer.account.address);
+    await mintTo(f, f.seller.account.address);
+
+    const sellers = await f.collection.read.tokensOf([f.seller.account.address]);
+    const buyers = await f.collection.read.tokensOf([f.buyer.account.address]);
+
+    assert.deepEqual([...sellers], [1n, 3n]);
+    assert.deepEqual([...buyers], [2n]);
+  });
+
+  it("lists nothing for an address holding nothing", async () => {
+    const f = await fixture();
+    await mintTo(f, f.seller.account.address);
+
+    assert.deepEqual([...(await f.collection.read.tokensOf([f.stranger.account.address]))], []);
+  });
+
+  it("follows a token when it changes hands", async () => {
     const f = await fixture();
     const tokenId = await mintTo(f, f.seller.account.address);
 
-    const [receiver, amount] = await f.collection.read.royaltyInfo([tokenId, PRICE]);
-
-    assert.equal(getAddress(receiver), getAddress(f.creator.account.address));
-    assert.equal(amount, bps(PRICE, ROYALTY_BPS));
-  });
-
-  it("refuses a royalty above its own cap at construction", async () => {
-    const f = await fixture();
-
-    await rejects(
-      f.viem.deployContract("ConsignCollection", [
-        "Greedy",
-        "GRDY",
-        "ipfs://greedy/",
-        10n,
-        f.creator.account.address,
-        1001n,
-      ]),
-      "RoyaltyTooHigh",
+    await f.collection.write.transferFrom(
+      [f.seller.account.address, f.buyer.account.address, tokenId],
+      { account: f.seller.account },
     );
+
+    assert.deepEqual([...(await f.collection.read.tokensOf([f.seller.account.address]))], []);
+    assert.deepEqual([...(await f.collection.read.tokensOf([f.buyer.account.address]))], [tokenId]);
   });
 
-  it("builds a token URI from the base and the id", async () => {
+  // --------------------------------------------------------------- metadata
+
+  it("builds its metadata on chain, with no link to anywhere", async () => {
     const f = await fixture();
     const tokenId = await mintTo(f, f.seller.account.address);
 
-    assert.equal(await f.collection.read.tokenURI([tokenId]), "ipfs://demo/1.json");
+    const uri = await f.collection.read.tokenURI([tokenId]);
+
+    assert.ok(uri.startsWith("data:application/json;base64,"));
+    assert.ok(!uri.includes("ipfs"), "nothing may point at a file somebody has to keep paying for");
+    assert.ok(!uri.includes("http"), "nor at a server that can stop answering");
   });
 
-  it("has no URI for a token that does not exist", async () => {
+  it("carries a name, a description and an embedded image", async () => {
+    const f = await fixture();
+    const tokenId = await mintTo(f, f.seller.account.address);
+
+    const meta = JSON.parse(fromDataUri(await f.collection.read.tokenURI([tokenId])));
+
+    assert.equal(meta.name, "Plinth Demo #1");
+    assert.ok(meta.description.length > 20);
+    assert.ok(meta.image.startsWith("data:image/svg+xml;base64,"));
+  });
+
+  it("embeds an image that is really an SVG", async () => {
+    const f = await fixture();
+    const tokenId = await mintTo(f, f.seller.account.address);
+
+    const meta = JSON.parse(fromDataUri(await f.collection.read.tokenURI([tokenId])));
+    const svg = fromDataUri(meta.image);
+
+    assert.ok(svg.startsWith("<svg "), "a wallet will try to render this");
+    assert.ok(svg.trimEnd().endsWith("</svg>"), "and an unclosed tag renders as nothing");
+    assert.ok(svg.includes('xmlns="http://www.w3.org/2000/svg"'), "without this it is not an image");
+  });
+
+  it("has no setter for its metadata, because there is nowhere to set it to", async () => {
+    const f = await fixture();
+
+    const names = f.collection.abi
+      .filter((entry) => entry.type === "function")
+      .map((entry) => entry.name);
+
+    assert.ok(!names.some((name) => /setBaseURI|setTokenURI|freezeMetadata/i.test(name)));
+  });
+
+  it("draws the same picture for the same id, every time", async () => {
+    const f = await fixture();
+    const tokenId = await mintTo(f, f.seller.account.address);
+
+    const first = await f.collection.read.imageOf([tokenId]);
+    const second = await f.collection.read.imageOf([tokenId]);
+
+    assert.equal(first, second);
+  });
+
+  it("draws a different picture for a different id", async () => {
+    const f = await fixture();
+    await mintTo(f, f.seller.account.address);
+    await mintTo(f, f.seller.account.address);
+
+    assert.notEqual(await f.collection.read.imageOf([1n]), await f.collection.read.imageOf([2n]));
+  });
+
+  it("has no URI and no image for a token that does not exist", async () => {
     const f = await fixture();
 
     await rejects(f.collection.read.tokenURI([7n]), "NoSuchToken");
+    await rejects(f.collection.read.imageOf([7n]), "NoSuchToken");
   });
 
-  it("lets the owner move the metadata, once, and then never again", async () => {
+  // --------------------------------------------------------------- royalties
+
+  it("registers a royalty per token, inside its own ceiling", async () => {
+    const f = await fixture();
+
+    for (let i = 0; i < 5; i++) {
+      const tokenId = await mintTo(f, f.seller.account.address);
+      const [receiver, amount] = await f.collection.read.royaltyInfo([tokenId, 10_000n]);
+
+      assert.equal(getAddress(receiver), getAddress(f.creator.account.address));
+      assert.ok(amount >= 250n, `token ${tokenId} pays ${amount}, under the floor`);
+      assert.ok(amount <= 1000n, `token ${tokenId} pays ${amount}, over the ceiling`);
+    }
+  });
+
+  /**
+   * The one that matters. The picture states a royalty; `royaltyInfo` states a
+   * royalty. If those two ever disagree, the art is a claim about money that
+   * the contract will not honour.
+   */
+  it("draws exactly the royalty it charges", async () => {
+    const f = await fixture();
+
+    for (let i = 0; i < 5; i++) {
+      const tokenId = await mintTo(f, f.seller.account.address);
+
+      const [, amount] = await f.collection.read.royaltyInfo([tokenId, 10_000n]);
+      const drawn = `${amount / 100n}.${(amount % 100n) / 10n}% ROYALTY`;
+      const svg = await f.collection.read.imageOf([tokenId]);
+
+      assert.ok(svg.includes(drawn), `token ${tokenId} draws something other than ${drawn}`);
+    }
+  });
+
+  it("scales the royalty with the sale price", async () => {
     const f = await fixture();
     const tokenId = await mintTo(f, f.seller.account.address);
 
-    await f.collection.write.setBaseURI(["ipfs://moved/"]);
-    assert.equal(await f.collection.read.tokenURI([tokenId]), "ipfs://moved/1.json");
+    const [, atOne] = await f.collection.read.royaltyInfo([tokenId, PRICE]);
+    const [, atTen] = await f.collection.read.royaltyInfo([tokenId, PRICE * 10n]);
 
-    await f.collection.write.freezeMetadata();
-
-    assert.equal(await f.collection.read.metadataFrozen(), true);
-    await rejects(f.collection.write.setBaseURI(["ipfs://again/"]), "MetadataIsFrozen");
-    assert.equal(await f.collection.read.tokenURI([tokenId]), "ipfs://moved/1.json");
-  });
-
-  it("keeps metadata away from everyone but the owner", async () => {
-    const f = await fixture();
-
-    await rejects(
-      f.collection.write.setBaseURI(["ipfs://hijack/"], { account: f.stranger.account }),
-      "OwnableUnauthorizedAccount",
-    );
+    assert.equal(atTen, atOne * 10n);
   });
 
   it("announces both ERC-721 and ERC-2981 through ERC-165", async () => {

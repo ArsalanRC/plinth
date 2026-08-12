@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAddress } from "viem";
 
-import { fixture, listed, rejects, bps, PRICE, FEE_BPS, ROYALTY_BPS } from "../helpers.js";
+import { fixture, listed, rejects, bps, splitOf, PRICE, FEE_BPS } from "../helpers.js";
 
 describe("fees", () => {
   it("starts with the fee it was constructed with", async () => {
@@ -87,9 +87,13 @@ describe("fees", () => {
       value: PRICE,
     });
 
-    const toSeller = await f.market.read.proceedsOf([f.seller.account.address]);
+    const paid = await f.market.read.proceedsOf([f.seller.account.address]);
+    const { toSeller } = await splitOf(f, tokenId);
 
-    assert.equal(toSeller, PRICE - bps(PRICE, 1000n) - bps(PRICE, ROYALTY_BPS));
-    assert.equal(toSeller, (PRICE * 85n) / 100n, "the seller keeps at least 85%");
+    assert.equal(paid, toSeller);
+
+    // Worst legal case: the fee at its 10% ceiling and the royalty at its own.
+    // Whatever rate this token happens to carry, the seller cannot fall below 80%.
+    assert.ok(paid >= (PRICE * 80n) / 100n, `the seller kept ${paid}, under the floor`);
   });
 });

@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { getAddress, parseEther } from "viem";
 
-import { fixture, listed, rejects, bps, PRICE, FEE_BPS, ROYALTY_BPS } from "../helpers.js";
+import { fixture, listed, rejects, bps, splitOf, PRICE, FEE_BPS } from "../helpers.js";
 
 describe("buying", () => {
   it("moves the token to the buyer", async () => {
@@ -47,9 +47,7 @@ describe("buying", () => {
       value: PRICE,
     });
 
-    const royalty = bps(PRICE, ROYALTY_BPS);
-    const fee = bps(PRICE, BigInt(FEE_BPS));
-    const toSeller = PRICE - royalty - fee;
+    const { royalty, fee, toSeller } = await splitOf(f, tokenId);
 
     assert.equal(await f.market.read.proceedsOf([f.creator.account.address]), royalty);
     assert.equal(await f.market.read.proceedsOf([f.feeTaker.account.address]), fee);
@@ -160,8 +158,9 @@ describe("buying", () => {
     assert.equal(getAddress(sold.buyer!), getAddress(f.buyer.account.address));
     assert.equal(getAddress(sold.seller!), getAddress(f.seller.account.address));
     assert.equal(sold.price, PRICE);
-    assert.equal(sold.royalty, bps(PRICE, ROYALTY_BPS));
-    assert.equal(sold.fee, bps(PRICE, BigInt(FEE_BPS)));
+    const { royalty, fee } = await splitOf(f, tokenId);
+    assert.equal(sold.royalty, royalty);
+    assert.equal(sold.fee, fee);
   });
 
   it("sells at zero fee when the marketplace charges nothing", async () => {
@@ -174,10 +173,8 @@ describe("buying", () => {
       value: PRICE,
     });
 
+    const { royalty } = await splitOf(f, tokenId);
     assert.equal(await f.market.read.proceedsOf([f.feeTaker.account.address]), 0n);
-    assert.equal(
-      await f.market.read.proceedsOf([f.seller.account.address]),
-      PRICE - bps(PRICE, ROYALTY_BPS),
-    );
+    assert.equal(await f.market.read.proceedsOf([f.seller.account.address]), PRICE - royalty);
   });
 });

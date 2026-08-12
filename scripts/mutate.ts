@@ -37,7 +37,7 @@ interface Mutation {
 const MUTATIONS: Mutation[] = [
   {
     name: "withdraw zeroes the balance before paying out",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: `    function withdraw() external nonReentrant {
@@ -61,7 +61,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "buy deletes the listing before the token moves",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "    function buy(address collection, uint256 tokenId) external payable nonReentrant {",
@@ -89,7 +89,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "the seller is credited rather than paid during the sale",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "        _credit(item.seller, toSeller);",
@@ -101,7 +101,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "a collection's royalty claim is capped",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: `            uint256 cap = (price * MAX_ROYALTY_BPS) / BPS_DENOMINATOR;
@@ -116,7 +116,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "a royalty naming the zero address is refused",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "            if (receiver == address(0) || reported == 0) return (address(0), 0);",
@@ -127,7 +127,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "buy checks the listing can still be filled",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "        if (!_fillable(collection, tokenId, item.seller)) revert ListingStale();\n",
@@ -138,7 +138,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "the marketplace fee is bounded by a constant",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "        if (bps > MAX_FEE_BPS) revert FeeTooHigh(MAX_FEE_BPS, bps);\n",
@@ -149,7 +149,7 @@ const MUTATIONS: Mutation[] = [
   },
   {
     name: "payment must be exact, not merely sufficient",
-    file: "contracts/Consign.sol",
+    file: "contracts/Plinth.sol",
     edits: [
       {
         find: "        if (msg.value != item.price) revert WrongPayment(item.price, msg.value);",

@@ -1,15 +1,29 @@
-# consign
+# plinth
 
 [English](./README.md) · **Deutsch**
 
-### [→ Ansehen, wie abgerechnet wird](https://arsalanrc.github.io/consign)
+### [→ Marktplatz öffnen](https://arsalanrc.github.io/plinth)
 
-Ein Kommissions-Marktplatz für ERC-721-Token. Der Verkäufer behält den Token,
-und der Vertrag hält nichts außer dem Geld des Käufers, und das nur so lange,
-bis es jemand abholt.
+Ein NFT-Marktplatz auf Polygon. Token minten, einstellen, den von jemand
+anderem kaufen. Die Grafik entsteht on chain, der Verkäufer behält den Token bis
+zum Verkauf, und während des Verkaufs wird niemand ausgezahlt.
 
-Solidity 0.8.28, Hardhat 3, OpenZeppelin. 70 Tests. Jede Absicherung darin wurde
-absichtlich gelöscht, um zu prüfen, ob ein Test das überhaupt merkt.
+Kein Server, kein Konto, keine Datenbank. Die Seite ist statisch, und sie redet
+ganz ohne Wallet-Library mit der Chain.
+
+Solidity 0.8.28, Hardhat 3, OpenZeppelin. 100 Tests.
+
+---
+
+## Ohne Wallet ausprobieren
+
+Kaum jemand installiert eine Browser-Extension, nur um sich ein Portfolio-Stück
+anzusehen. Also läuft der ganze Marktplatz auf erfundenen Daten, solange niemand
+eine verbindet. Jeder Knopf funktioniert, und jede Ablehnung ist die des
+Vertrags: den eigenen Token zu kaufen scheitert dort aus demselben Grund wie on
+chain.
+
+Eine Demo, die nur den guten Fall zeigt, bringt einem etwas Falsches bei.
 
 ---
 
@@ -24,8 +38,8 @@ Ein Listing erteilt ein Approval. Bewegt wird nichts, bis jemand kauft.
 Ein Marktplatz mit Verwahrung kann den Token hinter dem eigenen Bug einsperren,
 und das ist der schlimmere Fehler, weil er das Einzige trifft, was dem Verkäufer
 wirklich gehört. Der Preis dafür, sich herauszuhalten: ein Listing kann
-veralten. Also prüft `buy` genau das, bevor irgendetwas abgerechnet wird. Der
-Verkäufer muss den Token noch besitzen. Das Approval muss noch stehen.
+veralten. Also prüft `buy` genau das. Der Verkäufer muss den Token noch
+besitzen. Das Approval muss noch stehen.
 
 Ein veraltetes Listing darf jeder aufräumen. Verkäufer, die weitergezogen sind,
 kommen dafür nicht zurück, und bis es jemand anderes tut, steht das Angebot in
@@ -49,7 +63,7 @@ Jeder Vertrag, der ein Listing bepreist oder beleiht, lässt sich in genau diese
 Moment zum Lesen bringen. Löscht man erst danach, sieht jeder dieser Leser einen
 Token, den sein alter Besitzer immer noch zum Verkauf anbietet, obwohl er ihm
 längst nicht mehr gehört. Das ist eine wahre Antwort auf die falsche Frage.
-Read-only Reentrancy hat auf genau dieser Form schon echtes Geld gekostet.
+Read-only Reentrancy hat auf genau diesem Fehler schon echtes Geld gekostet.
 
 ### Royalties sind bei zehn Prozent gedeckelt
 
@@ -57,9 +71,8 @@ Read-only Reentrancy hat auf genau dieser Form schon echtes Geld gekostet.
 
 Eine Collection kann mehr Royalty melden, als der Verkauf überhaupt einbringt.
 Ohne Deckel unterläuft die Rechnung den Anteil des Verkäufers, und danach
-revertet jeder Verkauf dieser Collection, dauerhaft. Kaputt aussehen würde dabei
-der Marktplatz. Der Deckel hält den Verkauf am Leben, und er hält den Schaden in
-der Collection, die ihn verursacht hat.
+revertet jeder Verkauf dieser Collection, dauerhaft. Der Deckel hält den Verkauf
+am Leben, und er hält den Schaden in der Collection, die ihn verursacht hat.
 
 Eine Royalty an die Nulladresse wird ebenfalls abgelehnt, denn das wäre keine
 fehlgeschlagene Zahlung, sondern eine erfolgreiche, die niemand jemals abholen
@@ -67,12 +80,50 @@ kann.
 
 ---
 
+## Die Grafik liegt on chain
+
+`tokenURI` liefert ein base64-JSON-Dokument mit dem Bild darin. Kein IPFS-Hash,
+kein Pinning-Dienst, kein Gateway. Das Bild entsteht bei jedem Aufruf neu aus
+der Token-ID und hält damit genau so lange wie die Chain.
+
+Angefangen hat das als der übliche Link zu IPFS. Der zeigte auf nichts, und das
+ist derselbe echte Defekt wie eine Install-Zeile, die nie veröffentlicht wurde.
+
+Jeder Token zeichnet seine eigene Royalty: ein Balken, geteilt dort, wo der
+Anteil des Creators liegt. Ein Test stellt sicher, dass Bild und `royaltyInfo`
+niemals auseinanderlaufen. Eine Grafik, die eine Zahl behauptet, die ihr eigener
+Vertrag nicht einlöst, ist Dekoration im Kostüm von Daten.
+
+Sie zeichnet die Royalty und sonst nichts, mit Absicht. Eine Gebühr gäbe das
+bessere Bild, und die Collection kann sie unmöglich kennen.
+
+---
+
+## Keine Wallet-Library
+
+`site/abi.js` kodiert Aufrufe und dekodiert Rückgaben von Hand. Kein ethers,
+kein viem, nichts von einem CDN. Ein Marktplatz-Frontend zieht sonst hundert
+Kilobyte fremden Code, um Hexadezimal zu formatieren.
+
+Die Selektoren sind Konstanten statt berechnet, denn berechnen bräuchte
+keccak256, und das gibt es im Browser nicht. Eine Hash-Implementierung
+auszuliefern, um siebenundzwanzig Hex-Strings nicht tippen zu müssen, ist ein
+schlechter Tausch.
+
+Vertretbar macht das erst der Test. `test/specs/abi.ts` deployt beide Verträge
+auf eine echte Chain, schickt echte Call-Daten durch diesen Codec und vergleicht
+jede Antwort mit dem typisierten Vertrag. Ein falscher Encoder wirft nämlich
+nicht. Er erzeugt sauberes Hexadezimal, das der Node falsch liest, und gegen
+sich selbst getestet beweist er gar nichts.
+
+---
+
 ## Der Mutationstest
 
 Ein Sicherheitstest, der auch gegen einen ungeschützten Vertrag durchläuft, ist
-eine Behauptung und keine Prüfung, und ansehen kann man den Unterschied nicht.
-Also löscht `pnpm mutate` jede Absicherung einzeln. Bleibt die Suite grün,
-schlägt der Lauf fehl.
+eine Behauptung und keine Prüfung. Ansehen kann man den Unterschied nicht. Also
+löscht `pnpm mutate` jede Absicherung einzeln. Bleibt die Suite grün, schlägt
+der Lauf fehl.
 
 Beim ersten Lauf hat er zwei hohle Tests gefunden. Beide sahen gut aus.
 
@@ -87,27 +138,29 @@ Staleness-Prüfung weist den verschachtelten Kauf schon vorher ab, also kam es
 auf die Reihenfolge nie an. Was sie wirklich schützt, ist ein Vertrag, der
 während des Callbacks liest. Genau das prüft `SaleObserver` jetzt.
 
-Acht Mutationen. Alle acht gefangen.
-
-```bash
-pnpm mutate
-```
+Acht Mutationen. Alle acht gefangen, bei jedem Push.
 
 ---
 
 ## Ausführen
 
 ```bash
-git clone https://github.com/ArsalanRC/consign.git
-cd consign
+git clone https://github.com/ArsalanRC/plinth.git
+cd plinth
 pnpm install
 
-pnpm test      # 70 Tests
+pnpm test      # 100 Tests
 pnpm mutate    # 8 Mutationen, jede muss auffallen
 pnpm check     # Lint, Typen, Tests
 ```
 
 Hardhat 3 braucht Node 22 oder neuer. Die CI fährt 22 und 24.
+
+Zum Ausliefern der Seite reicht jeder statische Server:
+
+```bash
+cd site && python3 -m http.server 8000
+```
 
 ---
 
@@ -115,12 +168,14 @@ Hardhat 3 braucht Node 22 oder neuer. Die CI fährt 22 und 24.
 
 | Pfad | Inhalt |
 |---|---|
-| `contracts/Consign.sol` | Der Marktplatz: Listing, Kauf, Abrechnung, Gebühr |
-| `contracts/ConsignCollection.sol` | Das ERC-721, mit Royalty und fester Obergrenze |
+| `contracts/Plinth.sol` | Der Marktplatz: Listing, Kauf, Abrechnung, Gebühr |
+| `contracts/PlinthCollection.sol` | Das ERC-721, feste Obergrenze, Royalty pro Token |
+| `contracts/Art.sol` | Bild und Metadaten, beide aus der Token-ID gebaut |
 | `contracts/mocks/` | Verträge, die sich absichtlich schlecht benehmen |
-| `test/specs/` | Die Suite, eine Datei pro Thema |
+| `site/abi.js` | Der Codec, getestet gegen einen echten Node |
+| `site/chain.js` | Wallet und Chain, über `window.ethereum` |
+| `site/demo.js` | Der Marktplatz ohne fremde Wallet |
 | `scripts/mutate.ts` | Löscht jede Absicherung und prüft, ob ein Test es merkt |
-| `scripts/deploy.ts` | Deployment, von Hand ausgeführt, nie durch die CI |
 
 Das ERC-721 selbst kommt von OpenZeppelin. Ein eigenes zu schreiben ist kein
 Kunststück, sondern eine Stelle für einen Bug, der jemanden seinen Token kostet.
@@ -128,24 +183,39 @@ Das Urteilsvermögen steckt in dem, was um den Standard herum liegt.
 
 ---
 
-## Deployment auf Amoy
+## Selbst deployen
 
-Amoy ist das Testnet von Polygon, und das POL dafür gibt es gratis aus einem
-Faucet.
+Amoy ist das Testnet von Polygon, und das POL dafür gibt es gratis aus
+[dem Faucet](https://faucet.polygon.technology).
 
 ```bash
-pnpm hardhat keystore set AMOY_RPC_URL
-pnpm hardhat keystore set AMOY_PRIVATE_KEY
+pnpm hardhat keystore set AMOY_RPC_URL       # https://rpc-amoy.polygon.technology
+pnpm hardhat keystore set AMOY_PRIVATE_KEY   # eine Wegwerf-Wallet, keine echte
 pnpm deploy:amoy
 ```
 
+Die beiden ausgegebenen Adressen kommen in `site/config.js`, dann läuft die
+Seite gegen dein Deployment.
+
 Der Key liegt in Hardhats verschlüsseltem Keystore. Nichts in diesem Repository
 liest einen Key aus einer Dotfile oder aus einer Umgebungsvariable, die es
-selbst setzt. Nutze eine Wallet, in der nichts liegt, das dir fehlen würde.
+selbst setzt. Das Skript liest beide Verträge nach dem Deployment zurück, denn
+ein Konstruktor, der revertet, hinterlässt trotzdem eine Adresse, und eine
+Quittung ist kein Beweis.
 
-Das Skript liest beide Verträge nach dem Deployment zurück, denn ein
-Konstruktor, der revertet, hinterlässt trotzdem eine Adresse, und eine Quittung
-ist kein Beweis.
+---
+
+## Ist eine statische Seite dafür sicher?
+
+Ja, und es ist der übliche Weg.
+
+MetaMask injiziert einen Provider in die Seite. Die Seite bittet um eine
+Signatur, die Extension zeigt dir den Dialog und behält deinen Key. Nichts hier
+sieht jemals einen Private Key, und es gibt keinen Server, auf dem einer liegen
+könnte. Lesezugriffe gehen an einen öffentlichen RPC, und das ist ein
+öffentlicher Lesezugriff.
+
+Kein Backend zu haben ist hier das Sicherheitsargument, kein Zugeständnis.
 
 ---
 
