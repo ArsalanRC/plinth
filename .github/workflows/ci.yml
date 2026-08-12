@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Hardhat 3 needs 22 or newer, so the floor is the floor of the tool
+        # rather than a preference.
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `version:` here. `packageManager` in package.json is the one source
+      # of truth, and setting both makes the action error out rather than pick.
+      # `standalone` keeps pnpm's own Node floor from deciding the matrix.
+      - uses: pnpm/action-setup@v4
+        with:
+          standalone: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm type-check
+      - run: pnpm test
+
+  mutate:
+    name: Mutation check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          standalone: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Breaks each defence in turn and fails if the suite stays green. Slower
+      # than the tests because it runs them once per mutation, which is why it
+      # is its own job rather than a step inside the matrix.
+      - run: pnpm mutate

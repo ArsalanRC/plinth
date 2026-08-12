@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title data-i18n="meta.title">consign</title>
+<meta name="description" content="A consignment marketplace for ERC-721 tokens. The seller keeps the token, nobody is paid during the sale, and every defence has been deleted on purpose to check that a test notices." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./base.css" />
+<link rel="stylesheet" href="./theme.css" />
+<script>
+  // Before first paint: no theme flash, no language flash. Inline on purpose.
+  // An external file here would be a round trip during which the page renders
+  // in the wrong theme, which is exactly the flash this prevents.
+  (function () {
+    var p = "consign", t = null, l = null;
+    try { t = localStorage.getItem(p + "-theme"); l = localStorage.getItem(p + "-lang"); } catch (e) {}
+    document.documentElement.dataset.theme =
+      t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    var browserIsGerman = (navigator.language || "en").toLowerCase().startsWith("de");
+    document.documentElement.lang = l || (browserIsGerman ? "de" : "en");
+  })();
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="wordmark" href="#top">consign</a>
+  <nav class="topnav">
+    <a href="https://github.com/ArsalanRC/consign" target="_blank" rel="noopener">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg><span data-i18n="nav.source">Source</span>
+    </a>
+    <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" target="_blank" rel="noopener">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zm1.78 13.02H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg><span data-i18n="nav.linkedin">LinkedIn</span>
+    </a>
+    <button type="button" class="pill" id="lang-btn" data-i18n="nav.lang">Deutsch</button>
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="Switch theme">
+      <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.9 6.9 0 0 0 11.1 11.1z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <p class="kicker" data-i18n="hero.kicker"></p>
+    <h1 class="hero-title" data-i18n-html="hero.title"></h1>
+    <p class="lede" data-i18n="hero.lede"></p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://github.com/ArsalanRC/consign" target="_blank" rel="noopener" data-i18n="hero.cta"></a>
+      <a class="btn" href="#settlement" data-i18n="hero.cta2"></a>
+    </div>
+
+    <!-- The hero visual is the thing the contract does: one sale dividing
+         three ways, drawn to scale from the same basis points the contract
+         uses. -->
+    <div class="scene glass reveal" id="settlement">
+      <div class="scene-head">
+        <h3 data-i18n="split.title"></h3>
+        <span class="scene-note" data-i18n="split.note"></span>
+      </div>
+
+      <div class="split-bar" aria-hidden="true">
+        <span class="s-seller" id="bar-seller"></span>
+        <span class="s-creator" id="bar-creator"></span>
+        <span class="s-market" id="bar-market"></span>
+      </div>
+
+      <div class="split-legend">
+        <div class="l-seller">
+          <span class="k" data-i18n="split.seller"></span>
+          <span class="v" id="v-seller">0</span>
+        </div>
+        <div class="l-creator">
+          <span class="k" data-i18n="split.creator"></span>
+          <span class="v" id="v-creator">0</span>
+        </div>
+        <div class="l-market">
+          <span class="k" data-i18n="split.market"></span>
+          <span class="v" id="v-market">0</span>
+        </div>
+      </div>
+
+      <p class="caption" data-i18n="split.caption"></p>
+    </div>
+  </section>
+
+  <!-- 01 ------------------------------------------------------------------ -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="pay.eyebrow"></p>
+    <h2 data-i18n="pay.title"></h2>
+    <p class="body" data-i18n="pay.body"></p>
+
+    <div class="scene glass">
+      <div class="scene-head">
+        <h3 data-i18n="pay.sceneTitle"></h3>
+        <button type="button" class="pill" id="pay-replay" data-i18n="common.replay"></button>
+      </div>
+
+      <div class="lanes">
+        <div class="lane" id="lane-push">
+          <h3 data-i18n="pay.pushTitle"></h3>
+          <p class="lane-sub" data-i18n="pay.pushSub"></p>
+          <ol class="steps" id="steps-push"></ol>
+          <p class="verdict" id="verdict-push"></p>
+        </div>
+
+        <div class="lane" id="lane-pull">
+          <h3 data-i18n="pay.pullTitle"></h3>
+          <p class="lane-sub" data-i18n="pay.pullSub"></p>
+          <ol class="steps" id="steps-pull"></ol>
+          <p class="verdict" id="verdict-pull"></p>
+        </div>
+      </div>
+
+      <p class="caption" data-i18n="pay.caption"></p>
+    </div>
+  </section>
+
+  <!-- 02 ------------------------------------------------------------------ -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="cap.eyebrow"></p>
+    <h2 data-i18n="cap.title"></h2>
+    <p class="body" data-i18n="cap.body"></p>
+
+    <div class="scene glass">
+      <div class="scene-head">
+        <h3 data-i18n="cap.sceneTitle"></h3>
+        <span class="scene-note" data-i18n="cap.note"></span>
+      </div>
+
+      <div class="toggle-row">
+        <label class="switch">
+          <input type="checkbox" id="cap-toggle" checked />
+          <span class="track"></span>
+          <span data-i18n="cap.switch"></span>
+        </label>
+      </div>
+
+      <div class="split-bar" aria-hidden="true">
+        <span class="s-seller" id="cap-seller"></span>
+        <span class="s-creator" id="cap-creator"></span>
+        <span class="s-market" id="cap-market"></span>
+      </div>
+
+      <div class="split-legend">
+        <div class="l-creator">
+          <span class="k" data-i18n="cap.demanded"></span>
+          <span class="v" id="cap-v-demanded">0</span>
+        </div>
+        <div class="l-creator">
+          <span class="k" data-i18n="cap.paid"></span>
+          <span class="v" id="cap-v-paid">0</span>
+        </div>
+        <div class="l-seller">
+          <span class="k" data-i18n="cap.kept"></span>
+          <span class="v" id="cap-v-kept">0</span>
+        </div>
+      </div>
+
+      <p class="verdict" id="cap-verdict"></p>
+      <p class="caption" data-i18n="cap.caption"></p>
+    </div>
+  </section>
+
+  <!-- 03 ------------------------------------------------------------------ -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="stale.eyebrow"></p>
+    <h2 data-i18n="stale.title"></h2>
+    <p class="body" data-i18n="stale.body"></p>
+
+    <div class="scene glass">
+      <div class="scene-head">
+        <h3 data-i18n="stale.sceneTitle"></h3>
+        <button type="button" class="pill" id="stale-replay" data-i18n="common.replay"></button>
+      </div>
+
+      <ol class="steps" id="steps-stale"></ol>
+      <p class="verdict" id="verdict-stale"></p>
+      <p class="caption" data-i18n="stale.caption"></p>
+    </div>
+  </section>
+
+  <!-- 04 ------------------------------------------------------------------ -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="mut.eyebrow"></p>
+    <h2 data-i18n="mut.title"></h2>
+    <p class="body" data-i18n="mut.body"></p>
+
+    <div class="scene glass">
+      <div class="scene-head">
+        <h3 data-i18n="mut.sceneTitle"></h3>
+        <span class="scene-note" data-i18n="mut.note"></span>
+      </div>
+
+      <div class="mutations" id="mutations"></div>
+
+      <p class="caption" data-i18n="mut.caption"></p>
+    </div>
+  </section>
+
+  <!-- 05 ------------------------------------------------------------------ -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="status.eyebrow"></p>
+    <h2 data-i18n="status.title"></h2>
+    <ul class="ledger">
+      <li class="is-done"><span data-i18n="status.p1"></span><em data-i18n="status.done"></em></li>
+      <li class="is-done"><span data-i18n="status.p2"></span><em data-i18n="status.done"></em></li>
+      <li class="is-done"><span data-i18n="status.p3"></span><em data-i18n="status.done"></em></li>
+      <li><span data-i18n="status.p4"></span><em data-i18n="status.next"></em></li>
+      <li><span data-i18n="status.p5"></span><em data-i18n="status.next"></em></li>
+    </ul>
+    <p class="caption" data-i18n="status.caption"></p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span><span data-i18n="foot.built">Built by</span>
+    <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" target="_blank" rel="noopener">Arsalan Khadim</a></span>
+  <span class="sep">·</span>
+  <span data-i18n="foot.deps"></span>
+  <span class="sep">·</span>
+  <span>MIT</span>
+</footer>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

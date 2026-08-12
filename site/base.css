@@ -1,0 +1,331 @@
+/* Shared page chrome for every repo on the ArsalanRC account.
+   ---------------------------------------------------------------------------
+   This file owns the parts that should look the same everywhere: the sticky
+   header, the language and theme controls, section rhythm, buttons, cards,
+   notes, the footer, and the accessibility floor. It owns no colour values and
+   no subject matter.
+
+   Every colour here is a role, never a hue. A repo supplies the actual values
+   in its own theme.css, which loads after this file:
+
+     :root      { --accent: #6BC5A8; --warn: #D4A537; --bad: #E5675C; }
+     [light]    { the same three, darkened enough to pass contrast on paper }
+
+   The reason for the split is boring and practical. There are fifteen repos
+   planned. If the header is rewritten fifteen times, twelve of them will drift
+   and three will be broken, and nobody will notice because nobody rereads a
+   header. Written once, a fix to the focus ring fixes it everywhere. */
+
+/* ------------------------------------------------------------- structure */
+
+:root {
+  color-scheme: dark;
+
+  --ground:    #171A2B;
+  --surface:   #1F2338;
+  --surface-2: #262B44;
+  --line:      #333A57;
+  --text:      #E4E6F0;
+  --dim:       #8B90A8;
+
+  /* Placeholders. A repo without a theme.css still renders, in grey, which is
+     a visible reminder that it has not been given an identity yet. */
+  --accent: #8B90A8;
+  --warn:   #8B90A8;
+  --bad:    #8B90A8;
+
+  --glow:   rgba(255, 255, 255, 0.05);
+  --shadow: rgba(0, 0, 0, 0.35);
+
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --r: 5px;
+  --band: 62rem;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --ground:    #F4F5FA;
+  --surface:   #FFFFFF;
+  --surface-2: #EDEFF7;
+  --line:      #D6DAE8;
+  --text:      #191D2B;
+  --dim:       #5F6479;
+
+  --glow:   rgba(0, 0, 0, 0.04);
+  --shadow: rgba(30, 34, 55, 0.12);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  background-image: radial-gradient(ellipse 70% 40% at 50% -5%, var(--glow), transparent 70%);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+  background: color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.wordmark {
+  font-family: var(--mono);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-decoration: none;
+}
+.wordmark .dim { color: var(--dim); }
+
+.topnav { display: flex; align-items: center; gap: 0.9rem; }
+.topnav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.topnav a:hover, .topnav a:focus-visible { color: var(--accent); }
+
+/* Brand marks inherit the link colour, so they theme themselves and light up
+   with the label on hover rather than sitting there as static artwork. */
+.ico { width: 1rem; height: 1rem; flex: none; fill: currentColor; }
+
+/* On narrow screens the labels go and the marks carry the meaning. */
+@media (max-width: 680px) {
+  .topnav a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .topnav a { gap: 0; }
+  .ico { width: 1.15rem; height: 1.15rem; }
+}
+
+.pill, .icon-btn {
+  font-family: var(--sans);
+  color: var(--dim);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.pill { font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.3rem 0.7rem; }
+.icon-btn { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; padding: 0; border-radius: var(--r); }
+.pill:hover, .icon-btn:hover, .pill:focus-visible, .icon-btn:focus-visible { color: var(--accent); border-color: var(--accent); }
+.icon-btn svg { width: 0.95rem; height: 0.95rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.icon-btn .moon { display: none; }
+:root[data-theme="light"] .icon-btn .moon { display: block; }
+:root[data-theme="light"] .icon-btn .sun { display: none; }
+
+/* ---------------------------------------------------------------- layout */
+
+main { display: block; }
+
+.hero, .band {
+  max-width: var(--band);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 5.5rem) clamp(1rem, 4vw, 2.5rem);
+}
+.band { border-top: 1px solid var(--line); }
+
+h2 {
+  margin: 0 0 0.9rem;
+  font-family: var(--mono);
+  font-size: clamp(1.5rem, 3.6vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.eyebrow {
+  margin: 0 0 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.body { margin: 0 0 1.8rem; max-width: 62ch; color: var(--text); }
+.dim-body { color: var(--dim); }
+.caption { margin: 1rem 0 0; font-size: 0.86rem; color: var(--dim); max-width: 62ch; }
+
+/* ------------------------------------------------------------------ hero */
+
+.hero { position: relative; padding-top: clamp(3.5rem, 10vw, 7rem); }
+
+.kicker {
+  margin: 0 0 1rem;
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.hero-title {
+  margin: 0 0 1.3rem;
+  font-family: var(--mono);
+  font-size: clamp(1.9rem, 5.6vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.lede { margin: 0 0 2rem; max-width: 60ch; font-size: 1.05rem; color: var(--dim); }
+
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.9rem; }
+
+/* ---------------------------------------------------------------- controls */
+
+.btn {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.6rem 1.1rem;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:hover, .btn:focus-visible { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--ground); }
+.btn-primary:hover, .btn-primary:focus-visible {
+  background: color-mix(in srgb, var(--accent) 84%, white);
+  border-color: transparent;
+  color: var(--ground);
+}
+
+.install {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--dim);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 0.55rem 0.8rem;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+}
+
+.card {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 1.2rem;
+}
+.card figcaption { display: grid; gap: 0.25rem; margin-top: 1rem; }
+.card figcaption strong { font-size: 0.92rem; }
+.card figcaption span { font-size: 0.86rem; color: var(--dim); }
+
+.note {
+  margin-top: 1.6rem;
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r);
+}
+.note-warn { border-left-color: var(--warn); }
+.note-bad { border-left-color: var(--bad); }
+.note strong { display: block; margin-bottom: 0.5rem; font-size: 0.95rem; }
+.note p { margin: 0; font-size: 0.9rem; color: var(--dim); max-width: 62ch; }
+
+.code {
+  margin: 0.7rem 0;
+  padding: 0.7rem 0.85rem;
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow-x: auto;
+}
+.code code { font-family: var(--mono); font-size: 0.78rem; color: var(--accent); }
+
+/* A checklist of what is built and what is not. Kept in the shared file
+   because every repo needs somewhere honest to say "this part is not done". */
+.ledger { margin: 0 0 1.8rem; padding: 0; list-style: none; display: grid; gap: 0.1rem; max-width: 34rem; }
+.ledger li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px dotted var(--line);
+  font-size: 0.92rem;
+  color: var(--dim);
+}
+.ledger li em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ledger li.is-done { color: var(--text); }
+.ledger li.is-done em { color: var(--accent); }
+
+/* ---------------------------------------------------------------- footer */
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.6rem 1rem 2.2rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+.foot .sep { opacity: 0.5; }
+.foot a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line); }
+.foot a:hover, .foot a:focus-visible { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ------------------------------------------------------------------- a11y */
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

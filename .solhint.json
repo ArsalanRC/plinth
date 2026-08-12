@@ -4,8 +4,19 @@
     "compiler-version": ["error", "0.8.28"],
     "func-visibility": ["error", { "ignoreConstructors": true }],
     "max-line-length": ["error", 120],
-    "not-rely-on-time": "off",
     "gas-custom-errors": "error",
-    "no-empty-blocks": "off"
+    "immutable-vars-naming": ["error", { "immutablesAsConstants": false }],
+
+    "not-rely-on-time": "off",
+    "no-empty-blocks": "off",
+
+    "use-natspec": "off",
+
+    "gas-strict-inequalities": "off",
+    "gas-increment-by-one": "off",
+    "gas-indexed-events": "off",
+    "gas-calldata-parameters": "off",
+
+    "one-contract-per-file": "off"
   }
 }

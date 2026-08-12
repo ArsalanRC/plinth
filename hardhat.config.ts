@@ -13,6 +13,12 @@ import hardhatToolboxViem from "@nomicfoundation/hardhat-toolbox-viem";
  */
 const config: HardhatUserConfig = {
   plugins: [hardhatToolboxViem],
+  // Specs only. The runner treats every file in this directory as a test, so
+  // shared fixtures live one level up in `test/` and get imported rather than
+  // run, which keeps the reported count equal to the number of real cases.
+  paths: {
+    tests: { nodejs: "test/specs" },
+  },
   solidity: {
     version: "0.8.28",
     settings: {
