@@ -2,14 +2,27 @@
 
 **English** · [Deutsch](./README.de.md)
 
-### [→ See how it settles](https://arsalanrc.github.io/plinth)
+### [→ Open the marketplace](https://arsalanrc.github.io/plinth)
 
-A consignment marketplace for ERC-721 tokens. The seller keeps the token, and
-the contract holds nothing but the buyer's money, only until somebody withdraws
-it.
+An NFT marketplace on Polygon. Mint a token, list it, buy somebody else's. The
+art is generated on chain, the seller keeps custody until it sells, and nobody
+is paid during the sale.
 
-Solidity 0.8.28, Hardhat 3, OpenZeppelin. 70 tests. Every defence in it has been
-deleted on purpose, to check that a test notices.
+No server, no account, no database. The page is static, and it talks to the
+chain with no wallet library at all.
+
+Solidity 0.8.28, Hardhat 3, OpenZeppelin. 100 tests.
+
+---
+
+## Try it without a wallet
+
+Most people will not install a browser extension to look at a portfolio piece,
+so the whole marketplace runs on invented state until somebody connects one.
+Every button works. Every refusal is the contract's own refusal, so buying your
+own listing fails there for the same reason it fails on chain.
+
+A demo that only shows the happy path teaches you something untrue.
 
 ---
 
@@ -21,11 +34,10 @@ Each one is here because the obvious alternative fails quietly.
 
 Listing grants an approval. Nothing moves until somebody buys.
 
-A marketplace that takes custody can strand your token behind its own bug, which
-is a worse failure than anything waiting on the other side of a trade. The cost
-of staying out of the way is that a listing can go stale, so `buy` checks for it
-before settling anything. The seller must still own the token. The approval must
-still stand.
+A marketplace that takes custody can strand your token behind its own bug. That
+is a worse failure than anything on the other side of the trade. The cost of
+staying out of the way is that a listing can go stale, so `buy` checks for it.
+The seller must still own the token. The approval must still stand.
 
 Anybody can clear a stale listing. Sellers who have moved on do not come back to
 tidy up, so until somebody else does, the listing sits in every front end
@@ -56,12 +68,48 @@ exactly this mistake.
 
 A collection can report a royalty larger than the price it is being paid.
 Uncapped, subtracting that underflows the seller's share, and every sale of that
-collection reverts from then on. The marketplace looks like the broken party.
-Capping keeps the sale alive, and it keeps the damage inside the collection that
-caused it.
+collection reverts from then on. Capping keeps the sale alive, and it keeps the
+damage inside the collection that caused it. A royalty naming the zero address
+is refused too, because crediting it is not a failed payment: it is a successful
+payment nobody can ever collect.
 
-A royalty naming the zero address is refused too, because crediting it is not a
-failed payment: it is a successful payment nobody can ever collect.
+---
+
+## The art is on chain
+
+`tokenURI` returns a base64 JSON document with the image inside it. There is no
+IPFS hash, no pinning service and no gateway. The picture is built from the
+token id every time it is asked for, so it lasts exactly as long as the chain
+does.
+
+This started as the usual link to IPFS. That link pointed at nothing, which is
+the same class of live defect as an install line nobody ever published.
+
+Each token draws its own royalty: one bar, split where the creator's share
+falls. A test asserts that the picture and `royaltyInfo` can never disagree.
+Art that states a number its own contract will not honour is decoration
+pretending to be data.
+
+It draws the royalty and nothing else, on purpose. A marketplace fee would make
+a better picture, and the collection has no way to know one.
+
+---
+
+## No wallet library
+
+`site/abi.js` encodes calls and decodes returns by hand. No ethers, no viem,
+nothing from a CDN. A marketplace front end normally pulls in a hundred
+kilobytes of somebody else's code to format hexadecimal.
+
+Function selectors are constants rather than computed, because computing them
+needs keccak256 and browsers do not provide it. Shipping a hash implementation
+to save typing twenty-seven hex strings is a bad trade.
+
+What makes that defensible is the test. `test/specs/abi.ts` deploys both
+contracts on a real chain and sends real call data through this codec, then
+compares every answer with the typed contract. An encoder that is wrong does not
+throw. It produces neat hexadecimal that the node misreads, and testing it
+against itself proves nothing at all.
 
 ---
 
@@ -84,11 +132,7 @@ already refuses the nested purchase, so the ordering never came into it. What
 the ordering actually protects is a contract reading mid-callback, and
 `SaleObserver` tests that directly.
 
-Eight mutations now. All eight caught.
-
-```bash
-pnpm mutate
-```
+Eight mutations now. All eight caught, on every push.
 
 ---
 
@@ -99,12 +143,18 @@ git clone https://github.com/ArsalanRC/plinth.git
 cd plinth
 pnpm install
 
-pnpm test      # 70 tests
+pnpm test      # 100 tests
 pnpm mutate    # 8 mutations, each one must be caught
 pnpm check     # lint, types, tests
 ```
 
 Hardhat 3 needs Node 22 or newer. CI runs 22 and 24.
+
+To serve the page, anything static will do:
+
+```bash
+cd site && python3 -m http.server 8000
+```
 
 ---
 
@@ -113,11 +163,13 @@ Hardhat 3 needs Node 22 or newer. CI runs 22 and 24.
 | Path | What it holds |
 |---|---|
 | `contracts/Plinth.sol` | The marketplace: listing, buying, settlement, fees |
-| `contracts/PlinthCollection.sol` | The ERC-721, with a royalty and a supply that cannot grow |
+| `contracts/PlinthCollection.sol` | The ERC-721, with a fixed supply and a royalty per token |
+| `contracts/Art.sol` | The picture and the metadata, both built from the token id |
 | `contracts/mocks/` | Contracts that misbehave on purpose |
-| `test/specs/` | The suite, one file per concern |
+| `site/abi.js` | The codec, tested against a real node |
+| `site/chain.js` | Wallet and chain, through `window.ethereum` |
+| `site/demo.js` | The marketplace with nobody's wallet attached |
 | `scripts/mutate.ts` | Deletes each defence and checks a test notices |
-| `scripts/deploy.ts` | Deployment, run by hand, never by CI |
 
 The ERC-721 itself comes from OpenZeppelin. Writing your own is not a display of
 skill: it is a place to put a bug that costs somebody their token. The judgement
@@ -125,23 +177,36 @@ here is in what sits around the standard.
 
 ---
 
-## Deploying to Amoy
+## Deploying your own
 
-Amoy is Polygon's testnet, and its POL is free from a faucet.
+Amoy is Polygon's testnet, and its POL is free from
+[the faucet](https://faucet.polygon.technology).
 
 ```bash
-pnpm hardhat keystore set AMOY_RPC_URL
-pnpm hardhat keystore set AMOY_PRIVATE_KEY
+pnpm hardhat keystore set AMOY_RPC_URL       # https://rpc-amoy.polygon.technology
+pnpm hardhat keystore set AMOY_PRIVATE_KEY   # a throwaway wallet, not a real one
 pnpm deploy:amoy
 ```
 
-The key lives in Hardhat's encrypted keystore. Nothing in this repository reads
-a key from a dotfile, or from an environment variable it sets itself. Use a
-wallet that holds nothing you would miss.
+Put the two addresses it prints into `site/config.js` and serve the page.
 
-The script reads both contracts back after deploying them, because a
-constructor that reverts still leaves an address behind, and a receipt is not
-proof.
+The key lives in Hardhat's encrypted keystore. Nothing in this repository reads
+a key from a dotfile, or from an environment variable it sets itself. The script
+reads both contracts back after deploying them, because a constructor that
+reverts still leaves an address behind, and a receipt is not proof.
+
+---
+
+## Is a static page safe for this?
+
+Yes, and it is the ordinary way to build one.
+
+MetaMask injects a provider into the page. The page asks it to sign; the
+extension shows you the dialog and keeps your key. Nothing here ever sees a
+private key, and there is no server to store one on. Reads go to a public RPC,
+which is a public read.
+
+Having no backend is the security argument, not a compromise on it.
 
 ---
 
