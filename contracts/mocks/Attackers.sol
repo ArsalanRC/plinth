@@ -4,7 +4,7 @@ pragma solidity 0.8.28;
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-interface IConsign {
+interface IPlinth {
     function list(address collection, uint256 tokenId, uint96 price) external;
     function buy(address collection, uint256 tokenId) external payable;
     function withdraw() external;
@@ -16,9 +16,9 @@ interface IConsign {
  *      never sold is not the case any of these tests are about.
  */
 abstract contract Seller is IERC721Receiver {
-    IConsign internal immutable market;
+    IPlinth internal immutable market;
 
-    constructor(IConsign market_) {
+    constructor(IPlinth market_) {
         market = market_;
     }
 
@@ -49,7 +49,7 @@ abstract contract Seller is IERC721Receiver {
  * contract's own withdrawal fails, which is the point.
  */
 contract RejectsEther is Seller {
-    constructor(IConsign market_) Seller(market_) {}
+    constructor(IPlinth market_) Seller(market_) {}
 
     receive() external payable {
         // A string revert, not a custom error, because this mock is imitating
@@ -81,7 +81,7 @@ contract ReentrantWithdrawer is Seller {
     uint256 public reentryAttempts;
     uint256 public reentrySuccesses;
 
-    constructor(IConsign market_) Seller(market_) {}
+    constructor(IPlinth market_) Seller(market_) {}
 
     // A fallback doing real work is exactly the hazard here, so the rule
     // warning about it is right in general and wrong about this contract.
@@ -112,7 +112,7 @@ contract ReentrantBuyer is Seller {
     uint256 public reentryAttempts;
     bool public reentryReverted;
 
-    constructor(IConsign market_) Seller(market_) {}
+    constructor(IPlinth market_) Seller(market_) {}
 
     function attack(address collection, uint256 tokenId, uint256 price) external {
         _collection = collection;

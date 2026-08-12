@@ -4,7 +4,7 @@ import { getAddress } from "viem";
 
 import { fixture, mintTo, rejects, fromDataUri, MAX_SUPPLY, PRICE } from "../helpers.js";
 
-describe("ConsignCollection", () => {
+describe("PlinthCollection", () => {
   it("mints sequential ids starting at one", async () => {
     const f = await fixture();
 
@@ -40,7 +40,7 @@ describe("ConsignCollection", () => {
 
   it("refuses to mint past the declared supply", async () => {
     const f = await fixture();
-    const small = await f.viem.deployContract("ConsignCollection", [
+    const small = await f.viem.deployContract("PlinthCollection", [
       "Tiny",
       "TINY",
       2n,
@@ -116,7 +116,7 @@ describe("ConsignCollection", () => {
 
     const meta = JSON.parse(fromDataUri(await f.collection.read.tokenURI([tokenId])));
 
-    assert.equal(meta.name, "Consign Demo #1");
+    assert.equal(meta.name, "Plinth Demo #1");
     assert.ok(meta.description.length > 20);
     assert.ok(meta.image.startsWith("data:image/svg+xml;base64,"));
   });

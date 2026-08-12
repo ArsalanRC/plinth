@@ -1,7 +1,7 @@
 {
-  "name": "consign",
+  "name": "plinth",
   "version": "0.1.0",
-  "description": "A consignment marketplace for ERC-721 tokens, written to argue about how a sale should be settled",
+  "description": "An NFT marketplace on Polygon: mint, list and buy, with the art generated on chain and the front end talking to the chain with no library at all",
   "type": "module",
   "private": true,
   "license": "MIT",

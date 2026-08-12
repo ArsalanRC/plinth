@@ -1,8 +1,8 @@
-# consign
+# plinth
 
 **English** · [Deutsch](./README.de.md)
 
-### [→ See how it settles](https://arsalanrc.github.io/consign)
+### [→ See how it settles](https://arsalanrc.github.io/plinth)
 
 A consignment marketplace for ERC-721 tokens. The seller keeps the token, and
 the contract holds nothing but the buyer's money, only until somebody withdraws
@@ -95,8 +95,8 @@ pnpm mutate
 ## Running it
 
 ```bash
-git clone https://github.com/ArsalanRC/consign.git
-cd consign
+git clone https://github.com/ArsalanRC/plinth.git
+cd plinth
 pnpm install
 
 pnpm test      # 70 tests
@@ -112,8 +112,8 @@ Hardhat 3 needs Node 22 or newer. CI runs 22 and 24.
 
 | Path | What it holds |
 |---|---|
-| `contracts/Consign.sol` | The marketplace: listing, buying, settlement, fees |
-| `contracts/ConsignCollection.sol` | The ERC-721, with a royalty and a supply that cannot grow |
+| `contracts/Plinth.sol` | The marketplace: listing, buying, settlement, fees |
+| `contracts/PlinthCollection.sol` | The ERC-721, with a royalty and a supply that cannot grow |
 | `contracts/mocks/` | Contracts that misbehave on purpose |
 | `test/specs/` | The suite, one file per concern |
 | `scripts/mutate.ts` | Deletes each defence and checks a test notices |

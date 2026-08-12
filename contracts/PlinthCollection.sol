@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Art} from "./Art.sol";
 
 /**
- * @title ConsignCollection
+ * @title PlinthCollection
  * @notice A small ERC-721 collection whose art and metadata live on chain.
  *
  * The token standard itself comes from OpenZeppelin and that is on purpose.
@@ -25,7 +25,7 @@ import {Art} from "./Art.sol";
  * - A royalty registered per token, matching exactly the number its own
  *   picture draws.
  */
-contract ConsignCollection is ERC721, ERC2981, Ownable {
+contract PlinthCollection is ERC721, ERC2981, Ownable {
     /// @notice Basis points a token's royalty can never exceed.
     uint96 public constant MAX_ROYALTY_BPS = 1000;
 

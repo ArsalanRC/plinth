@@ -21,8 +21,8 @@ import { formatEther, parseEther } from "viem";
 const FEE_BPS = 250;
 
 const COLLECTION = {
-  name: "Consign Demo",
-  symbol: "CNSGN",
+  name: "Plinth Demo",
+  symbol: "PLNTH",
   maxSupply: 500n,
 };
 
@@ -47,16 +47,16 @@ if (balance < parseEther("0.05")) {
   );
 }
 
-const market = await viem.deployContract("Consign", [FEE_BPS, deployer]);
-console.log(`Consign            ${market.address}`);
+const market = await viem.deployContract("Plinth", [FEE_BPS, deployer]);
+console.log(`Plinth            ${market.address}`);
 
-const collection = await viem.deployContract("ConsignCollection", [
+const collection = await viem.deployContract("PlinthCollection", [
   COLLECTION.name,
   COLLECTION.symbol,
   COLLECTION.maxSupply,
   deployer,
 ]);
-console.log(`ConsignCollection  ${collection.address}\n`);
+console.log(`PlinthCollection  ${collection.address}\n`);
 
 // Read the deployed contracts back rather than trusting the receipts. A
 // deployment that reverted in the constructor leaves an address behind too.

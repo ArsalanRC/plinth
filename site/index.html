@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title data-i18n="meta.title">consign</title>
-<meta name="description" content="A consignment marketplace for ERC-721 tokens. The seller keeps the token, nobody is paid during the sale, and every defence has been deleted on purpose to check that a test notices." />
+<title data-i18n="meta.title">plinth</title>
+<meta name="description" content="An NFT marketplace on Polygon. Mint, list and buy, with the art generated on chain and the front end talking to the chain with no library at all." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -15,10 +15,10 @@
   // An external file here would be a round trip during which the page renders
   // in the wrong theme, which is exactly the flash this prevents.
   (function () {
-    var p = "consign", t = null, l = null;
+    var p = "plinth", t = null, l = null;
     try { t = localStorage.getItem(p + "-theme"); l = localStorage.getItem(p + "-lang"); } catch (e) {}
     document.documentElement.dataset.theme =
-      t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      t || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     var browserIsGerman = (navigator.language || "en").toLowerCase().startsWith("de");
     document.documentElement.lang = l || (browserIsGerman ? "de" : "en");
   })();
@@ -26,15 +26,52 @@
 </head>
 <body>
 
+<!-- The landscape. Generated here rather than downloaded, so there is no
+     licence to honour and no third party who can take it away. Four ridges,
+     lightest at the back, which is how distance actually looks. No orbs and
+     nothing that drifts: the only motion is parallax under a real scroll
+     position. -->
+<div class="backdrop" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--sky-top)" />
+        <stop offset="100%" stop-color="var(--sky-bottom)" />
+      </linearGradient>
+    </defs>
+
+    <rect width="1440" height="900" fill="url(#sky)" />
+
+    <path class="ridge" data-depth="0.06" fill="var(--ridge-4)"
+      d="M0 520 L120 470 L210 505 L320 440 L430 495 L540 450 L660 500 L780 455 L900 505 L1020 460 L1140 500 L1260 465 L1360 500 L1440 470 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.12" fill="var(--ridge-3)"
+      d="M0 600 L110 555 L230 595 L340 540 L470 590 L590 545 L700 595 L830 550 L950 600 L1070 555 L1200 600 L1320 560 L1440 600 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.2" fill="var(--ridge-2)"
+      d="M0 690 L130 650 L250 690 L380 640 L500 690 L620 645 L750 695 L870 650 L990 695 L1110 655 L1240 700 L1360 660 L1440 690 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.3" fill="var(--ridge-1)"
+      d="M0 780 L140 745 L270 785 L400 740 L520 790 L650 748 L780 795 L900 750 L1030 795 L1150 755 L1280 800 L1400 760 L1440 780 L1440 900 L0 900 Z" />
+  </svg>
+</div>
+
+<!-- Grain, so a wide gradient never bands. -->
+<svg class="grain" aria-hidden="true">
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" />
+    <feColorMatrix type="saturate" values="0" />
+  </filter>
+  <rect width="100%" height="100%" filter="url(#noise)" opacity="0.32" />
+</svg>
+
 <header class="topbar">
-  <a class="wordmark" href="#top">consign</a>
+  <a class="wordmark" href="#top">plinth</a>
   <nav class="topnav">
-    <a href="https://github.com/ArsalanRC/consign" target="_blank" rel="noopener">
+    <a href="https://github.com/ArsalanRC/plinth" target="_blank" rel="noopener">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg><span data-i18n="nav.source">Source</span>
     </a>
     <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" target="_blank" rel="noopener">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zm1.78 13.02H3.55V9h3.57v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/></svg><span data-i18n="nav.linkedin">LinkedIn</span>
     </a>
+    <button type="button" class="pill" id="connect" data-i18n="nav.connect">Connect</button>
     <button type="button" class="pill" id="lang-btn" data-i18n="nav.lang">Deutsch</button>
     <button type="button" class="icon-btn" id="theme-btn" aria-label="Switch theme">
       <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
@@ -46,21 +83,80 @@
 <main id="top">
 
   <section class="hero">
+    <p class="megaword" aria-hidden="true"><span>PLINTH</span></p>
+
     <p class="kicker" data-i18n="hero.kicker"></p>
     <h1 class="hero-title" data-i18n-html="hero.title"></h1>
     <p class="lede" data-i18n="hero.lede"></p>
+
     <div class="hero-actions">
-      <a class="btn btn-primary" href="https://github.com/ArsalanRC/consign" target="_blank" rel="noopener" data-i18n="hero.cta"></a>
-      <a class="btn" href="#settlement" data-i18n="hero.cta2"></a>
+      <button type="button" class="btn btn-primary" id="connect-2" data-i18n="hero.connect"></button>
+      <a class="btn" href="#market" data-i18n="hero.browse"></a>
     </div>
 
-    <!-- The hero visual is the thing the contract does: one sale dividing
-         three ways, drawn to scale from the same basis points the contract
-         uses. -->
-    <div class="scene glass reveal" id="settlement">
+    <!-- The wallet. Real when connected, invented in demo mode, and the badge
+         is the difference. Nothing here is ever ambiguous about which. -->
+    <div class="wallet glass reveal" id="wallet">
+      <div class="cell">
+        <span class="k" data-i18n="wallet.account"></span>
+        <span class="v" id="w-address">—</span>
+      </div>
+      <div class="cell">
+        <span class="k" data-i18n="wallet.balance"></span>
+        <span class="v" id="w-balance">—</span>
+      </div>
+      <div class="cell">
+        <span class="k" data-i18n="wallet.owned"></span>
+        <span class="v" id="w-owned">—</span>
+      </div>
+      <div class="cell">
+        <span class="k" data-i18n="wallet.proceeds"></span>
+        <span class="v accent" id="w-proceeds">—</span>
+      </div>
+      <div class="cell actions">
+        <span class="badge-demo" id="w-demo" hidden data-i18n="wallet.demo"></span>
+        <button type="button" class="btn" id="withdraw" data-i18n="wallet.withdraw"></button>
+      </div>
+    </div>
+
+    <p class="status" id="status"></p>
+  </section>
+
+  <!-- The market ------------------------------------------------------- -->
+  <section class="band reveal" id="market">
+    <p class="eyebrow" data-i18n="market.eyebrow"></p>
+    <h2 data-i18n="market.title"></h2>
+    <p class="body" data-i18n="market.body"></p>
+
+    <div class="grid" id="market-grid"></div>
+    <p class="empty" id="market-empty" hidden data-i18n="market.empty"></p>
+  </section>
+
+  <!-- Mint and your items ---------------------------------------------- -->
+  <section class="band reveal" id="mine">
+    <p class="eyebrow" data-i18n="mine.eyebrow"></p>
+    <h2 data-i18n="mine.title"></h2>
+    <p class="body" data-i18n="mine.body"></p>
+
+    <div class="hero-actions">
+      <button type="button" class="btn btn-primary" id="mint" data-i18n="mine.mint"></button>
+      <span class="scene-note" id="supply">—</span>
+    </div>
+
+    <div class="grid" id="mine-grid"></div>
+    <p class="empty" id="mine-empty" hidden data-i18n="mine.empty"></p>
+  </section>
+
+  <!-- How it settles ---------------------------------------------------- -->
+  <section class="band reveal">
+    <p class="eyebrow" data-i18n="split.eyebrow"></p>
+    <h2 data-i18n="split.title"></h2>
+    <p class="body" data-i18n="split.body"></p>
+
+    <div class="scene glass">
       <div class="scene-head">
-        <h3 data-i18n="split.title"></h3>
-        <span class="scene-note" data-i18n="split.note"></span>
+        <h3 data-i18n="split.sceneTitle"></h3>
+        <span class="scene-note" id="split-note">—</span>
       </div>
 
       <div class="split-bar" aria-hidden="true">
@@ -88,7 +184,7 @@
     </div>
   </section>
 
-  <!-- 01 ------------------------------------------------------------------ -->
+  <!-- Why nobody is paid during a sale ---------------------------------- -->
   <section class="band reveal">
     <p class="eyebrow" data-i18n="pay.eyebrow"></p>
     <h2 data-i18n="pay.title"></h2>
@@ -107,7 +203,6 @@
           <ol class="steps" id="steps-push"></ol>
           <p class="verdict" id="verdict-push"></p>
         </div>
-
         <div class="lane" id="lane-pull">
           <h3 data-i18n="pay.pullTitle"></h3>
           <p class="lane-sub" data-i18n="pay.pullSub"></p>
@@ -120,89 +215,7 @@
     </div>
   </section>
 
-  <!-- 02 ------------------------------------------------------------------ -->
-  <section class="band reveal">
-    <p class="eyebrow" data-i18n="cap.eyebrow"></p>
-    <h2 data-i18n="cap.title"></h2>
-    <p class="body" data-i18n="cap.body"></p>
-
-    <div class="scene glass">
-      <div class="scene-head">
-        <h3 data-i18n="cap.sceneTitle"></h3>
-        <span class="scene-note" data-i18n="cap.note"></span>
-      </div>
-
-      <div class="toggle-row">
-        <label class="switch">
-          <input type="checkbox" id="cap-toggle" checked />
-          <span class="track"></span>
-          <span data-i18n="cap.switch"></span>
-        </label>
-      </div>
-
-      <div class="split-bar" aria-hidden="true">
-        <span class="s-seller" id="cap-seller"></span>
-        <span class="s-creator" id="cap-creator"></span>
-        <span class="s-market" id="cap-market"></span>
-      </div>
-
-      <div class="split-legend">
-        <div class="l-creator">
-          <span class="k" data-i18n="cap.demanded"></span>
-          <span class="v" id="cap-v-demanded">0</span>
-        </div>
-        <div class="l-creator">
-          <span class="k" data-i18n="cap.paid"></span>
-          <span class="v" id="cap-v-paid">0</span>
-        </div>
-        <div class="l-seller">
-          <span class="k" data-i18n="cap.kept"></span>
-          <span class="v" id="cap-v-kept">0</span>
-        </div>
-      </div>
-
-      <p class="verdict" id="cap-verdict"></p>
-      <p class="caption" data-i18n="cap.caption"></p>
-    </div>
-  </section>
-
-  <!-- 03 ------------------------------------------------------------------ -->
-  <section class="band reveal">
-    <p class="eyebrow" data-i18n="stale.eyebrow"></p>
-    <h2 data-i18n="stale.title"></h2>
-    <p class="body" data-i18n="stale.body"></p>
-
-    <div class="scene glass">
-      <div class="scene-head">
-        <h3 data-i18n="stale.sceneTitle"></h3>
-        <button type="button" class="pill" id="stale-replay" data-i18n="common.replay"></button>
-      </div>
-
-      <ol class="steps" id="steps-stale"></ol>
-      <p class="verdict" id="verdict-stale"></p>
-      <p class="caption" data-i18n="stale.caption"></p>
-    </div>
-  </section>
-
-  <!-- 04 ------------------------------------------------------------------ -->
-  <section class="band reveal">
-    <p class="eyebrow" data-i18n="mut.eyebrow"></p>
-    <h2 data-i18n="mut.title"></h2>
-    <p class="body" data-i18n="mut.body"></p>
-
-    <div class="scene glass">
-      <div class="scene-head">
-        <h3 data-i18n="mut.sceneTitle"></h3>
-        <span class="scene-note" data-i18n="mut.note"></span>
-      </div>
-
-      <div class="mutations" id="mutations"></div>
-
-      <p class="caption" data-i18n="mut.caption"></p>
-    </div>
-  </section>
-
-  <!-- 05 ------------------------------------------------------------------ -->
+  <!-- Status ------------------------------------------------------------ -->
   <section class="band reveal">
     <p class="eyebrow" data-i18n="status.eyebrow"></p>
     <h2 data-i18n="status.title"></h2>
@@ -210,7 +223,7 @@
       <li class="is-done"><span data-i18n="status.p1"></span><em data-i18n="status.done"></em></li>
       <li class="is-done"><span data-i18n="status.p2"></span><em data-i18n="status.done"></em></li>
       <li class="is-done"><span data-i18n="status.p3"></span><em data-i18n="status.done"></em></li>
-      <li><span data-i18n="status.p4"></span><em data-i18n="status.next"></em></li>
+      <li id="status-deploy"><span data-i18n="status.p4"></span><em data-i18n="status.next"></em></li>
       <li><span data-i18n="status.p5"></span><em data-i18n="status.next"></em></li>
     </ul>
     <p class="caption" data-i18n="status.caption"></p>

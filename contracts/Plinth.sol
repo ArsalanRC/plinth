@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title Consign
+ * @title Plinth
  * @notice A consignment marketplace for ERC-721 tokens.
  *
  * The seller keeps the token. This contract never takes custody of anything
@@ -28,7 +28,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
  * 4. Royalties are read defensively and capped. A collection reporting a
  *    royalty above the sale price would otherwise revert every sale it touches.
  */
-contract Consign is Ownable, ReentrancyGuard {
+contract Plinth is Ownable, ReentrancyGuard {
     /**
      * @dev `price` is `uint96` so a listing occupies one storage slot rather
      *      than two. 2^96 wei is around 79 billion ether, so the ceiling is not

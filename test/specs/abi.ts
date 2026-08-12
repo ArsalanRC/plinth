@@ -216,7 +216,7 @@ describe("abi codec", () => {
       data: encode("symbol()") as `0x${string}`,
     });
 
-    assert.equal(decodeString(data!), "CNSGN");
+    assert.equal(decodeString(data!), "PLNTH");
   });
 
   it("sends a transaction the chain accepts", async () => {

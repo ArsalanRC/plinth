@@ -3,7 +3,7 @@ pragma solidity 0.8.28;
 
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-interface IConsignView {
+interface IPlinthView {
     struct Listing {
         address seller;
         uint96 price;
@@ -30,14 +30,14 @@ interface IConsignView {
  * shape of mistake.
  */
 contract SaleObserver is IERC721Receiver {
-    IConsignView private immutable market;
+    IPlinthView private immutable market;
 
     bool public observed;
     address public observedSeller;
     uint96 public observedPrice;
     bool public observedFillable;
 
-    constructor(IConsignView market_) {
+    constructor(IPlinthView market_) {
         market = market_;
     }
 
@@ -54,7 +54,7 @@ contract SaleObserver is IERC721Receiver {
         external
         returns (bytes4)
     {
-        IConsignView.Listing memory item = market.listingOf(msg.sender, tokenId);
+        IPlinthView.Listing memory item = market.listingOf(msg.sender, tokenId);
 
         observed = true;
         observedSeller = item.seller;

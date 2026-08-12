@@ -20,11 +20,11 @@ export async function fixture() {
   const { viem } = await network.create();
   const [deployer, seller, buyer, creator, feeTaker, stranger] = await viem.getWalletClients();
 
-  const market = await viem.deployContract("Consign", [FEE_BPS, feeTaker!.account.address]);
+  const market = await viem.deployContract("Plinth", [FEE_BPS, feeTaker!.account.address]);
 
-  const collection = await viem.deployContract("ConsignCollection", [
-    "Consign Demo",
-    "CNSGN",
+  const collection = await viem.deployContract("PlinthCollection", [
+    "Plinth Demo",
+    "PLNTH",
     MAX_SUPPLY,
     creator!.account.address,
   ]);

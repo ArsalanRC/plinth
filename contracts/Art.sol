@@ -38,7 +38,7 @@ library Art {
      * @notice The royalty this token carries, in basis points.
      * @dev Deterministic in the id, between 250 and 1000, so every token sits
      *      inside the ceiling and the marketplace never has to cap one.
-     *      `ConsignCollection` registers this exact number with ERC-2981 at
+     *      `PlinthCollection` registers this exact number with ERC-2981 at
      *      mint, so the picture and `royaltyInfo` cannot disagree.
      */
     function royaltyBps(uint256 id) internal pure returns (uint256) {
@@ -96,7 +96,7 @@ library Art {
     function _caption(uint256 id, uint256 royalty) private pure returns (string memory) {
         return string.concat(
             '<text x="60" y="440" font-family="IBM Plex Mono, ui-monospace, monospace" ',
-            'font-size="26" font-weight="600" fill="#100e0c">CONSIGN #', id.toString(), "</text>",
+            'font-size="26" font-weight="600" fill="#100e0c">PLINTH #', id.toString(), "</text>",
             '<text x="540" y="440" text-anchor="end" ',
             'font-family="IBM Plex Mono, ui-monospace, monospace" font-size="26" fill="#6a635a">',
             percent(royalty), " ROYALTY</text>"

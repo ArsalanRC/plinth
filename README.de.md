@@ -1,8 +1,8 @@
-# consign
+# plinth
 
 [English](./README.md) · **Deutsch**
 
-### [→ Ansehen, wie abgerechnet wird](https://arsalanrc.github.io/consign)
+### [→ Ansehen, wie abgerechnet wird](https://arsalanrc.github.io/plinth)
 
 Ein Kommissions-Marktplatz für ERC-721-Token. Der Verkäufer behält den Token,
 und der Vertrag hält nichts außer dem Geld des Käufers, und das nur so lange,
@@ -98,8 +98,8 @@ pnpm mutate
 ## Ausführen
 
 ```bash
-git clone https://github.com/ArsalanRC/consign.git
-cd consign
+git clone https://github.com/ArsalanRC/plinth.git
+cd plinth
 pnpm install
 
 pnpm test      # 70 Tests
@@ -115,8 +115,8 @@ Hardhat 3 braucht Node 22 oder neuer. Die CI fährt 22 und 24.
 
 | Pfad | Inhalt |
 |---|---|
-| `contracts/Consign.sol` | Der Marktplatz: Listing, Kauf, Abrechnung, Gebühr |
-| `contracts/ConsignCollection.sol` | Das ERC-721, mit Royalty und fester Obergrenze |
+| `contracts/Plinth.sol` | Der Marktplatz: Listing, Kauf, Abrechnung, Gebühr |
+| `contracts/PlinthCollection.sol` | Das ERC-721, mit Royalty und fester Obergrenze |
 | `contracts/mocks/` | Verträge, die sich absichtlich schlecht benehmen |
 | `test/specs/` | Die Suite, eine Datei pro Thema |
 | `scripts/mutate.ts` | Löscht jede Absicherung und prüft, ob ein Test es merkt |

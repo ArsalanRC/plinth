@@ -1,48 +1,48 @@
 /* ---------------------------------------------------------------------------
-   consign: the look.
+   plinth: the look.
 
-   Design reference: drinkcollider.com. Taken as a language and rebuilt from
-   nothing: no CSS, markup, copy or asset came across.
+   Design reference: drinkcollider.com, read from screenshots rather than from
+   a description of it. Taken as a language and rebuilt from nothing: no CSS,
+   markup, copy or asset came across.
 
-   What was kept is the grammar, and it is a specific one:
+   The grammar that was kept:
 
-   - Warm cream ground with near-black ink. Not a dark page.
+   - Warm cream ground with near-black ink. A light page, not a dark one.
    - A giant wordmark, edge to edge, cropped by the viewport, that content
-     overlaps rather than clears. This is the signature and everything else is
-     quieter than it.
-   - Hard one-pixel rules and boxed sections. Corners are effectively square.
-     Nothing floats on a soft shadow.
-   - Pill buttons with a thin outline and small uppercase labels.
-   - Small hard-edged chips for anything that is data.
-   - One hot accent, orange, plus two cooler tones lifted from the product art.
+     overlaps rather than clears.
+   - A full-bleed landscape behind the hero, atmospheric and warm.
+   - Hard rules and boxed sections. Structure carried by lines, not by shadows.
+   - Pill buttons, thin outline, small uppercase labels.
+   - One hot accent, orange, plus cooler tones from the product art.
 
-   The vocabulary changed because the subject did. Their orange sells a drink.
-   Here it is the seller's share of a sale, so the accent is a semantic colour
-   on every scene rather than decoration.
+   Deliberately not here, on Arsalan's instruction:
+   - No glowing orbs or radial blobs anywhere. They are the default background
+     of every generated page and they read as filler.
+   - No coloured bar down one edge of a panel to signal state. State is carried
+     by the whole border, a background tint and a chip, so a panel never looks
+     like it has a stripe stuck to it.
 
-   base.css owns layout and declares colour roles with no hues in them. This
-   file supplies the hues, twice, once per theme, and overrides the shapes.
+   The landscape is generated, in `index.html`, as inline SVG. Nothing is
+   downloaded and nothing is anybody else's, so there is no licence to honour
+   and no third party who can take it away.
    --------------------------------------------------------------------------- */
 
 :root {
   --ground: #f7f2ea;
   --surface: #fffdf9;
   --surface-2: #efe7d9;
-  --line: rgba(16, 14, 12, 0.2);
-  --rule: #100e0c;
+  --line: rgba(16, 14, 12, 0.16);
+  --rule: rgba(16, 14, 12, 0.85);
   --text: #0d0b0a;
   --dim: #6a635a;
 
   --accent: #d9530a;
-  --warn: #d9530a;
+  --warn: #b8791a;
   --bad: #b3311a;
 
-  --glow: rgba(217, 83, 10, 0.06);
-  --shadow: rgba(30, 22, 14, 0.1);
+  --glow: rgba(217, 83, 10, 0.07);
+  --shadow: rgba(48, 34, 18, 0.16);
 
-  /* The three shares of a sale. Orange is the seller because it is the
-     largest share and the loudest colour. The other two are lifted from the
-     product art on the reference, which is where its cooler tones live. */
   --seller: #d9530a;
   --creator: #6b5bd0;
   --market: #2f8f76;
@@ -50,47 +50,120 @@
   --settled: #2f7a55;
   --reverted: #b3311a;
 
-  /* Collider's hero panel is a translucent cream plate over an image, with a
-     hard edge and no shadow. That is the only glass here. */
-  --glass: rgba(255, 253, 249, 0.72);
-  --glass-line: rgba(16, 14, 12, 0.22);
+  /* Apple glass: a translucent plate that picks up what is behind it. The
+     blur does the work, the saturation stops it going grey, and the inner
+     highlight is a light on the surface rather than an accent colour. */
+  --glass-top: rgba(255, 253, 249, 0.74);
+  --glass-bottom: rgba(255, 253, 249, 0.56);
+  --glass-line: rgba(16, 14, 12, 0.12);
+  --glass-sheen: rgba(255, 255, 255, 0.65);
+
+  /* The landscape, back to front. Deliberately pale and low contrast: it is
+     scenery behind a page people have to read, not a photograph. Ridge 4 is
+     furthest away and lightest, which is how distance actually looks. */
+  --sky-top: #fdfaf5;
+  --sky-bottom: #f2e7d4;
+  --ridge-4: #f0e6d4;
+  --ridge-3: #e9dcc5;
+  --ridge-2: #e1d1b6;
+  --ridge-1: #d8c5a5;
 
   --display: "Sora", ui-sans-serif, system-ui, sans-serif;
   --sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --r: 2px;
-  --band: 66rem;
+  --r: 4px;
+  --r-glass: 18px;
+  --band: 70rem;
 }
 
 :root[data-theme="dark"] {
   --ground: #0c0b09;
-  --surface: #141210;
-  --surface-2: #1c1917;
-  --line: rgba(247, 242, 234, 0.22);
-  --rule: #f7f2ea;
+  --surface: #16130f;
+  --surface-2: #1d1915;
+  --line: rgba(247, 242, 234, 0.16);
+  --rule: rgba(247, 242, 234, 0.8);
   --text: #f7f2ea;
-  --dim: #989186;
+  --dim: #9c948a;
 
-  /* Orange that reads on cream burns on near-black, so the dark theme
-     re-picks it rather than reusing it. A token that carries meaning must not
-     be derived from a token that carries appearance. */
-  --accent: #ff7a2f;
-  --warn: #ff7a2f;
+  /* Orange that reads on cream burns on near-black, so it is re-picked rather
+     than reused. A token carrying meaning must not derive from one carrying
+     appearance. */
+  --accent: #ff8442;
+  --warn: #e0a24a;
   --bad: #e2603f;
 
-  --glow: rgba(255, 122, 47, 0.09);
-  --shadow: rgba(0, 0, 0, 0.5);
+  --glow: rgba(255, 132, 66, 0.1);
+  --shadow: rgba(0, 0, 0, 0.6);
 
-  --seller: #ff7a2f;
+  --seller: #ff8442;
   --creator: #9a8bea;
   --market: #4fc3a5;
 
   --settled: #56b98c;
   --reverted: #e2603f;
 
-  --glass: rgba(20, 18, 16, 0.66);
-  --glass-line: rgba(247, 242, 234, 0.2);
+  --glass-top: rgba(30, 26, 21, 0.7);
+  --glass-bottom: rgba(22, 19, 15, 0.55);
+  --glass-line: rgba(247, 242, 234, 0.14);
+  --glass-sheen: rgba(255, 255, 255, 0.14);
+
+  --sky-top: #0e0c09;
+  --sky-bottom: #1a150f;
+  --ridge-4: #17130e;
+  --ridge-3: #1d1812;
+  --ridge-2: #241d15;
+  --ridge-1: #2c2419;
+}
+
+/* ------------------------------------------------------------- the backdrop */
+
+/*
+ * The landscape sits behind everything, fixed, and never scrolls out. Its
+ * layers move at different rates under a real scroll position, which is the
+ * only motion on it. No drift, no float, no pulse.
+ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.backdrop svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.backdrop .ridge {
+  transition: transform 0.1s linear;
+  will-change: transform;
+}
+
+/* Grain over the whole thing, so the gradient never bands on a wide screen.
+   An SVG element without explicit dimensions collapses to its default 300 by
+   150, which renders as a grey rectangle in the corner rather than as texture
+   across the page. */
+.grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+}
+
+:root[data-theme="dark"] .grain {
+  mix-blend-mode: screen;
+  opacity: 0.28;
+}
+
+body {
+  background: transparent;
 }
 
 /* --------------------------------------------------------------- typography */
@@ -102,12 +175,18 @@ h3 {
   font-family: var(--display);
 }
 
+.wordmark {
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
 .hero-title {
   font-weight: 800;
-  font-size: clamp(2.7rem, 7.4vw, 5rem);
-  line-height: 0.94;
+  font-size: clamp(2.6rem, 6.6vw, 4.6rem);
+  line-height: 0.95;
   letter-spacing: -0.035em;
-  max-width: 15ch;
+  max-width: 16ch;
 }
 
 .hero-title em {
@@ -115,15 +194,9 @@ h3 {
   color: var(--accent);
 }
 
-.wordmark {
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  text-transform: uppercase;
-}
-
 h2 {
   font-weight: 800;
-  font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
   letter-spacing: -0.03em;
 }
 
@@ -134,26 +207,29 @@ h3 {
 }
 
 .lede {
-  max-width: 50ch;
-  font-size: 1.05rem;
+  max-width: 48ch;
+  font-size: 1.06rem;
 }
 
 /* --------------------------------------------------- the giant wordmark */
 
 /*
  * The reference's signature: the name at a size the viewport cannot hold, cut
- * off at both edges, with the content sitting over it rather than below it.
+ * off at both edges.
  *
- * `overflow: clip` on the band rather than `hidden`, so the page never grows a
- * horizontal scrollbar on a narrow screen. Pointer events are off because it
- * is a background that happens to be text, and selecting it by accident while
- * trying to select a paragraph is annoying.
+ * It does not sit under the copy, though. The reference overlaps a photograph;
+ * here it would overlap text somebody has to read, and a wordmark behind a
+ * paragraph is a legibility problem with a rationale attached.
+ *
+ * `overflow: clip` rather than `hidden`, so the page never grows a horizontal
+ * scrollbar. Pointer events off because it is decoration that happens to be
+ * text, and catching it while selecting a paragraph is irritating.
  */
 .megaword {
   position: relative;
   overflow: clip;
-  margin: 0;
-  line-height: 0.72;
+  margin: 0 0 0.6rem;
+  line-height: 0.78;
   text-align: center;
   pointer-events: none;
   user-select: none;
@@ -163,55 +239,77 @@ h3 {
   display: block;
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(5rem, 21vw, 17rem);
+  font-size: clamp(4.5rem, 20vw, 16rem);
   letter-spacing: -0.055em;
   color: var(--text);
   white-space: nowrap;
-}
-
-/* Sits behind the hero panel and is overlapped by it, which is the whole
-   effect. Negative margin pulls the panel up into the letterforms. */
-.hero .megaword {
-  margin: 0 0 -1.6rem;
+  opacity: 0.88;
 }
 
 @media (max-width: 40rem) {
-  .hero .megaword {
-    margin-bottom: -0.7rem;
+  .megaword {
+    margin-bottom: 0.3rem;
   }
 }
 
-/* ------------------------------------------------------------- boxed panels */
+/* -------------------------------------------------------------- Apple glass */
 
 /*
- * Hard rules, square corners, no shadow. The reference boxes its sections with
- * a single hairline and lets the grid do the work that a card shadow would do
- * elsewhere.
+ * One plate, used by every panel. The blur is what makes it glass; the
+ * gradient stops it reading as flat film; the sheen is a highlight along the
+ * top edge, which is a light on a surface rather than a colour accent.
  */
 .glass {
   position: relative;
-  background: var(--glass);
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
   border: 1px solid var(--glass-line);
-  border-radius: var(--r);
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  border-radius: var(--r-glass);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), 0 10px 34px -18px var(--shadow);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  /* Without blur the plate is just translucent, and translucent over a busy
+     landscape is unreadable. Fall back to opaque rather than to unreadable. */
+  .glass {
+    background: var(--surface);
+  }
 }
 
 .btn {
   border-radius: 999px;
+  transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn[disabled],
+.pill[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ------------------------------------------------------------------ reveals */
 
-/* Revealed by a position check in the scroll handler, never by
-   IntersectionObserver. Observers coalesce callbacks, so anything that enters
-   and leaves the viewport between two ticks never reports as intersecting and
-   stays invisible for good. Fast scroll, a deep link and the End key all
-   reproduce it. */
+/*
+ * Revealed by a position check inside the scroll handler that already exists,
+ * never by IntersectionObserver. Observers coalesce callbacks, so an element
+ * entering and leaving the viewport between two ticks never reports as
+ * intersecting and stays invisible for good. Fast scroll, a deep link and the
+ * End key all reproduce it, silently.
+ */
 .reveal {
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(14px);
+  transition: opacity 0.6s cubic-bezier(0.2, 0.7, 0.3, 1), transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .reveal.is-in {
@@ -220,14 +318,253 @@ h3 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal {
+  .reveal,
+  .backdrop .ridge {
     opacity: 1;
     transform: none;
     transition: none;
   }
 }
 
-/* ------------------------------------------------------------------- scenes */
+/* ------------------------------------------------------------ wallet strip */
+
+.wallet {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1px;
+  margin-top: 1.5rem;
+  padding: 0;
+  overflow: hidden;
+}
+
+.wallet .cell {
+  padding: 0.9rem 1.1rem;
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+}
+
+.wallet .k {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 0.3rem;
+}
+
+.wallet .v {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.wallet .v.accent {
+  color: var(--accent);
+}
+
+.wallet .cell.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* A demo badge that cannot be missed and cannot be mistaken for a chain. */
+.badge-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--warn);
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+}
+
+/* ---------------------------------------------------------------- the market */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.2, 0.7, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.item:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 0 1px 0 var(--glass-sheen), 0 20px 44px -22px var(--shadow);
+}
+
+.item .art {
+  aspect-ratio: 1;
+  width: 100%;
+  display: block;
+  border-bottom: 1px solid var(--glass-line);
+  background: var(--surface-2);
+}
+
+.item .art svg,
+.item .art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.item .meta {
+  padding: 0.85rem 0.95rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.item .row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.item .id {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--dim);
+}
+
+.item .price {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.item .owner {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--dim);
+}
+
+/* State is the whole border plus a tint, never a stripe down one side. */
+.item.is-mine {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-line));
+}
+
+.item.is-busy {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.item .actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.item .actions .btn {
+  padding: 0.34rem 0.8rem;
+  font-size: 0.74rem;
+}
+
+.price-input {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  padding: 0.34rem 0.55rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+}
+
+.price-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--dim);
+  font-size: 0.92rem;
+}
+
+/* --------------------------------------------------------------- the split */
+
+.split-bar {
+  display: flex;
+  height: 2.6rem;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--glass-line);
+  background: var(--surface-2);
+}
+
+.split-bar span {
+  display: block;
+  width: 0;
+  transition: width 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.split-bar .s-seller {
+  background: var(--seller);
+}
+.split-bar .s-creator {
+  background: var(--creator);
+}
+.split-bar .s-market {
+  background: var(--market);
+}
+
+.split-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1px;
+  margin-top: 1rem;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--glass-line);
+}
+
+.split-legend div {
+  padding: 0.65rem 0.8rem;
+  background: var(--surface);
+}
+
+.split-legend .k {
+  display: block;
+  font-size: 0.66rem;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.2rem;
+}
+
+.split-legend .v {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.split-legend .l-seller .v {
+  color: var(--seller);
+}
+.split-legend .l-creator .v {
+  color: var(--creator);
+}
+.split-legend .l-market .v {
+  color: var(--market);
+}
+
+/* -------------------------------------------------------------------- scenes */
 
 .scene {
   margin: 1.5rem 0 0;
@@ -245,120 +582,39 @@ h3 {
   border-bottom: 1px solid var(--glass-line);
 }
 
-/* A hard chip, the way the reference labels a price or a badge. */
 .scene-note {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.02em;
-  color: var(--text);
-  border: 1px solid var(--glass-line);
-  border-radius: var(--r);
-  padding: 0.2rem 0.5rem;
-}
-
-/* The split bar: one sale, three shares, drawn to scale. Square, ruled, and
-   divided by hairlines rather than by gaps. */
-.split-bar {
-  display: flex;
-  height: 2.9rem;
-  border-radius: var(--r);
-  overflow: hidden;
-  background: var(--surface-2);
-  border: 1px solid var(--rule);
-}
-
-.split-bar span {
-  display: block;
-  width: 0;
-  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.split-bar .s-seller {
-  background: var(--seller);
-}
-.split-bar .s-creator {
-  background: var(--creator);
-}
-.split-bar .s-market {
-  background: var(--market);
-}
-
-.split-legend {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  margin-top: 1rem;
-  border: 1px solid var(--glass-line);
-  border-radius: var(--r);
-}
-
-/* One shared rule between cells, the way a product grid divides itself. */
-.split-legend div {
-  padding: 0.6rem 0.75rem;
-  border-left: 1px solid var(--glass-line);
-}
-
-.split-legend div:first-child {
-  border-left: 0;
-}
-
-.split-legend .k {
-  display: block;
   font-size: 0.68rem;
+  letter-spacing: 0.02em;
   color: var(--dim);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.15rem;
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
 }
 
-.split-legend .v {
-  font-family: var(--mono);
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.split-legend .l-seller .v {
-  color: var(--seller);
-}
-.split-legend .l-creator .v {
-  color: var(--creator);
-}
-.split-legend .l-market .v {
-  color: var(--market);
-}
-
-/* Two lanes running the same sale under different settlement rules. */
 .lanes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1px;
   border: 1px solid var(--glass-line);
   border-radius: var(--r);
+  overflow: hidden;
+  background: var(--glass-line);
 }
 
 .lane {
   padding: 1rem;
-  border-left: 1px solid var(--glass-line);
+  background: var(--surface);
+  transition: background 0.3s ease;
 }
 
-.lane:first-child {
-  border-left: 0;
-}
-
-@media (max-width: 40rem) {
-  .lane {
-    border-left: 0;
-    border-top: 1px solid var(--glass-line);
-  }
-  .lane:first-child {
-    border-top: 0;
-  }
-}
-
+/* Tint the whole panel, no stripe. */
 .lane.is-reverted {
-  box-shadow: inset 3px 0 0 var(--reverted);
+  background: color-mix(in srgb, var(--reverted) 7%, var(--surface));
 }
 
 .lane.is-settled {
-  box-shadow: inset 3px 0 0 var(--settled);
+  background: color-mix(in srgb, var(--settled) 8%, var(--surface));
 }
 
 .lane h3 {
@@ -387,12 +643,14 @@ h3 {
   font-family: var(--mono);
   font-size: 0.78rem;
   line-height: 1.45;
-  opacity: 0.28;
-  transition: opacity 0.3s ease;
+  opacity: 0.25;
+  transform: translateX(-4px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .steps li.is-on {
   opacity: 1;
+  transform: none;
 }
 
 .steps li .mark {
@@ -404,9 +662,7 @@ h3 {
 .steps li.is-good .mark {
   color: var(--settled);
 }
-.steps li.is-bad .mark {
-  color: var(--reverted);
-}
+.steps li.is-bad .mark,
 .steps li.is-bad {
   color: var(--reverted);
 }
@@ -428,142 +684,53 @@ h3 {
   color: var(--settled);
 }
 
-/* A switch that turns a defence on and off, used by the royalty scene. */
-.toggle-row {
+/* ------------------------------------------------------------------- status */
+
+/* One line that tells the user what the page is doing right now. Signing and
+   waiting for a block are different states, and one spinner for both makes the
+   twenty seconds between them feel like a hang. */
+.status {
+  margin-top: 1rem;
+  min-height: 1.4rem;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--dim);
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.1rem;
+  gap: 0.5rem;
 }
 
-.switch {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  cursor: pointer;
-  font-size: 0.86rem;
-  user-select: none;
+.status.is-bad {
+  color: var(--reverted);
+}
+.status.is-good {
+  color: var(--settled);
 }
 
-.switch input {
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+.status a {
+  color: inherit;
 }
 
-.switch .track {
-  width: 2.6rem;
-  height: 1.45rem;
-  border-radius: 999px;
-  background: transparent;
-  border: 1px solid var(--rule);
-  position: relative;
-  transition: background 0.2s ease, border-color 0.2s ease;
+.spinner {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
   flex: none;
 }
 
-.switch .track::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0.16rem;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--dim);
-  transform: translateY(-50%);
-  transition: transform 0.2s ease, background 0.2s ease;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.switch input:checked + .track {
-  border-color: var(--accent);
-}
-
-.switch input:checked + .track::after {
-  transform: translate(1.1rem, -50%);
-  background: var(--accent);
-}
-
-.switch input:focus-visible + .track {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* The mutation list. Click a defence to delete it and watch a test go red.
-   One box, hairline-divided, rather than eight floating cards. */
-.mutations {
-  display: grid;
-  border: 1px solid var(--glass-line);
-  border-radius: var(--r);
-}
-
-.mutation {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.35rem 1rem;
-  align-items: center;
-  width: 100%;
-  text-align: left;
-  padding: 0.7rem 0.85rem;
-  border: 0;
-  border-top: 1px solid var(--glass-line);
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.mutation:first-child {
-  border-top: 0;
-}
-
-.mutation:hover {
-  background: var(--glow);
-}
-
-.mutation:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-
-.mutation .what {
-  font-size: 0.88rem;
-}
-
-.mutation .caught {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  color: var(--dim);
-  grid-column: 1 / -1;
-}
-
-.mutation .state {
-  font-family: var(--mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text);
-  white-space: nowrap;
-  border: 1px solid var(--glass-line);
-  border-radius: var(--r);
-  padding: 0.15rem 0.4rem;
-}
-
-.mutation.is-broken {
-  background: var(--glow);
-  box-shadow: inset 3px 0 0 var(--reverted);
-}
-
-.mutation.is-broken .state {
-  color: var(--reverted);
-  border-color: var(--reverted);
-}
-
-.mutation.is-broken .caught {
-  color: var(--reverted);
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
 }
 
 /* --------------------------------------------------------------- responsive */
@@ -573,16 +740,12 @@ h3 {
     padding: 1rem;
   }
 
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 0.8rem;
+  }
+
   .split-bar {
-    height: 2.3rem;
-  }
-
-  .split-legend div {
-    border-left: 0;
-    border-top: 1px solid var(--glass-line);
-  }
-
-  .split-legend div:first-child {
-    border-top: 0;
+    height: 2.1rem;
   }
 }
