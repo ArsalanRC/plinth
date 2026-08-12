@@ -1,0 +1,485 @@
+/* ---------------------------------------------------------------------------
+   consign: the look.
+
+   Design reference: drinkcollider.com. Taken as a language and rebuilt from
+   nothing: no CSS, markup, copy or asset came across. What was kept is the
+   grammar. Near-black ground, one warm metal accent, heavy geometric display
+   type against small quiet body text, cards with a generous radius and almost
+   no shadow, and a surface that stays smooth rather than textured.
+
+   The vocabulary changed because the subject did. Their warm gold sells a
+   drink. Here it is money, and it is the seller's share of it, which is why
+   the accent is also a semantic colour on every scene.
+
+   base.css owns layout and declares colour roles with no hues in them. This
+   file supplies the hues, twice, once per theme.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --ground: #0e0f13;
+  --surface: #16181e;
+  --surface-2: #1d2027;
+  --line: #2a2e38;
+  --text: #f2eee6;
+  --dim: #98938a;
+
+  --accent: #e8b75d;
+  --warn: #d9a441;
+  --bad: #c4553d;
+
+  --glow: rgba(232, 183, 93, 0.08);
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  /* The three shares of a sale. Each keeps its colour everywhere it appears,
+     so the bar, the ledger rows and the numbers all agree without a legend. */
+  --seller: #e8b75d;
+  --creator: #cd8462;
+  --market: #7fa88f;
+
+  --settled: #7fa88f;
+  --reverted: #c4553d;
+
+  --glass: rgba(28, 31, 39, 0.62);
+  --glass-line: rgba(255, 255, 255, 0.09);
+
+  --display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --sans: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --r: 12px;
+  --band: 64rem;
+}
+
+:root[data-theme="light"] {
+  --ground: #faf7f1;
+  --surface: #ffffff;
+  --surface-2: #f3eee4;
+  --line: #e2dacb;
+  --text: #171512;
+  --dim: #6b655b;
+
+  /* Gold that glows on charcoal is illegible mustard on paper, so the light
+     theme re-picks it rather than reusing it. Same lesson the chess demo
+     learned: a token that carries meaning cannot be derived from appearance. */
+  --accent: #9a6b18;
+  --warn: #a37516;
+  --bad: #a5402a;
+
+  --glow: rgba(154, 107, 24, 0.07);
+  --shadow: rgba(60, 48, 26, 0.12);
+
+  --seller: #9a6b18;
+  --creator: #a85c3c;
+  --market: #4a7259;
+
+  --settled: #4a7259;
+  --reverted: #a5402a;
+
+  --glass: rgba(255, 255, 255, 0.66);
+  --glass-line: rgba(23, 21, 18, 0.08);
+}
+
+/* --------------------------------------------------------------- typography */
+
+.wordmark,
+.hero-title,
+h2,
+h3 {
+  font-family: var(--display);
+  letter-spacing: -0.02em;
+}
+
+.hero-title {
+  font-weight: 800;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 0.98;
+  max-width: 16ch;
+}
+
+.hero-title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.wordmark {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.lede {
+  max-width: 52ch;
+  font-size: 1.05rem;
+}
+
+h2 {
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+}
+
+h3 {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+/* -------------------------------------------------------------------- glass */
+
+/* One rule, used by every panel on the page. `backdrop-filter` is the whole
+   effect; the hairline and the shadow are what stop it reading as a flat
+   translucent box. */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 1px 2px var(--shadow), 0 12px 32px -20px var(--shadow);
+}
+
+/* ------------------------------------------------------------------ reveals */
+
+/* Revealed by a position check in the scroll handler, never by
+   IntersectionObserver. Observers coalesce callbacks, so anything that enters
+   and leaves the viewport between two ticks never reports as intersecting and
+   stays invisible for good. Fast scroll, a deep link and the End key all
+   reproduce it. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------- scenes */
+
+.scene {
+  margin: 1.5rem 0 0;
+  padding: 1.5rem;
+}
+
+.scene-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.scene-note {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--dim);
+}
+
+/* The split bar: one sale, three shares, drawn to scale. */
+.split-bar {
+  display: flex;
+  height: 3rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+.split-bar span {
+  display: block;
+  width: 0;
+  transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.split-bar .s-seller {
+  background: var(--seller);
+}
+.split-bar .s-creator {
+  background: var(--creator);
+}
+.split-bar .s-market {
+  background: var(--market);
+}
+
+.split-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.split-legend div {
+  border-left: 3px solid var(--line);
+  padding-left: 0.6rem;
+}
+
+.split-legend .k {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.split-legend .v {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.split-legend .l-seller {
+  border-color: var(--seller);
+}
+.split-legend .l-seller .v {
+  color: var(--seller);
+}
+.split-legend .l-creator {
+  border-color: var(--creator);
+}
+.split-legend .l-creator .v {
+  color: var(--creator);
+}
+.split-legend .l-market {
+  border-color: var(--market);
+}
+.split-legend .l-market .v {
+  color: var(--market);
+}
+
+/* Two lanes running the same sale under different settlement rules. */
+.lanes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.lane {
+  padding: 1rem;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.lane.is-reverted {
+  border-color: var(--reverted);
+}
+
+.lane.is-settled {
+  border-color: var(--settled);
+}
+
+.lane h3 {
+  margin: 0 0 0.15rem;
+}
+
+.lane .lane-sub {
+  font-size: 0.8rem;
+  color: var(--dim);
+  margin: 0 0 0.9rem;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 1.35rem 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  opacity: 0.25;
+  transition: opacity 0.3s ease;
+}
+
+.steps li.is-on {
+  opacity: 1;
+}
+
+.steps li .mark {
+  width: 1.35rem;
+  text-align: center;
+  color: var(--dim);
+}
+
+.steps li.is-good .mark {
+  color: var(--settled);
+}
+.steps li.is-bad .mark {
+  color: var(--reverted);
+}
+.steps li.is-bad {
+  color: var(--reverted);
+}
+
+.verdict {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  min-height: 1.2rem;
+}
+
+.verdict.is-bad {
+  color: var(--reverted);
+}
+.verdict.is-good {
+  color: var(--settled);
+}
+
+/* A switch that turns a defence on and off, used by the royalty scene. */
+.toggle-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  user-select: none;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .track {
+  width: 2.6rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  position: relative;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  flex: none;
+}
+
+.switch .track::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.18rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: var(--dim);
+  transform: translateY(-50%);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.switch input:checked + .track {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  border-color: var(--accent);
+}
+
+.switch input:checked + .track::after {
+  transform: translate(1.05rem, -50%);
+  background: var(--accent);
+}
+
+.switch input:focus-visible + .track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The mutation list. Click a defence to delete it and watch a test go red. */
+.mutations {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mutation {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.mutation:hover {
+  border-color: var(--accent);
+}
+
+.mutation:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mutation .what {
+  font-size: 0.9rem;
+}
+
+.mutation .caught {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--dim);
+  grid-column: 1 / -1;
+}
+
+.mutation .state {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--settled);
+  white-space: nowrap;
+}
+
+.mutation.is-broken {
+  border-color: var(--reverted);
+  background: color-mix(in srgb, var(--reverted) 8%, var(--surface));
+}
+
+.mutation.is-broken .state {
+  color: var(--reverted);
+}
+
+.mutation.is-broken .caught {
+  color: var(--reverted);
+}
+
+/* --------------------------------------------------------------- responsive */
+
+@media (max-width: 40rem) {
+  .scene {
+    padding: 1.1rem;
+  }
+
+  .split-bar {
+    height: 2.4rem;
+  }
+}
