@@ -1,0 +1,12 @@
+node_modules/
+artifacts/
+cache/
+types/
+coverage/
+coverage.json
+
+# Hardhat 3 keystore and anything else that could carry a key.
+.env
+.env.*
+*.key
+keystore.json
