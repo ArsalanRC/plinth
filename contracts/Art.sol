@@ -24,6 +24,10 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * states a number its own contract cannot produce is decoration pretending to
  * be data.
  */
+/* solhint-disable quotes */
+// Every string in here is a fragment of SVG or JSON, both of which quote their
+// own attributes with double quotes. Single-quoting the Solidity is what keeps
+// the markup readable and escape-free.
 library Art {
     using Strings for uint256;
 

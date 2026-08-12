@@ -10,12 +10,23 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "noEmit": true
+    "noEmit": true,
+
+    // The page is plain JavaScript with no build step, and the ABI codec lives
+    // there. The tests import it directly rather than through a copy, so the
+    // thing that ships is the thing that was tested.
+    // Types are inferred from the JS for anything that imports it, which is
+    // what the codec tests want. `checkJs` stays off: demanding annotations in
+    // a file that ships to a browser unbuilt would mean adding a build step to
+    // satisfy a checker, which is the tail wagging the dog.
+    "allowJs": true,
+    "checkJs": false
   },
   "include": [
     "hardhat.config.ts",
     "test/**/*.ts",
     "scripts/**/*.ts",
+    "site/*.js",
     "artifacts/**/*.d.ts"
   ]
 }

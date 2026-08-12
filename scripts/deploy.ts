@@ -20,13 +20,9 @@ import { formatEther, parseEther } from "viem";
 /** 2.5%, well inside the contract's own 10% ceiling. */
 const FEE_BPS = 250;
 
-/** 5% to the creator, declared by the collection through ERC-2981. */
-const ROYALTY_BPS = 500n;
-
 const COLLECTION = {
   name: "Consign Demo",
   symbol: "CNSGN",
-  baseURI: "ipfs://bafybeic6qkm3n7pojkyzqvbzcbz6xjrz4qzr3wqhqxjqxr3wqhqxjqxr3w/",
   maxSupply: 500n,
 };
 
@@ -57,10 +53,8 @@ console.log(`Consign            ${market.address}`);
 const collection = await viem.deployContract("ConsignCollection", [
   COLLECTION.name,
   COLLECTION.symbol,
-  COLLECTION.baseURI,
   COLLECTION.maxSupply,
   deployer,
-  ROYALTY_BPS,
 ]);
 console.log(`ConsignCollection  ${collection.address}\n`);
 
