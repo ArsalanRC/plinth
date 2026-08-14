@@ -38,20 +38,39 @@ export async function call(to, data) {
     return provider().request({ method: "eth_call", params: [{ to, data }, "latest"] });
   }
 
-  const response = await fetch(CHAIN.rpc, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "eth_call",
-      params: [{ to, data }, "latest"],
-    }),
-  });
+  return rpcCall("eth_call", [{ to, data }, "latest"]);
+}
 
-  const body = await response.json();
-  if (body.error) throw new Error(body.error.message ?? "The node refused the call");
-  return body.result;
+/**
+ * A JSON-RPC call against the first endpoint that answers.
+ *
+ * Public testnet endpoints go down, and the best known one for Amoy was
+ * refusing connections outright the day this was written. One dead endpoint
+ * should cost a visitor a second, not the whole page.
+ */
+async function rpcCall(method, params) {
+  let last = null;
+
+  for (const url of CHAIN.rpc) {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+
+      const body = await response.json();
+
+      // An error from the node is a real answer: the endpoint is alive and the
+      // call was wrong. Trying the next one would just get the same reply.
+      if (body.error) throw new Error(body.error.message ?? "The node refused the call");
+      return body.result;
+    } catch (error) {
+      last = error;
+    }
+  }
+
+  throw last ?? new Error("No RPC endpoint answered");
 }
 
 /** Ask the wallet for accounts. This is the call that opens MetaMask. */
@@ -103,7 +122,7 @@ export async function ensureChain() {
           chainId: CHAIN.hex,
           chainName: CHAIN.name,
           nativeCurrency: CHAIN.currency,
-          rpcUrls: [CHAIN.rpc],
+          rpcUrls: CHAIN.rpc,
           blockExplorerUrls: [CHAIN.explorer],
         },
       ],
