@@ -53,8 +53,8 @@ export const CHAIN = {
  * in the source.
  */
 export const CONTRACTS = {
-  market: null,
-  collection: null,
+  market: "0x2e24d151283c5b5da36db089be1a1c6eab70cbcf",
+  collection: "0xa4a3cbcd73d1709cb1db4d7a45fd35ff2f149af7",
 };
 
 /** Whether a real deployment exists to talk to. */

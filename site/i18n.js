@@ -121,7 +121,7 @@ export const STRINGS = {
     "status.p1": "Marketplace and collection, 100 tests, mutation check in CI",
     "status.p2": "Art generated on chain, no IPFS, nothing to pin",
     "status.p3": "Wallet, mint, list, buy and withdraw, plus a demo for everyone else",
-    "status.p4": "Deployed to Polygon Amoy",
+    "status.p4": "Live on Polygon Amoy",
     "status.p5": "Auctions and offers",
     "status.caption":
       "There is no upgrade path and there will not be one. A proxy would let the owner rewrite the settlement rules after people had already trusted them.",
@@ -239,7 +239,7 @@ export const STRINGS = {
     "status.p1": "Marktplatz und Collection, 100 Tests, Mutationstest in der CI",
     "status.p2": "Grafik on chain erzeugt, kein IPFS, nichts zu pinnen",
     "status.p3": "Wallet, minten, anbieten, kaufen, abholen, plus Demo für alle anderen",
-    "status.p4": "Auf Polygon Amoy deployt",
+    "status.p4": "Live auf Polygon Amoy",
     "status.p5": "Auktionen und Angebote",
     "status.caption":
       "Einen Upgrade-Pfad gibt es nicht, und es wird auch keinen geben. Ein Proxy ließe den Owner die Abrechnungsregeln umschreiben, nachdem Leute ihnen bereits vertraut haben.",
