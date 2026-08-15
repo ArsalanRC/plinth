@@ -14,7 +14,7 @@
  * page points at this deployment.
  */
 
-import { network } from "hardhat";
+import hre, { network } from "hardhat";
 import { formatEther } from "viem";
 
 /** 2.5%, well inside the contract's own 10% ceiling. */
@@ -50,11 +50,29 @@ console.log(`Balance        ${formatEther(balance)}\n`);
  * like a code-size problem and is not one. Estimate what is about to be spent.
  */
 const gasPrice = await publicClient.getGasPrice();
-const GAS_MARKET = 1_200_000n;
-const GAS_COLLECTION = 2_200_000n;
+
+/**
+ * Gas from the actual bytecode, not from a constant.
+ *
+ * Storing deployed code costs 200 gas a byte, so a contract's deployment gas
+ * is mostly a function of its size. This started as two hardcoded numbers and
+ * they went stale the moment the art grew: the collection went from 9KB to
+ * 19KB, the real cost roughly doubled, and the guard waved through a run that
+ * could not finish. Measuring the artifact cannot drift.
+ *
+ * The margin covers constructor execution and the transaction itself, which
+ * are small next to the storage cost at this size.
+ */
+async function gasFor(name: string): Promise<bigint> {
+  const artifact = await hre.artifacts.readArtifact(name);
+  const bytes = BigInt((artifact.deployedBytecode.length - 2) / 2);
+  return bytes * 200n + 600_000n;
+}
 
 const reuse = process.env.PLINTH_ADDRESS as `0x${string}` | undefined;
-const needed = (reuse ? GAS_COLLECTION : GAS_MARKET + GAS_COLLECTION) * gasPrice;
+const gasCollection = await gasFor("PlinthCollection");
+const gasMarket = reuse ? 0n : await gasFor("Plinth");
+const needed = (gasMarket + gasCollection) * gasPrice;
 
 console.log(`Gas price      ${Number(gasPrice) / 1e9} gwei`);
 console.log(`Needs about    ${formatEther(needed)}\n`);
