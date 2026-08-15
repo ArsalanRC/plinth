@@ -22,6 +22,18 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.28",
     settings: {
+      /**
+       * The IR pipeline, because the art does not fit the legacy one.
+       *
+       * Composing an SVG means concatenating many fragments in one expression,
+       * and the old code generator runs out of stack slots doing it. The
+       * alternative was breaking readable drawing code into a chain of tiny
+       * functions to satisfy a compiler limitation, which makes the art harder
+       * to follow and benefits nobody reading it.
+       *
+       * Costs a slower compile, and generates tighter code in return.
+       */
+      viaIR: true,
       optimizer: { enabled: true, runs: 200 },
       // Deployed bytecode carries no metadata hash, so an identical source
       // always compiles to identical bytecode. That is what makes a

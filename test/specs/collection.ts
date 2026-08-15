@@ -184,22 +184,79 @@ describe("PlinthCollection", () => {
   });
 
   /**
-   * The one that matters. The picture states a royalty; `royaltyInfo` states a
-   * royalty. If those two ever disagree, the art is a claim about money that
-   * the contract will not honour.
+   * The one that matters. The metadata states a royalty; `royaltyInfo` states a
+   * royalty. If those two ever disagree, the token advertises a number the
+   * contract will not honour, and a buyer reads the wrong one.
    */
-  it("draws exactly the royalty it charges", async () => {
+  it("publishes exactly the royalty it charges", async () => {
     const f = await fixture();
 
     for (let i = 0; i < 5; i++) {
       const tokenId = await mintTo(f, f.seller.account.address);
 
       const [, amount] = await f.collection.read.royaltyInfo([tokenId, 10_000n]);
-      const drawn = `${amount / 100n}.${(amount % 100n) / 10n}% ROYALTY`;
-      const svg = await f.collection.read.imageOf([tokenId]);
+      const expected = `${amount / 100n}.${(amount % 100n) / 10n}%`;
 
-      assert.ok(svg.includes(drawn), `token ${tokenId} draws something other than ${drawn}`);
+      const meta = JSON.parse(fromDataUri(await f.collection.read.tokenURI([tokenId])));
+      const stated = meta.attributes.find(
+        (a: { trait_type: string }) => a.trait_type === "Creator royalty",
+      );
+
+      assert.equal(stated?.value, expected, `token ${tokenId} states the wrong royalty`);
     }
+  });
+
+  it("publishes every layer as a filterable attribute", async () => {
+    const f = await fixture();
+    const tokenId = await mintTo(f, f.seller.account.address);
+
+    const meta = JSON.parse(fromDataUri(await f.collection.read.tokenURI([tokenId])));
+    const traits = meta.attributes.map((a: { trait_type: string }) => a.trait_type);
+
+    // Without these a marketplace cannot filter or rank by rarity, and a
+    // weighted generative collection whose weights are invisible is a picture.
+    for (const key of ["Background", "Fur", "Pattern", "Eyes", "Eye shape", "Mouth", "Accessory"]) {
+      assert.ok(traits.includes(key), `no ${key} attribute`);
+    }
+
+    for (const attr of meta.attributes) {
+      assert.ok(String(attr.value).length > 0, `${attr.trait_type} has an empty value`);
+    }
+  });
+
+  /**
+   * The rarest traits have to actually be rare, and the common ones common.
+   * A weighting table that is wired up backwards still produces valid art, so
+   * nothing else in the suite would notice.
+   */
+  it("hands out rare traits rarely", async () => {
+    const f = await fixture();
+    const counts = new Map<string, number>();
+    const SAMPLE = 120;
+
+    for (let id = 1n; id <= BigInt(SAMPLE); id++) {
+      const accessory = (await f.collection.read.traitsOf([id]))[6];
+      counts.set(accessory, (counts.get(accessory) ?? 0) + 1);
+    }
+
+    const none = counts.get("None") ?? 0;
+    const crown = counts.get("Crown") ?? 0;
+
+    assert.ok(none > crown, `None appeared ${none} times, Crown ${crown}. The table is backwards`);
+    assert.ok(none / SAMPLE > 0.2, `None is only ${((none / SAMPLE) * 100).toFixed(0)}%, expected ~35%`);
+    assert.ok(crown / SAMPLE < 0.12, `Crown is ${((crown / SAMPLE) * 100).toFixed(0)}%, expected ~3%`);
+  });
+
+  it("gives two different tokens different cats", async () => {
+    const f = await fixture();
+    const seen = new Set<string>();
+
+    for (let i = 0; i < 12; i++) {
+      const tokenId = await mintTo(f, f.seller.account.address);
+      seen.add(await f.collection.read.imageOf([tokenId]));
+    }
+
+    assert.equal(seen.size, 12, "some tokens drew an identical cat");
   });
 
   it("scales the royalty with the sale price", async () => {
