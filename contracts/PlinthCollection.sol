@@ -90,6 +90,32 @@ contract PlinthCollection is ERC721, ERC2981, Ownable {
     }
 
     /**
+     * @notice The seven layers of a token id.
+     * @dev Pure, and deliberately does not require the token to exist. The art
+     *      is a function of the id alone, so a front end can show what the next
+     *      mint would look like before anybody pays for it, and the rarity
+     *      table can be sampled without minting a hundred tokens first.
+     *
+     *      Order: background, fur, pattern, eye colour, eye shape, mouth,
+     *      accessory. The same order they appear in the metadata.
+     */
+    function traitsOf(uint256 tokenId) external pure returns (string[7] memory) {
+        (, string memory bg) = Art.background(tokenId);
+        (, string memory coat) = Art.fur(tokenId);
+        (, string memory eyes) = Art.eyeColour(tokenId);
+
+        return [
+            bg,
+            coat,
+            Art.pattern(tokenId),
+            eyes,
+            Art.eyeShape(tokenId),
+            Art.mouth(tokenId),
+            Art.accessory(tokenId)
+        ];
+    }
+
+    /**
      * @notice Every token this address owns.
      * @dev Linear in the supply, and unusable from another contract at any
      *      real size. It exists for the page, which calls it with `eth_call`
