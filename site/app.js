@@ -531,7 +531,14 @@ if (chain.hasWallet()) {
 
 /** Reconnect silently if this browser has already granted access. */
 async function boot() {
-  $("status-deploy").classList.toggle("is-done", isDeployed());
+  /* Both halves of this row derive from the same fact. Hardcoding the word
+     "done" in the markup would leave a fork with no contract addresses
+     claiming a deployment it does not have. */
+  const deployed = isDeployed();
+  const row = $("status-deploy");
+  row.classList.toggle("is-done", deployed);
+  row.querySelector("em").dataset.i18n = deployed ? "status.done" : "status.next";
+  row.querySelector("em").textContent = t(deployed ? "status.done" : "status.next");
 
   if (isDeployed() && chain.hasWallet()) {
     const existing = await chain.currentAccount();

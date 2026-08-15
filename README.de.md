@@ -189,7 +189,7 @@ Amoy ist das Testnet von Polygon, und das POL dafür gibt es gratis aus
 [dem Faucet](https://faucet.polygon.technology).
 
 ```bash
-pnpm hardhat keystore set AMOY_RPC_URL       # https://rpc-amoy.polygon.technology
+pnpm hardhat keystore set AMOY_RPC_URL       # https://polygon-amoy-bor-rpc.publicnode.com
 pnpm hardhat keystore set AMOY_PRIVATE_KEY   # eine Wegwerf-Wallet, keine echte
 pnpm deploy:amoy
 ```

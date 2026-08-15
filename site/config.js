@@ -17,7 +17,26 @@ export const CHAIN = {
   hex: "0x13882",
   name: "Polygon Amoy",
   currency: { name: "POL", symbol: "POL", decimals: 18 },
-  rpc: "https://rpc-amoy.polygon.technology",
+
+  /**
+   * Several endpoints, tried in order, because the obvious one is not reliable.
+   *
+   * `rpc-amoy.polygon.technology` is the endpoint every guide names and it was
+   * refusing connections entirely on 2026-08-14. A wallet pointed at it said
+   * "unable to connect to Amoy" and reported a funded account as empty, which
+   * looks exactly like a faucet that never paid out. It is not a failure worth
+   * debugging twice, so the page carries alternatives and moves on.
+   *
+   * All of these are public and keyless. Anything needing an API key does not
+   * belong in a file served to the browser.
+   */
+  rpc: [
+    "https://polygon-amoy-bor-rpc.publicnode.com",
+    "https://polygon-amoy.drpc.org",
+    "https://polygon-amoy.gateway.tenderly.co",
+    "https://rpc-amoy.polygon.technology",
+  ],
+
   explorer: "https://amoy.polygonscan.com",
   faucet: "https://faucet.polygon.technology",
 };
@@ -34,8 +53,8 @@ export const CHAIN = {
  * in the source.
  */
 export const CONTRACTS = {
-  market: null,
-  collection: null,
+  market: "0x2e24d151283c5b5da36db089be1a1c6eab70cbcf",
+  collection: "0xa4a3cbcd73d1709cb1db4d7a45fd35ff2f149af7",
 };
 
 /** Whether a real deployment exists to talk to. */
