@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title data-i18n="col.metaTitle">Plinth Cats · the collection</title>
+<meta name="description" content="500 cats drawn on chain in seven weighted layers. Browse by trait, see what is rare, and open any one of them." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./base.css" />
+<link rel="stylesheet" href="./theme.css" />
+<script>
+  (function () {
+    var p = "plinth", t = null, l = null;
+    try { t = localStorage.getItem(p + "-theme"); l = localStorage.getItem(p + "-lang"); } catch (e) {}
+    document.documentElement.dataset.theme =
+      t || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.lang =
+      l || ((navigator.language || "en").toLowerCase().startsWith("de") ? "de" : "en");
+  })();
+</script>
+</head>
+<body>
+
+<div class="backdrop" aria-hidden="true">
+  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--sky-top)" />
+        <stop offset="100%" stop-color="var(--sky-bottom)" />
+      </linearGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#sky)" />
+    <path class="ridge" data-depth="0.06" fill="var(--ridge-4)"
+      d="M0 520 L120 470 L210 505 L320 440 L430 495 L540 450 L660 500 L780 455 L900 505 L1020 460 L1140 500 L1260 465 L1360 500 L1440 470 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.12" fill="var(--ridge-3)"
+      d="M0 600 L110 555 L230 595 L340 540 L470 590 L590 545 L700 595 L830 550 L950 600 L1070 555 L1200 600 L1320 560 L1440 600 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.2" fill="var(--ridge-2)"
+      d="M0 690 L130 650 L250 690 L380 640 L500 690 L620 645 L750 695 L870 650 L990 695 L1110 655 L1240 700 L1360 660 L1440 690 L1440 900 L0 900 Z" />
+    <path class="ridge" data-depth="0.3" fill="var(--ridge-1)"
+      d="M0 780 L140 745 L270 785 L400 740 L520 790 L650 748 L780 795 L900 750 L1030 795 L1150 755 L1280 800 L1400 760 L1440 780 L1440 900 L0 900 Z" />
+  </svg>
+</div>
+
+<svg class="grain" aria-hidden="true">
+  <filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" /><feColorMatrix type="saturate" values="0" /></filter>
+  <rect width="100%" height="100%" filter="url(#noise)" opacity="0.32" />
+</svg>
+
+<header class="topbar">
+  <a class="wordmark" href="./index.html">plinth</a>
+  <nav class="topnav">
+    <a href="./index.html" data-i18n="nav.market">Market</a>
+    <a href="./collection.html" class="is-here" data-i18n="nav.collection">Collection</a>
+    <a href="./profile.html" data-i18n="nav.profile">Profile</a>
+    <button type="button" class="pill" id="connect" data-i18n="nav.connect">Connect</button>
+    <button type="button" class="pill" id="lang-btn" data-i18n="nav.lang">Deutsch</button>
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="Switch theme">
+      <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a6.9 6.9 0 0 0 11.1 11.1z"/></svg>
+    </button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- Collection identity ------------------------------------------------ -->
+  <section class="hero">
+    <div class="col-head glass reveal">
+      <div class="col-avatar" id="col-avatar" aria-hidden="true"></div>
+      <div class="col-id">
+        <h1 data-i18n="col.name">Plinth Cats</h1>
+        <p class="col-by">
+          <span data-i18n="col.by">Created by</span>
+          <a id="col-creator" href="#" target="_blank" rel="noopener">—</a>
+          <span class="sep">·</span>
+          <span data-i18n="col.chain">Polygon Amoy</span>
+          <span class="sep">·</span>
+          <span>ERC-721</span>
+        </p>
+        <p class="col-desc" data-i18n="col.desc"></p>
+      </div>
+    </div>
+
+    <!-- Every figure here is read from the chain or computed from the
+         contract. A stat that cannot be computed is left out rather than
+         invented, which is why there is no volume or floor history. -->
+    <div class="stats glass reveal">
+      <div><span class="k" data-i18n="col.items"></span><span class="v" id="s-items">—</span></div>
+      <div><span class="k" data-i18n="col.supply"></span><span class="v" id="s-supply">—</span></div>
+      <div><span class="k" data-i18n="col.owners"></span><span class="v" id="s-owners">—</span></div>
+      <div><span class="k" data-i18n="col.listed"></span><span class="v" id="s-listed">—</span></div>
+      <div><span class="k" data-i18n="col.floor"></span><span class="v accent" id="s-floor">—</span></div>
+    </div>
+  </section>
+
+  <!-- Filters and grid ---------------------------------------------------- -->
+  <section class="band reveal">
+    <div class="col-layout">
+
+      <aside class="filters glass" id="filters">
+        <div class="filters-head">
+          <h2 data-i18n="col.traits">Traits</h2>
+          <button type="button" class="pill" id="clear" data-i18n="col.clear">Clear</button>
+        </div>
+        <div id="filter-groups"></div>
+      </aside>
+
+      <div class="col-main">
+        <div class="col-bar">
+          <span class="scene-note" id="showing">—</span>
+          <label class="sort">
+            <span data-i18n="col.sort">Sort</span>
+            <select id="sort" class="price-input">
+              <option value="id" data-i18n="col.sortId">Token id</option>
+              <option value="rare" data-i18n="col.sortRare">Rarest first</option>
+              <option value="price" data-i18n="col.sortPrice">Price</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid" id="grid"></div>
+        <p class="empty" id="empty" hidden data-i18n="col.none"></p>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- One token, opened from the grid. A dialog rather than a third page: the
+     URL still carries the id so it can be shared and reloaded, and going back
+     returns you to the grid where you were rather than to the top of it. -->
+<dialog class="token-dialog glass" id="token">
+  <button type="button" class="token-close" id="token-close" aria-label="Close">&times;</button>
+  <div class="token-body">
+    <div class="token-art" id="t-art"></div>
+    <div class="token-meta">
+      <p class="eyebrow" data-i18n="col.name">Plinth Cats</p>
+      <h2 id="t-name">—</h2>
+      <p class="t-owner"><span data-i18n="tok.owner">Owned by</span> <span id="t-owner">—</span></p>
+
+      <div class="t-price glass">
+        <span class="k" data-i18n="tok.price">Price</span>
+        <span class="v" id="t-price">—</span>
+        <button type="button" class="btn btn-primary" id="t-action" hidden></button>
+      </div>
+
+      <h3 data-i18n="tok.traits">Traits</h3>
+      <div class="t-traits" id="t-traits"></div>
+
+      <h3 data-i18n="tok.details">Details</h3>
+      <dl class="t-details" id="t-details"></dl>
+    </div>
+  </div>
+</dialog>
+
+<footer class="foot">
+  <span><span data-i18n="foot.built">Built by</span>
+    <a href="https://www.linkedin.com/in/muhammad-arsalan-khadim-b87550259/" target="_blank" rel="noopener">Arsalan Khadim</a></span>
+  <span class="sep">·</span>
+  <span data-i18n="foot.deps"></span>
+  <span class="sep">·</span>
+  <span>MIT</span>
+</footer>
+
+<script type="module" src="./collection.js"></script>
+</body>
+</html>
