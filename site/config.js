@@ -55,7 +55,19 @@ export const CHAIN = {
 export const CONTRACTS = {
   market: "0x2e24d151283c5b5da36db089be1a1c6eab70cbcf",
   collection: "0xa4a3cbcd73d1709cb1db4d7a45fd35ff2f149af7",
+
+  /**
+   * The faucet. Null until it is deployed, and the page handles that: the
+   * button is simply not offered, and the public faucets are named instead.
+   *
+   * `scripts/topup.ts` reads this same line, so the address the page talks to
+   * and the address the owner funds cannot drift apart.
+   */
+  drip: null,
 };
 
 /** Whether a real deployment exists to talk to. */
 export const isDeployed = () => CONTRACTS.market !== null && CONTRACTS.collection !== null;
+
+/** Whether there is a faucet to offer. Separate: the market works without one. */
+export const hasDrip = () => CONTRACTS.drip !== null;

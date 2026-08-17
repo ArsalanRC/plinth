@@ -158,6 +158,73 @@ const MUTATIONS: Mutation[] = [
     ],
     expect: ["refuses payment above the asking price rather than keeping the difference"],
   },
+  {
+    name: "the faucet records the claim before it sends the money",
+    file: "contracts/Drip.sol",
+    edits: [
+      {
+        find: `        lastClaimAt[recipient] = block.timestamp;
+
+        (bool sent,) = payable(recipient).call{value: amount}("");
+        if (!sent) revert SendFailed();`,
+        replace: `        (bool sent,) = payable(recipient).call{value: amount}("");
+        if (!sent) revert SendFailed();
+
+        lastClaimAt[recipient] = block.timestamp;`,
+      },
+    ],
+    expect: ["survives a recipient that claims again while it is being paid"],
+  },
+  {
+    name: "the faucet cooldown follows the recipient, not the caller",
+    file: "contracts/Drip.sol",
+    edits: [
+      {
+        find: "        lastClaimAt[recipient] = block.timestamp;",
+        replace: "        lastClaimAt[msg.sender] = block.timestamp;",
+      },
+    ],
+    // Not the plain repeat-claim test. That one passes either way, because
+    // `claim` makes the caller and the recipient the same address. What breaks
+    // is paying for somebody else, which is the case the faucet exists for.
+    expect: ["keys the cooldown on the recipient, not on whoever paid"],
+  },
+  {
+    name: "the faucet refuses funding past its ceiling",
+    file: "contracts/Drip.sol",
+    edits: [
+      {
+        find: `        if (address(this).balance > MAX_BALANCE) revert TooFull(MAX_BALANCE, address(this).balance);
+        emit Funded(msg.sender, msg.value, address(this).balance);`,
+        replace: "        emit Funded(msg.sender, msg.value, address(this).balance);",
+      },
+    ],
+    expect: ["refuses funding that would take it over its ceiling"],
+  },
+  {
+    name: "the drip amount is bounded by a constant",
+    file: "contracts/Drip.sol",
+    edits: [
+      {
+        find: "        if (amount > MAX_DRIP) revert DripTooLarge(MAX_DRIP, amount);\n",
+        replace: "",
+      },
+    ],
+    expect: ["refuses a drip above the cap, so a visitor can read the ceiling from the code"],
+  },
+  {
+    name: "an empty faucet says it is empty",
+    file: "contracts/Drip.sol",
+    edits: [
+      {
+        find: "        if (address(this).balance < amount) revert Dry(address(this).balance, amount);\n",
+        replace: "",
+      },
+    ],
+    // Without this the send simply fails, and the page cannot tell "come back
+    // tomorrow, here are the public faucets" apart from "something is broken".
+    expect: ["says it is dry rather than sending what it does not have"],
+  },
 ];
 
 function runTests(): { passed: boolean; output: string } {

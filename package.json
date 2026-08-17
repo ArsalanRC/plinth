@@ -16,7 +16,9 @@
     "type-check": "tsc --noEmit",
     "check": "pnpm lint && pnpm type-check && pnpm test",
     "mutate": "node scripts/mutate.ts",
-    "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy"
+    "deploy:amoy": "hardhat run scripts/deploy.ts --network amoy",
+    "deploy:drip": "hardhat run scripts/deploy-drip.ts --network amoy",
+    "topup": "hardhat run scripts/topup.ts --network amoy"
   },
   "keywords": [
     "solidity",

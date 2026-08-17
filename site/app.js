@@ -16,7 +16,7 @@
 
 import { STRINGS, SCENES } from "./i18n.js";
 import { initChrome, prefersReduced, sleep } from "./chrome.js";
-import { CHAIN, isDeployed } from "./config.js";
+import { CHAIN, isDeployed, hasDrip } from "./config.js";
 import { createDemo } from "./demo.js";
 import { formatUnits, parseUnits } from "./abi.js";
 import * as chain from "./chain.js";
@@ -81,6 +81,7 @@ function explain(error) {
   const named = [
     "NotListed", "AlreadyListed", "NotOwner", "NotSeller", "NotApproved",
     "PriceIsZero", "WrongPayment", "ListingStale", "NothingToWithdraw", "SoldOut",
+    "TooSoon", "Dry", "TooFull",
   ].find((name) => text.includes(name));
 
   if (named) return t(`err.${named}`) ?? named;
@@ -261,6 +262,7 @@ async function render() {
   $("supply").textContent = `${state.tokens.length} / ${state.supply ?? state.tokens.length}`;
   $("split-note").textContent = `${t("split.fee")} ${state.feeBps / 100}%`;
 
+  renderFaucet();
   paintSplit();
 }
 
@@ -361,6 +363,138 @@ async function doWithdraw() {
   await loadLive();
 }
 
+// -------------------------------------------------------------------- faucet
+
+/** The faucet's last known state, or null when there is no faucet at all. */
+let faucet = null;
+
+const ZERO = "0x0000000000000000000000000000000000000000";
+
+/** A wait as the largest unit that still says something useful. */
+function formatWait(seconds) {
+  if (seconds <= 0n) return "0s";
+  const hours = seconds / 3600n;
+  const minutes = (seconds % 3600n) / 60n;
+
+  if (hours > 0n) return `${hours}h ${minutes}m`;
+  if (minutes > 0n) return `${minutes}m`;
+  return `${seconds}s`;
+}
+
+/**
+ * Read the faucet.
+ *
+ * Works before anybody connects, because `eth_call` needs no account. The zero
+ * address is used then: the contract answers `ready: false` for it, which is
+ * correct, and the balance and the drip size are the same whoever asks. So a
+ * visitor sees how full the faucet is before deciding to connect.
+ */
+async function loadFaucet() {
+  if (!hasDrip()) {
+    faucet = null;
+    return;
+  }
+
+  try {
+    faucet = await chain.dripCheck(state.isDemo ? ZERO : state.address);
+  } catch {
+    // A faucet that cannot be read is shown as one that cannot be used, rather
+    // than as a button that fails when pressed.
+    faucet = null;
+  }
+}
+
+/**
+ * Draw the panel for whichever of six states the visitor is in.
+ *
+ * Every branch ends with something to do. "Empty" names the public faucet,
+ * "no POL at all" explains why the button cannot help and names it too. A
+ * refusal with no next step is the failure this panel exists to replace.
+ */
+function renderFaucet() {
+  const panel = $("faucet");
+  const chip = $("faucet-chip");
+  const note = $("faucet-note");
+  const button = $("drip");
+  const link = $("faucet-public");
+
+  link.href = CHAIN.faucet;
+  $("faucet-body").textContent = t("faucet.body");
+
+  panel.classList.remove("is-ready", "is-dry");
+  chip.className = "scene-note";
+
+  const set = (chipText, chipKind, noteKey, enabled) => {
+    chip.textContent = chipText;
+    if (chipKind) {
+      chip.classList.add(chipKind);
+      panel.classList.add(chipKind);
+    }
+    note.textContent = t(noteKey);
+    button.disabled = !enabled;
+    button.hidden = false;
+  };
+
+  if (faucet === null) {
+    set(t("faucet.none"), null, "faucet.noteNone", false);
+    button.hidden = true;
+    return;
+  }
+
+  const claims = faucet.claimsLeft;
+  const full = claims === 1n ? t("faucet.one") : t("faucet.claims").replace("{n}", claims);
+
+  if (claims === 0n) {
+    set(t("faucet.empty"), "is-dry", "faucet.noteDry", false);
+    return;
+  }
+
+  // Before connecting, the honest thing to show is how full it is, plus what
+  // the two routes are. The button starts the connection rather than a claim.
+  if (state.isDemo) {
+    set(full, null, "faucet.noteDemo", true);
+    return;
+  }
+
+  // A wallet at exactly zero cannot pay for the claim transaction. No contract
+  // fixes that, so the panel says where the first POL comes from instead.
+  if (state.balance === 0n) {
+    set(full, null, "faucet.noteZero", false);
+    return;
+  }
+
+  if (!faucet.ready) {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    set(
+      t("faucet.wait").replace("{t}", formatWait(faucet.nextAt - now)),
+      null,
+      "faucet.noteCooldown",
+      false,
+    );
+    return;
+  }
+
+  set(full, "is-ready", "faucet.noteCooldown", true);
+}
+
+async function doDrip() {
+  // In demo mode the button is the connect button. Claiming needs a real
+  // address, and inventing a drip into an invented balance would teach a
+  // visitor something false about what the page just did.
+  if (state.isDemo) {
+    await doConnect();
+    return;
+  }
+
+  say(t("busy.sign"), "", { busy: true });
+  const { hash } = await chain.send({ ...chain.tx.claim(), from: account }, () =>
+    say(t("busy.mining"), "", { busy: true }),
+  );
+
+  say(t("ok.dripped"), "is-good", { href: chain.explorerTx(hash) });
+  await loadLive();
+}
+
 // ---------------------------------------------------------------------- live
 
 /** Read the whole market off the chain. */
@@ -399,6 +533,7 @@ async function loadLive() {
     mine: () => tokens.filter((tk) => tk.mineFlag),
   };
 
+  await loadFaucet();
   await render();
 }
 
@@ -514,6 +649,7 @@ $("connect").addEventListener("click", doConnect);
 $("connect-2").addEventListener("click", doConnect);
 $("mint").addEventListener("click", () => run($("mine"), doMint));
 $("withdraw").addEventListener("click", () => run($("wallet"), doWithdraw));
+$("drip").addEventListener("click", () => run($("faucet"), doDrip));
 $("pay-replay").addEventListener("click", runPay);
 
 chrome.onLangChange(() => {
@@ -556,6 +692,7 @@ async function boot() {
     }
   }
 
+  await loadFaucet();
   await render();
   onScroll();
 }

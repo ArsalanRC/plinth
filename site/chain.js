@@ -20,6 +20,7 @@ import {
   decodeUintArray,
   decodeString,
   decodeListing,
+  decodeCheck,
 } from "./abi.js";
 
 export const hasWallet = () => typeof globalThis.ethereum !== "undefined";
@@ -230,6 +231,28 @@ export async function isApprovedForAll(owner) {
   );
 }
 
+// -------------------------------------------------------------------- faucet
+
+const drip = () => CONTRACTS.drip;
+
+/**
+ * The faucet's whole state for one address, in a single call.
+ *
+ * Returns null when there is no faucet deployed, which is a normal state and
+ * not a failure: the marketplace works without one and the page says so rather
+ * than offering a button that cannot work.
+ */
+export async function dripCheck(address) {
+  if (drip() === null) return null;
+  return decodeCheck(await call(drip(), encode("check(address)", [address])));
+}
+
+/** How long between claims, read rather than written down on the page. */
+export async function dripCooldown() {
+  if (drip() === null) return null;
+  return decodeUint(await call(drip(), encode("COOLDOWN()")));
+}
+
 /**
  * The image for a token, pulled out of its on-chain metadata.
  *
@@ -282,6 +305,8 @@ export const tx = {
   }),
 
   withdraw: () => ({ to: market(), data: encode("withdraw()") }),
+
+  claim: () => ({ to: drip(), data: encode("claim()") }),
 };
 
 /** A short address, the way every wallet shows one. */

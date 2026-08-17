@@ -384,6 +384,57 @@ h3 {
   padding: 0.18rem 0.6rem;
 }
 
+/* ---------------------------------------------------------------- the faucet */
+
+.faucet {
+  margin-top: 1.25rem;
+  padding: 1.3rem 1.4rem 1.4rem;
+}
+
+.faucet .scene-head {
+  padding-bottom: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.faucet h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.faucet .body {
+  margin: 0 0 1.1rem;
+  max-width: 58ch;
+}
+
+/*
+ * State on the whole plate, never a stripe down one edge. A hard bar butting a
+ * blurred border reads as a rendering fault, and the stock documentation
+ * admonition says nothing about the page it sits on.
+ */
+.faucet.is-ready {
+  border-color: color-mix(in srgb, var(--settled) 45%, var(--glass-line));
+  background:
+    linear-gradient(180deg, var(--glass-top), var(--glass-bottom)),
+    color-mix(in srgb, var(--settled) 7%, transparent);
+}
+
+.faucet.is-dry {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--glass-line));
+  background:
+    linear-gradient(180deg, var(--glass-top), var(--glass-bottom)),
+    color-mix(in srgb, var(--warn) 7%, transparent);
+}
+
+.faucet .scene-note.is-ready {
+  color: var(--settled);
+  border-color: color-mix(in srgb, var(--settled) 55%, var(--glass-line));
+}
+
+.faucet .scene-note.is-dry {
+  color: var(--warn);
+  border-color: color-mix(in srgb, var(--warn) 55%, var(--glass-line));
+}
+
 /* ---------------------------------------------------------------- the market */
 
 .grid {
