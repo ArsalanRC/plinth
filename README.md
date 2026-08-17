@@ -11,7 +11,7 @@ is paid during the sale.
 No server, no account, no database. The page is static, and it talks to the
 chain with no wallet library at all.
 
-Solidity 0.8.28, Hardhat 3, OpenZeppelin. 100 tests.
+Solidity 0.8.28, Hardhat 3, OpenZeppelin. 132 tests.
 
 ---
 
@@ -132,7 +132,7 @@ already refuses the nested purchase, so the ordering never came into it. What
 the ordering actually protects is a contract reading mid-callback, and
 `SaleObserver` tests that directly.
 
-Eight mutations now. All eight caught, on every push.
+Thirteen mutations now. All thirteen caught, on every push.
 
 ---
 
@@ -143,8 +143,8 @@ git clone https://github.com/ArsalanRC/plinth.git
 cd plinth
 pnpm install
 
-pnpm test      # 100 tests
-pnpm mutate    # 8 mutations, each one must be caught
+pnpm test      # 132 tests
+pnpm mutate    # 13 mutations, each one must be caught
 pnpm check     # lint, types, tests
 ```
 
@@ -165,6 +165,7 @@ cd site && python3 -m http.server 8000
 | `contracts/Plinth.sol` | The marketplace: listing, buying, settlement, fees |
 | `contracts/PlinthCollection.sol` | The ERC-721, with a fixed supply and a royalty per token |
 | `contracts/Art.sol` | The picture and the metadata, both built from the token id |
+| `contracts/Drip.sol` | The test-POL faucet, with its rate limit on chain |
 | `contracts/mocks/` | Contracts that misbehave on purpose |
 | `site/abi.js` | The codec, tested against a real node |
 | `site/chain.js` | Wallet and chain, through `window.ethereum` |
@@ -194,6 +195,21 @@ The key lives in Hardhat's encrypted keystore. Nothing in this repository reads
 a key from a dotfile, or from an environment variable it sets itself. The script
 reads both contracts back after deploying them, because a constructor that
 reverts still leaves an address behind, and a receipt is not proof.
+
+### The faucet, if you want one
+
+```bash
+DRIP_FUNDING=0.1 pnpm deploy:drip   # deploys and funds in one transaction
+pnpm topup                          # refills it later
+```
+
+Put that address into `site/config.js` too, and the page offers a **Get test
+POL** button. Everything about it is bounded on chain: a fixed amount per claim,
+a cooldown per recipient, and a ceiling on the balance the contract will hold.
+
+It cannot help a wallet holding exactly zero. Sending the claim costs gas, and
+gas is paid in the currency being asked for. Nothing but a relayer fixes that,
+so the page says it plainly and links the public faucet instead.
 
 ---
 

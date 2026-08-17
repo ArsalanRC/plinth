@@ -11,7 +11,7 @@ zum Verkauf, und während des Verkaufs wird niemand ausgezahlt.
 Kein Server, kein Konto, keine Datenbank. Die Seite ist statisch, und sie redet
 ganz ohne Wallet-Library mit der Chain.
 
-Solidity 0.8.28, Hardhat 3, OpenZeppelin. 100 Tests.
+Solidity 0.8.28, Hardhat 3, OpenZeppelin. 132 Tests.
 
 ---
 
@@ -138,7 +138,7 @@ Staleness-Prüfung weist den verschachtelten Kauf schon vorher ab, also kam es
 auf die Reihenfolge nie an. Was sie wirklich schützt, ist ein Vertrag, der
 während des Callbacks liest. Genau das prüft `SaleObserver` jetzt.
 
-Acht Mutationen. Alle acht gefangen, bei jedem Push.
+Dreizehn Mutationen. Alle dreizehn gefangen, bei jedem Push.
 
 ---
 
@@ -149,8 +149,8 @@ git clone https://github.com/ArsalanRC/plinth.git
 cd plinth
 pnpm install
 
-pnpm test      # 100 Tests
-pnpm mutate    # 8 Mutationen, jede muss auffallen
+pnpm test      # 132 Tests
+pnpm mutate    # 13 Mutationen, jede muss auffallen
 pnpm check     # Lint, Typen, Tests
 ```
 
@@ -171,6 +171,7 @@ cd site && python3 -m http.server 8000
 | `contracts/Plinth.sol` | Der Marktplatz: Listing, Kauf, Abrechnung, Gebühr |
 | `contracts/PlinthCollection.sol` | Das ERC-721, feste Obergrenze, Royalty pro Token |
 | `contracts/Art.sol` | Bild und Metadaten, beide aus der Token-ID gebaut |
+| `contracts/Drip.sol` | Die Test-POL-Faucet, Limit direkt on chain |
 | `contracts/mocks/` | Verträge, die sich absichtlich schlecht benehmen |
 | `site/abi.js` | Der Codec, getestet gegen einen echten Node |
 | `site/chain.js` | Wallet und Chain, über `window.ethereum` |
@@ -202,6 +203,21 @@ liest einen Key aus einer Dotfile oder aus einer Umgebungsvariable, die es
 selbst setzt. Das Skript liest beide Verträge nach dem Deployment zurück, denn
 ein Konstruktor, der revertet, hinterlässt trotzdem eine Adresse, und eine
 Quittung ist kein Beweis.
+
+### Die Faucet, falls du eine willst
+
+```bash
+DRIP_FUNDING=0.1 pnpm deploy:drip   # deployen und befüllen in einer Transaktion
+pnpm topup                          # später nachfüllen
+```
+
+Diese Adresse kommt ebenfalls in `site/config.js`, dann bietet die Seite einen
+Button **Test-POL holen** an. Alle Grenzen liegen on chain: fester Betrag pro
+Abruf, Sperrfrist pro Empfänger, Obergrenze für das Guthaben des Vertrags.
+
+Einer Wallet mit exakt null POL hilft das nicht. Der Abruf kostet Gas, und Gas
+zahlt man in genau der Währung, um die es geht. Ohne Relayer löst das niemand,
+also sagt die Seite es offen und verlinkt die offizielle Faucet.
 
 ---
 
