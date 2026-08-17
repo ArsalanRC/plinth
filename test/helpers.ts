@@ -47,6 +47,48 @@ export async function fixture() {
 
 export type Fixture = Awaited<ReturnType<typeof fixture>>;
 
+/** What one claim pays, sized against a real gas price rather than guessed. */
+export const DRIP = parseEther("0.015");
+
+/**
+ * A funded faucet on a fresh chain.
+ *
+ * Funded through the constructor rather than by a follow-up transfer, because
+ * that is how it will actually be deployed: test POL is rationed, so paying for
+ * two transactions to do one job is a real cost.
+ */
+export async function dripFixture(funding: bigint = parseEther("0.5"), amount: bigint = DRIP) {
+  const { viem } = await network.create();
+  const [owner, visitor, other, stranger] = await viem.getWalletClients();
+  const publicClient = await viem.getPublicClient();
+
+  const drip = await viem.deployContract("Drip", [amount], { value: funding });
+
+  return {
+    viem,
+    publicClient,
+    drip,
+    owner: owner!,
+    visitor: visitor!,
+    other: other!,
+    stranger: stranger!,
+  };
+}
+
+export type DripFixture = Awaited<ReturnType<typeof dripFixture>>;
+
+/**
+ * Move the chain's clock forward.
+ *
+ * The cooldown is the whole point of the faucet, and a test that cannot pass
+ * time can only ever check the refusal. `evm_increaseTime` alone changes what
+ * the next block will say, so a block has to be mined before any call sees it.
+ */
+export async function advance(f: { publicClient: DripFixture["publicClient"] }, seconds: number) {
+  await f.publicClient.request({ method: "evm_increaseTime", params: [seconds] } as never);
+  await f.publicClient.request({ method: "evm_mine", params: [] } as never);
+}
+
 /**
  * Mint a token to the seller and approve the marketplace for it.
  *
