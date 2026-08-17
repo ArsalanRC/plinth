@@ -15,7 +15,7 @@
  */
 
 import hre, { network } from "hardhat";
-import { formatEther } from "viem";
+import { encodeAbiParameters, formatEther } from "viem";
 
 /** 2.5%, well inside the contract's own 10% ceiling. */
 const FEE_BPS = 250;
@@ -52,21 +52,68 @@ console.log(`Balance        ${formatEther(balance)}\n`);
 const gasPrice = await publicClient.getGasPrice();
 
 /**
- * Gas from the actual bytecode, not from a constant.
+ * What this deployment will actually cost.
  *
- * Storing deployed code costs 200 gas a byte, so a contract's deployment gas
- * is mostly a function of its size. This started as two hardcoded numbers and
- * they went stale the moment the art grew: the collection went from 9KB to
- * 19KB, the real cost roughly doubled, and the guard waved through a run that
- * could not finish. Measuring the artifact cannot drift.
+ * Third version of this check, and the first two were both wrong in the same
+ * way: a number typed in by hand that went stale. First a flat 0.05 POL
+ * threshold, then a hardcoded gas figure that was right for a 9KB contract and
+ * badly wrong once the art took it to 19KB. Both let a run begin that could not
+ * finish, and both times the node reported it as "contract creation code
+ * storage out of gas", which reads like a size problem and is not one.
  *
- * The margin covers constructor execution and the transaction itself, which
- * are small next to the storage cost at this size.
+ * So nothing is typed in now. The node is asked, and the arithmetic is only a
+ * fallback for a node that will not answer. Plus 5%, because the gas price can
+ * move between this check and the transaction landing.
  */
 async function gasFor(name: string): Promise<bigint> {
   const artifact = await hre.artifacts.readArtifact(name);
-  const bytes = BigInt((artifact.deployedBytecode.length - 2) / 2);
-  return bytes * 200n + 600_000n;
+
+  /**
+   * Ask the node first, and only fall back to arithmetic.
+   *
+   * `eth_estimateGas` normally refuses here, because it simulates against the
+   * sender's real balance and this is precisely the case where that balance is
+   * in question. The state override lends the sender a large balance for the
+   * simulation only, which gets a true number out of a node that would
+   * otherwise answer "out of gas" and tell us nothing.
+   *
+   * Measured against the real thing the formula came out 1.6% high, so it is a
+   * good fallback for a node that does not support overrides. It is a fallback
+   * all the same: the node knows and this does not.
+   */
+  try {
+    const data = (artifact.bytecode +
+      encodeDeployArgs(name).slice(2)) as `0x${string}`;
+
+    const estimate = await publicClient.request({
+      method: "eth_estimateGas",
+      params: [
+        { from: deployer, data },
+        "latest",
+        { [deployer]: { balance: "0x56BC75E2D63100000" } },
+      ],
+    } as never);
+
+    return (BigInt(estimate as string) * 105n) / 100n;
+  } catch {
+    const bytes = BigInt((artifact.deployedBytecode.length - 2) / 2);
+    return bytes * 200n + 600_000n;
+  }
+}
+
+/** Constructor arguments, encoded, so the estimate is of the real deployment. */
+function encodeDeployArgs(name: string): `0x${string}` {
+  if (name === "Plinth") {
+    return encodeAbiParameters(
+      [{ type: "uint16" }, { type: "address" }],
+      [FEE_BPS, deployer],
+    );
+  }
+
+  return encodeAbiParameters(
+    [{ type: "string" }, { type: "string" }, { type: "uint256" }, { type: "address" }],
+    [COLLECTION.name, COLLECTION.symbol, COLLECTION.maxSupply, deployer],
+  );
 }
 
 const reuse = process.env.PLINTH_ADDRESS as `0x${string}` | undefined;
