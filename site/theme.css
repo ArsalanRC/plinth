@@ -749,3 +749,373 @@ h3 {
     height: 2.1rem;
   }
 }
+
+/* ------------------------------------------------------- the collection page */
+
+.topnav a.is-here {
+  color: var(--accent);
+}
+
+.col-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 1.2rem;
+  margin-top: 1rem;
+}
+
+.col-avatar {
+  width: 7rem;
+  height: 7rem;
+  border-radius: var(--r-glass);
+  overflow: hidden;
+  border: 1px solid var(--glass-line);
+  flex: none;
+}
+
+.col-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.col-id h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.3rem;
+}
+
+.col-by {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--dim);
+  margin: 0 0 0.5rem;
+}
+
+.col-by a {
+  color: var(--accent);
+}
+
+.col-desc {
+  font-size: 0.92rem;
+  color: var(--dim);
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* Five figures, every one of them computed. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: 1px;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
+.stats div {
+  padding: 0.85rem 1rem;
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+}
+
+.stats .k {
+  display: block;
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 0.25rem;
+}
+
+.stats .v {
+  font-family: var(--mono);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.stats .v.accent {
+  color: var(--accent);
+}
+
+.col-layout {
+  display: grid;
+  grid-template-columns: 16rem 1fr;
+  gap: 1.2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 60rem) {
+  .col-layout {
+    grid-template-columns: 1fr;
+  }
+  .col-head {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}
+
+.filters {
+  padding: 1rem;
+  position: sticky;
+  top: 5rem;
+  max-height: calc(100svh - 7rem);
+  overflow-y: auto;
+}
+
+.filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--glass-line);
+}
+
+.filters-head h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.filters details {
+  border-top: 1px solid var(--glass-line);
+  padding: 0.5rem 0;
+}
+
+.filters details:first-child {
+  border-top: 0;
+}
+
+.filters summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filters summary .count {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  background: var(--accent);
+  color: var(--ground);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+}
+
+.trait-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.28rem 0;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.trait-row:hover .trait-name {
+  color: var(--accent);
+}
+
+.trait-share {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--dim);
+}
+
+.col-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
+
+.sort select {
+  width: auto;
+}
+
+/* The grid card is a button here, so it needs its own reset. */
+.item {
+  border: 1px solid var(--glass-line);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------ one token */
+
+.token-dialog {
+  width: min(60rem, 94vw);
+  max-height: 90svh;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  color: var(--text);
+  overflow: auto;
+}
+
+.token-dialog::backdrop {
+  background: rgba(16, 14, 12, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.token-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  background: none;
+  border: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--dim);
+  cursor: pointer;
+}
+
+.token-close:hover {
+  color: var(--accent);
+}
+
+.token-body {
+  display: grid;
+  grid-template-columns: minmax(14rem, 22rem) 1fr;
+  gap: 1.4rem;
+  padding: 1.4rem;
+}
+
+@media (max-width: 46rem) {
+  .token-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.token-art {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r);
+  overflow: hidden;
+  align-self: start;
+}
+
+.token-art .art img {
+  width: 100%;
+  display: block;
+}
+
+.token-meta h2 {
+  margin: 0.15rem 0 0.3rem;
+  font-size: 1.6rem;
+}
+
+.token-meta h3 {
+  margin: 1.2rem 0 0.5rem;
+}
+
+.t-owner {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--dim);
+  margin: 0;
+}
+
+.t-price {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+}
+
+.t-price .k {
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.t-price .v {
+  font-family: var(--mono);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-right: auto;
+}
+
+.t-traits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.6rem;
+}
+
+.t-trait {
+  padding: 0.6rem 0.7rem;
+}
+
+.t-trait .k {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.t-trait .v {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin: 0.1rem 0;
+}
+
+.t-trait .share {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--dim);
+}
+
+/* Rare enough to be worth pointing at, without a badge shouting about it. */
+.t-trait .share.is-rare {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.t-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.t-details dt {
+  color: var(--dim);
+}
+
+.t-details dd {
+  margin: 0;
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
+/* A modal dialog centres itself, unless something sets `position` on it.
+   `.glass` sets `position: relative`, which quietly broke that and left the
+   dialog anchored to the top of the document with its middle off screen. */
+.token-dialog[open] {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+}
