@@ -119,6 +119,27 @@
       </div>
     </div>
 
+    <!-- Test POL. A convenience and not a promise: nobody can create Amoy POL,
+         so this only ever hands on what its owner claimed from a public
+         faucet. The panel says that, says how full it is, and says what to do
+         when it is empty. State is carried by the border, a tint and the chip,
+         never by a bar down one edge. -->
+    <div class="faucet glass reveal" id="faucet">
+      <div class="scene-head">
+        <h3 data-i18n="faucet.title"></h3>
+        <span class="scene-note" id="faucet-chip">—</span>
+      </div>
+
+      <p class="body" id="faucet-body"></p>
+
+      <div class="hero-actions">
+        <button type="button" class="btn btn-primary" id="drip" data-i18n="faucet.get"></button>
+        <a class="btn" id="faucet-public" target="_blank" rel="noopener" data-i18n="faucet.public"></a>
+      </div>
+
+      <p class="caption" id="faucet-note"></p>
+    </div>
+
     <p class="status" id="status"></p>
   </section>
 

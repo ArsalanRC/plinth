@@ -56,6 +56,9 @@ export const SELECTOR = {
   "name()": "0x06fdde03",
   "symbol()": "0x95d89b41",
   "transferFrom(address,address,uint256)": "0x23b872dd",
+  "claim()": "0x4e71d92d",
+  "check(address)": "0xc23697a8",
+  "COOLDOWN()": "0xa2724a4d",
 };
 
 const ZERO_WORD = "0".repeat(64);
@@ -173,6 +176,24 @@ export function decodeQuote(data) {
     royalty: decodeUint(data, 1),
     fee: decodeUint(data, 2),
     toSeller: decodeUint(data, 3),
+  };
+}
+
+/**
+ * The faucet's `check`: everything needed to draw the button, in one call.
+ *
+ * Five static words, so no offset table. `ready` is the contract's own answer
+ * rather than something recomputed here from the other four, because the
+ * contract is the thing that will accept or refuse the claim and a second
+ * opinion in JavaScript can only ever disagree with it.
+ */
+export function decodeCheck(data) {
+  return {
+    ready: decodeBool(data, 0),
+    nextAt: decodeUint(data, 1),
+    amount: decodeUint(data, 2),
+    balance: decodeUint(data, 3),
+    claimsLeft: decodeUint(data, 4),
   };
 }
 

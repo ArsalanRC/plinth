@@ -83,6 +83,25 @@ export const STRINGS = {
     "wallet.demo": "Demo",
     "wallet.demoAccount": "0xDEM0…DEM0",
 
+    "faucet.title": "Test POL",
+    "faucet.body":
+      "Amoy POL is free but rationed. This faucet hands on what its owner claimed, so it runs dry some mornings. The demo needs no wallet and no POL at all.",
+    "faucet.get": "Get test POL",
+    "faucet.public": "Public faucet",
+    "faucet.claims": "{n} claims left",
+    "faucet.one": "1 claim left",
+    "faucet.empty": "Empty",
+    "faucet.wait": "Again in {t}",
+    "faucet.none": "Not deployed",
+    "faucet.ready": "Ready",
+    "faucet.noteCooldown": "One claim per address a day, counted by the contract itself.",
+    "faucet.noteDry":
+      "There is nothing in it right now. The public faucet still works, and it is what refills this one.",
+    "faucet.noteZero":
+      "A wallet at zero cannot claim, because sending that transaction costs gas. Take the first POL from the public faucet.",
+    "faucet.noteDemo": "Connect a wallet to claim. Or stay in the demo, which costs nothing.",
+    "faucet.noteNone": "No faucet is deployed yet. The public one works today.",
+
     "market.eyebrow": "The market",
     "market.title": "Everything currently for sale",
     "market.body":
@@ -159,6 +178,11 @@ export const STRINGS = {
     "err.ListingStale": "The seller moved that token. The listing is dead.",
     "err.NothingToWithdraw": "You are not owed anything.",
     "err.SoldOut": "The collection is sold out.",
+    "err.TooSoon": "You claimed already today. Come back tomorrow.",
+    "err.Dry": "The faucet is empty. Try the public one.",
+    "err.TooFull": "The faucet is already full.",
+
+    "ok.dripped": "Test POL on its way",
 
     "status.eyebrow": "Where it stands",
     "status.title": "Done, and deliberately not done",
@@ -247,6 +271,25 @@ export const STRINGS = {
     "wallet.demo": "Demo",
     "wallet.demoAccount": "0xDEM0…DEM0",
 
+    "faucet.title": "Test-POL",
+    "faucet.body":
+      "Amoy-POL kostet nichts, ist aber knapp. Was hier verteilt wird, hat der Betreiber selbst geholt. Manchmal ist deshalb morgens nichts mehr da. Die Demo läuft ganz ohne Wallet.",
+    "faucet.get": "Test-POL holen",
+    "faucet.public": "Offizielle Faucet",
+    "faucet.claims": "reicht für {n}",
+    "faucet.one": "reicht für einen",
+    "faucet.empty": "Leer",
+    "faucet.wait": "Wieder in {t}",
+    "faucet.none": "Nicht deployed",
+    "faucet.ready": "Bereit",
+    "faucet.noteCooldown": "Eine Abholung pro Adresse und Tag, gezählt vom Contract selbst.",
+    "faucet.noteDry":
+      "Gerade ist nichts drin. Die offizielle Faucet läuft weiter, und aus ihr wird diese hier gefüllt.",
+    "faucet.noteZero":
+      "Mit null POL geht kein Abruf, denn auch der kostet Gas. Hol dir die ersten POL bei der offiziellen Faucet.",
+    "faucet.noteDemo": "Zum Abholen die Wallet verbinden. Oder in der Demo bleiben, die kostet nichts.",
+    "faucet.noteNone": "Es ist noch keine Faucet deployed. Heute hilft die offizielle.",
+
     "market.eyebrow": "Der Markt",
     "market.title": "Alles, was gerade zum Verkauf steht",
     "market.body":
@@ -323,6 +366,11 @@ export const STRINGS = {
     "err.ListingStale": "Der Verkäufer hat den Token weitergeschoben. Das Listing ist tot.",
     "err.NothingToWithdraw": "Dir steht nichts zu.",
     "err.SoldOut": "Die Collection ist ausverkauft.",
+    "err.TooSoon": "Heute schon abgeholt. Morgen wieder.",
+    "err.Dry": "Die Faucet ist leer. Nimm die offizielle.",
+    "err.TooFull": "Die Faucet ist schon voll.",
+
+    "ok.dripped": "Test-POL ist unterwegs",
 
     "status.eyebrow": "Stand der Dinge",
     "status.title": "Fertig, und bewusst nicht fertig",

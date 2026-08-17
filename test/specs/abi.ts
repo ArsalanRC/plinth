@@ -13,11 +13,12 @@ import {
   decodeListing,
   decodeQuote,
   decodeRoyalty,
+  decodeCheck,
   formatUnits,
   parseUnits,
 } from "../../site/abi.js";
 
-import { fixture, mintTo, listed, mintAndApprove, PRICE } from "../helpers.js";
+import { fixture, dripFixture, mintTo, listed, mintAndApprove, PRICE, DRIP } from "../helpers.js";
 
 /**
  * The page talks to the chain with no library at all. That is only defensible
@@ -31,7 +32,8 @@ import { fixture, mintTo, listed, mintAndApprove, PRICE } from "../helpers.js";
 describe("abi codec", () => {
   it("has a selector that matches the compiled ABI for every signature", async () => {
     const f = await fixture();
-    const abi = [...f.market.abi, ...f.collection.abi];
+    const d = await dripFixture();
+    const abi = [...f.market.abi, ...f.collection.abi, ...d.drip.abi];
 
     const known = new Map<string, string>();
     for (const entry of abi) {
@@ -289,6 +291,72 @@ describe("abi codec", () => {
       await f.collection.read.isApprovedForAll([f.seller.account.address, f.market.address]),
       true,
     );
+  });
+
+  // ------------------------------------------------------------------ faucet
+
+  it("reads the faucet's whole state through one hand-built call", async () => {
+    const d = await dripFixture();
+
+    const { data } = await d.publicClient.call({
+      to: d.drip.address,
+      data: encode("check(address)", [d.visitor.account.address]) as `0x${string}`,
+    });
+
+    const decoded = decodeCheck(data!);
+    const [ready, nextAt, amount, balance, claimsLeft] = await d.drip.read.check([
+      d.visitor.account.address,
+    ]);
+
+    // Five static words in one return value, so a codec that miscounts them
+    // reports a faucet that is empty, or ready when it is not.
+    assert.deepEqual(decoded, { ready, nextAt, amount, balance, claimsLeft });
+    assert.equal(decoded.amount, DRIP);
+    assert.equal(decoded.ready, true);
+  });
+
+  it("reads a used faucet the same way the contract does", async () => {
+    const d = await dripFixture();
+    await d.drip.write.claim({ account: d.visitor.account });
+
+    const { data } = await d.publicClient.call({
+      to: d.drip.address,
+      data: encode("check(address)", [d.visitor.account.address]) as `0x${string}`,
+    });
+
+    const decoded = decodeCheck(data!);
+
+    assert.equal(decoded.ready, false);
+    assert.equal(decoded.nextAt, await d.drip.read.nextClaimAt([d.visitor.account.address]));
+  });
+
+  it("claims through call data it built itself", async () => {
+    const d = await dripFixture();
+
+    const before = await d.publicClient.getBalance({ address: d.other.account.address });
+    const hash = await d.other.sendTransaction({
+      to: d.drip.address,
+      data: encode("claim()") as `0x${string}`,
+    });
+    const receipt = await d.publicClient.waitForTransactionReceipt({ hash });
+    const after = await d.publicClient.getBalance({ address: d.other.account.address });
+
+    assert.equal(receipt.status, "success");
+    // Net of the gas this very transaction burned, which is the only honest
+    // way to assert on a balance the sender also paid out of.
+    assert.equal(after - before + receipt.gasUsed * receipt.effectiveGasPrice, DRIP);
+  });
+
+  it("reads the cooldown rather than letting the page write it down", async () => {
+    const d = await dripFixture();
+
+    const { data } = await d.publicClient.call({
+      to: d.drip.address,
+      data: encode("COOLDOWN()") as `0x${string}`,
+    });
+
+    assert.equal(decodeUint(data!), await d.drip.read.COOLDOWN());
+    assert.equal(decodeUint(data!), 86_400n);
   });
 
   // ------------------------------------------------------------------- units
