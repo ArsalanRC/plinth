@@ -62,6 +62,20 @@
 
 html { scroll-behavior: smooth; }
 
+/* The markup on these pages is written in English and translated in place once
+   the module loads. A visitor in any other language would otherwise get one
+   painted frame of English before the swap, which reads as a flicker on every
+   navigation.
+
+   The inline script in <head> sets this attribute before first paint, and only
+   when the language actually needs swapping, so an English visitor is never
+   hidden for a single frame. `visibility` rather than `display` so the layout
+   is already settled when it appears and nothing jumps.
+
+   The script also clears it on a timer, so a page whose JavaScript never
+   arrives shows up in English instead of staying blank. */
+html[data-i18n-pending] body { visibility: hidden; }
+
 body {
   margin: 0;
   background: var(--ground);
