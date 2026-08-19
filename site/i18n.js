@@ -22,6 +22,52 @@ export const STRINGS = {
     "nav.collection": "Collection",
     "nav.profile": "Profile",
     "nav.signout": "Sign out",
+    "nav.start": "Start here",
+
+    "start.metaTitle": "Start here · plinth",
+    "start.title": "New to all this? Start here.",
+    "start.sub": "Four ways in. Pick the one that matches where you are.",
+
+    "start.pick1": "Just look around",
+    "start.pick1sub": "No wallet, nothing installed, nothing at risk.",
+    "start.pick2": "Make a wallet",
+    "start.pick2sub": "About ten minutes. MetaMask is the usual first one.",
+    "start.pick3": "Get on the test network",
+    "start.pick3sub": "One click here, then free test coins.",
+    "start.pick4": "Use real Polygon",
+    "start.pick4sub": "Real money. Not live yet.",
+
+    "start.s1.title": "Just look around",
+    "start.s1.body":
+      "The market and the collection both work with nothing installed. You get invented listings and real artwork, drawn by the contract itself. Nothing you click can cost anything, because there is no wallet there to charge.",
+    "start.s1.cta": "Open the market",
+
+    "start.s2.title": "Make a wallet",
+    "start.s2.body":
+      "A wallet is a key, not an account. Nobody signs you up, and nobody can reset it for you later.",
+    "start.s2.step1": "Install MetaMask from its own site. Never from a search advert.",
+    "start.s2.step2": "Choose Create a new wallet. The password is for this browser only.",
+    "start.s2.step3": "Write the twelve words on paper. Not a photo, not a notes app.",
+    "start.s2.step4": "Confirm them. MetaMask asks for a few of the words back.",
+    "start.s2.warn":
+      "Anybody holding those twelve words owns everything in the wallet. No support desk can undo it. This site never asks for them and could not use them.",
+    "start.s2.docs": "MetaMask's own guide",
+    "start.s2.dl": "metamask.io/download",
+
+    "start.s3.title": "Get on the test network",
+    "start.s3.body":
+      "Amoy is Polygon's test network. The coins are free and worth nothing, which is exactly the point. You can mint, list and buy here without spending anything real.",
+    "start.s3.add": "Add Amoy to MetaMask",
+    "start.s3.added": "Done. Amoy is in your network list now.",
+    "start.s3.failed": "MetaMask turned that down. You can add it by hand instead.",
+    "start.s3.nowallet": "Install a wallet first and this button starts working.",
+    "start.s3.step2": "Get free test POL from the faucet. It takes about a minute.",
+    "start.s3.step3": "Come back, press Connect, and mint one.",
+    "start.s3.faucet": "Open the faucet",
+
+    "start.s4.title": "Use real Polygon",
+    "start.s4.body":
+      "Not live yet. The contracts run on the test network only, so there is nothing on Polygon mainnet to connect to. When that changes it will say so here plainly.",
 
     "prof.metaTitle": "Your wallet · plinth",
     "prof.title": "Your wallet",
@@ -231,6 +277,52 @@ export const STRINGS = {
     "nav.collection": "Collection",
     "nav.profile": "Profil",
     "nav.signout": "Trennen",
+    "nav.start": "Hier starten",
+
+    "start.metaTitle": "Hier starten · plinth",
+    "start.title": "Neu bei alldem? Fang hier an.",
+    "start.sub": "Vier Wege hinein. Nimm den, der zu dir passt.",
+
+    "start.pick1": "Nur umsehen",
+    "start.pick1sub": "Kein Wallet, nichts installiert, kein Risiko.",
+    "start.pick2": "Wallet anlegen",
+    "start.pick2sub": "Etwa zehn Minuten. MetaMask ist meist das erste.",
+    "start.pick3": "Ins Testnetz",
+    "start.pick3sub": "Ein Klick hier, danach kostenlose Test-Coins.",
+    "start.pick4": "Echtes Polygon",
+    "start.pick4sub": "Echtes Geld. Noch nicht live.",
+
+    "start.s1.title": "Nur umsehen",
+    "start.s1.body":
+      "Markt und Collection laufen ohne alles. Du siehst erfundene Listings und echte Grafik, vom Vertrag selbst gezeichnet. Klicken kostet nichts, weil es kein Wallet gibt, das zahlen könnte.",
+    "start.s1.cta": "Zum Markt",
+
+    "start.s2.title": "Wallet anlegen",
+    "start.s2.body":
+      "Ein Wallet ist ein Schlüssel, kein Konto. Niemand meldet dich an, und niemand kann es später zurücksetzen.",
+    "start.s2.step1": "MetaMask von der eigenen Seite installieren. Nie über eine Suchanzeige.",
+    "start.s2.step2": "Neues Wallet erstellen wählen. Das Passwort gilt nur für diesen Browser.",
+    "start.s2.step3": "Die zwölf Wörter auf Papier schreiben. Kein Foto, keine Notiz-App.",
+    "start.s2.step4": "Bestätigen. MetaMask fragt ein paar der Wörter wieder ab.",
+    "start.s2.warn":
+      "Wer diese zwölf Wörter hat, besitzt alles im Wallet. Kein Support macht das rückgängig. Diese Seite fragt nie danach und könnte damit nichts anfangen.",
+    "start.s2.docs": "Die Anleitung von MetaMask",
+    "start.s2.dl": "metamask.io/download",
+
+    "start.s3.title": "Ins Testnetz",
+    "start.s3.body":
+      "Amoy ist das Testnetz von Polygon. Die Coins sind gratis und wertlos, und genau darum geht es. Du kannst hier minten, listen und kaufen, ohne echtes Geld auszugeben.",
+    "start.s3.add": "Amoy zu MetaMask hinzufügen",
+    "start.s3.added": "Fertig. Amoy steht jetzt in deiner Netzwerkliste.",
+    "start.s3.failed": "MetaMask hat abgelehnt. Du kannst es auch von Hand eintragen.",
+    "start.s3.nowallet": "Erst ein Wallet installieren, dann geht dieser Button.",
+    "start.s3.step2": "Kostenloses Test-POL vom Faucet holen. Dauert etwa eine Minute.",
+    "start.s3.step3": "Zurückkommen, Verbinden drücken, einen Token minten.",
+    "start.s3.faucet": "Faucet öffnen",
+
+    "start.s4.title": "Echtes Polygon",
+    "start.s4.body":
+      "Noch nicht live. Die Verträge laufen nur im Testnetz, auf Polygon Mainnet gibt es also nichts zu verbinden. Sobald sich das ändert, steht es hier deutlich.",
 
     "prof.metaTitle": "Dein Wallet · plinth",
     "prof.title": "Dein Wallet",
