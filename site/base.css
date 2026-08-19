@@ -76,6 +76,68 @@ html { scroll-behavior: smooth; }
    arrives shows up in English instead of staying blank. */
 html[data-i18n-pending] body { visibility: hidden; }
 
+/* A row of routes into the site, for a visitor who does not yet know which one
+   is theirs. Deliberately not the `.stats` bar: that styles readouts, and
+   putting anchors inside it renders them as raw blue underlined links. */
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.9rem;
+  margin: 0 0 2rem;
+}
+
+.choice {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.choice:hover,
+.choice:focus-visible { transform: translateY(-2px); border-color: var(--accent); }
+.choice .k { font-weight: 600; font-size: 0.98rem; }
+.choice .v { font-size: 0.86rem; color: var(--dim); }
+
+/* A numbered how-to. The `.steps` list is a different thing entirely: it is the
+   payment-flow animation, monospace and faded until a script switches each line
+   on, so a static guide using it renders greyed out and one word wide. */
+.guide-steps {
+  margin: 0 0 1.6rem;
+  padding-left: 1.4rem;
+  max-width: 62ch;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.guide-steps li { line-height: 1.55; }
+.guide-steps li > a { margin-left: 0.4rem; }
+
+/* The one warning on a page that can actually cost somebody their money. It
+   was first written as a `.scene-note`, which is monospace and quiet, and it
+   read as a code comment next to the thing it is warning about. A warning
+   nobody's eye stops on is not a warning. */
+.callout-bad {
+  margin: 0 0 1.6rem;
+  padding: 0.95rem 1.15rem;
+  max-width: 62ch;
+  border: 1px solid var(--bad);
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+@supports (background: color-mix(in srgb, red 8%, transparent)) {
+  .callout-bad { background: color-mix(in srgb, var(--bad) 9%, transparent); }
+}
+
 body {
   margin: 0;
   background: var(--ground);
