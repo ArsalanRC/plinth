@@ -67,6 +67,13 @@ export function initChrome(strings, { prefix = "site" } = {}) {
 
     if (dict["meta.title"]) document.title = dict["meta.title"];
     labelTheme();
+
+    // The page is held invisible until this point when the markup's own
+    // language is not the one being shown. See `html[data-i18n-pending]` in
+    // base.css. Cleared here rather than on load, because it is the finished
+    // swap that makes the page safe to look at, not the script arriving.
+    delete root.dataset.i18nPending;
+
     try { localStorage.setItem(`${prefix}-lang`, lang); } catch { /* private mode */ }
 
     // Canvas and SVG that were drawn with baked-in text will not re-translate

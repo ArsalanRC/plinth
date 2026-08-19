@@ -18,6 +18,19 @@
       t || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.lang =
       l || ((navigator.language || "en").toLowerCase().startsWith("de") ? "de" : "en");
+
+    // This markup is written in English. A German visitor would otherwise read
+    // one painted frame of English before the translator runs, which is the
+    // flicker. Hide until it has run, and only for the languages that need
+    // swapping, so an English visitor waits for nothing. The timeout is the
+    // safety net: if the module never loads, the page appears in English
+    // rather than staying blank forever.
+    if (document.documentElement.lang !== "en") {
+      document.documentElement.dataset.i18nPending = "1";
+      setTimeout(function () {
+        delete document.documentElement.dataset.i18nPending;
+      }, 1200);
+    }
   })();
 </script>
 </head>
