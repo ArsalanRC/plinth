@@ -258,6 +258,7 @@ async function render() {
   $("connect").textContent = state.isDemo ? t("nav.connect") : chain.shortAddress(state.address);
   $("connect-2").textContent = state.isDemo ? t("hero.connect") : t("hero.connected");
   $("connect-2").disabled = !state.isDemo;
+  $("signout").hidden = state.isDemo;
 
   $("supply").textContent = `${state.tokens.length} / ${state.supply ?? state.tokens.length}`;
   $("split-note").textContent = `${t("split.fee")} ${state.feeBps / 100}%`;
@@ -647,6 +648,15 @@ function autoplay() {
 
 $("connect").addEventListener("click", doConnect);
 $("connect-2").addEventListener("click", doConnect);
+
+// Signing out reloads rather than unpicking the live state by hand. Every
+// panel on this page was built from the connected account, and rebuilding them
+// one at a time is how one of them gets missed and keeps showing the address
+// that just left.
+$("signout").addEventListener("click", async () => {
+  await chain.disconnect();
+  location.reload();
+});
 $("mint").addEventListener("click", () => run($("mine"), doMint));
 $("withdraw").addEventListener("click", () => run($("wallet"), doWithdraw));
 $("drip").addEventListener("click", () => run($("faucet"), doDrip));

@@ -81,13 +81,79 @@ export async function connect() {
   const accounts = await provider().request({ method: "eth_requestAccounts" });
   if (!accounts || accounts.length === 0) throw new Error("no-account");
 
+  remember(false);
   await ensureChain();
   return accounts[0];
 }
 
-/** Accounts already granted, without prompting. Used on load. */
+/*
+ * Signing out, and why it needs a flag of our own.
+ *
+ * A wallet permission outlives the page. Once somebody has connected, MetaMask
+ * goes on answering `eth_accounts` with their address no matter what this site
+ * does, so a sign-out that only cleared a variable would be undone by the
+ * silent reconnect on the very next load, and the button would look broken.
+ *
+ * The flag lives in localStorage, with a variable behind it for the browsers
+ * that refuse storage in private windows. There the sign-out lasts the page
+ * rather than the session, which is worth having over throwing.
+ */
+const SIGNED_OUT = "plinth:signed-out";
+let signedOutHere = false;
+
+function remember(on) {
+  signedOutHere = on;
+  try {
+    if (on) localStorage.setItem(SIGNED_OUT, "1");
+    else localStorage.removeItem(SIGNED_OUT);
+  } catch {
+    /* Storage blocked. `signedOutHere` still holds for this page. */
+  }
+}
+
+export function signedOut() {
+  if (signedOutHere) return true;
+  try {
+    return localStorage.getItem(SIGNED_OUT) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Let go of the connected wallet.
+ *
+ * **A page cannot log anybody out of MetaMask**, and a button pretending
+ * otherwise would be the dishonest version of this. What it can do is forget
+ * the account, stop reconnecting silently, and ask the wallet to revoke the
+ * permission it granted.
+ *
+ * `wallet_revokePermissions` is the call that really releases it. Wallets that
+ * have not implemented it throw rather than quietly do nothing, which is why
+ * the local flag is what makes the behaviour identical everywhere.
+ */
+export async function disconnect() {
+  remember(true);
+  if (!hasWallet()) return;
+
+  try {
+    await provider().request({
+      method: "wallet_revokePermissions",
+      params: [{ eth_accounts: {} }],
+    });
+  } catch {
+    /* No such method in this wallet. The flag above is the fallback. */
+  }
+}
+
+/**
+ * Accounts already granted, without prompting. Used on load.
+ *
+ * Answers null after a sign-out even though the wallet would still hand the
+ * address over, because that is the whole point of the sign-out.
+ */
 export async function currentAccount() {
-  if (!hasWallet()) return null;
+  if (!hasWallet() || signedOut()) return null;
 
   const accounts = await provider().request({ method: "eth_accounts" });
   return accounts && accounts.length > 0 ? accounts[0] : null;

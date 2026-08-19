@@ -319,14 +319,26 @@ $("clear").addEventListener("click", () => {
 
 $("sort").addEventListener("change", paintGrid);
 
+/** The nav's account state. The grid below is the same either way. */
+function paintAccount() {
+  $("connect").textContent = account ? chain.shortAddress(account) : t("nav.connect");
+  $("signout").hidden = !account;
+}
+
 $("connect").addEventListener("click", async () => {
   if (!chain.hasWallet() || !isDeployed()) return;
   try {
     account = await chain.connect();
     await loadLive();
+    paintAccount();
   } catch {
     /* the marketplace page reports connection errors; here it just stays demo */
   }
+});
+
+$("signout").addEventListener("click", async () => {
+  await chain.disconnect();
+  location.reload();
 });
 
 chrome.onLangChange(() => {
@@ -360,6 +372,7 @@ async function loadLive() {
 }
 
 function paintAll() {
+  paintAccount();
   paintStats();
   paintFilters();
   paintGrid();
