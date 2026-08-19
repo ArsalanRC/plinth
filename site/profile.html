@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title data-i18n="col.metaTitle">Plinth Cats · the collection</title>
-<meta name="description" content="500 cats drawn on chain in seven weighted layers. Browse by trait, see what is rare, and open any one of them." />
+<title data-i18n="prof.metaTitle">Your wallet · plinth</title>
+<meta name="description" content="What a connected wallet holds on plinth, read straight from the chain. No account, no server, no stored profile." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -52,8 +52,8 @@
   <a class="wordmark" href="./index.html">plinth</a>
   <nav class="topnav">
     <a href="./index.html" data-i18n="nav.market">Market</a>
-    <a href="./collection.html" class="is-here" data-i18n="nav.collection">Collection</a>
-    <a href="./profile.html" data-i18n="nav.profile">Profile</a>
+    <a href="./collection.html" data-i18n="nav.collection">Collection</a>
+    <a href="./profile.html" class="is-here" data-i18n="nav.profile">Profile</a>
     <a href="https://github.com/ArsalanRC/plinth" target="_blank" rel="noopener">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2 0-.4-.5-1.6.2-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/></svg><span data-i18n="nav.source">Source</span>
     </a>
@@ -72,96 +72,60 @@
 
 <main id="top">
 
-  <!-- Collection identity ------------------------------------------------ -->
+  <!-- Whoever is connected ------------------------------------------------
+       Deliberately not "Arsalan's profile". The page shows the address that
+       connected and nothing else, because hardcoding one owner would tie a
+       name to every holding it ever has. -->
   <section class="hero">
     <div class="col-head glass reveal">
-      <div class="col-avatar" id="col-avatar" aria-hidden="true"></div>
+      <div class="col-avatar" id="p-avatar" aria-hidden="true"></div>
       <div class="col-id">
-        <h1 data-i18n="col.name">Plinth Cats</h1>
+        <h1 data-i18n="prof.title">Your wallet</h1>
         <p class="col-by">
-          <span data-i18n="col.by">Created by</span>
-          <a id="col-creator" href="#" target="_blank" rel="noopener">—</a>
+          <a id="p-address" href="#" target="_blank" rel="noopener">—</a>
           <span class="sep">·</span>
           <span data-i18n="col.chain">Polygon Amoy</span>
-          <span class="sep">·</span>
-          <span>ERC-721</span>
         </p>
-        <p class="col-desc" data-i18n="col.desc"></p>
+        <p class="col-desc" data-i18n="prof.sub"></p>
       </div>
     </div>
 
-    <!-- Every figure here is read from the chain or computed from the
-         contract. A stat that cannot be computed is left out rather than
-         invented, which is why there is no volume or floor history. -->
+    <!-- Four numbers, every one of them an `eth_call`. Nothing here comes
+         from an indexer, because this project does not have one. -->
     <div class="stats glass reveal">
-      <div><span class="k" data-i18n="col.items"></span><span class="v" id="s-items">—</span></div>
-      <div><span class="k" data-i18n="col.supply"></span><span class="v" id="s-supply">—</span></div>
-      <div><span class="k" data-i18n="col.owners"></span><span class="v" id="s-owners">—</span></div>
-      <div><span class="k" data-i18n="col.listed"></span><span class="v" id="s-listed">—</span></div>
-      <div><span class="k" data-i18n="col.floor"></span><span class="v accent" id="s-floor">—</span></div>
+      <div><span class="k" data-i18n="prof.owned"></span><span class="v" id="p-owned">—</span></div>
+      <div><span class="k" data-i18n="prof.listed"></span><span class="v" id="p-listed">—</span></div>
+      <div><span class="k" data-i18n="prof.proceeds"></span><span class="v accent" id="p-proceeds">—</span></div>
+      <div><span class="k" data-i18n="prof.balance"></span><span class="v" id="p-balance">—</span></div>
     </div>
   </section>
 
-  <!-- Filters and grid ---------------------------------------------------- -->
   <section class="band reveal">
-    <div class="col-layout">
+    <h2 data-i18n="prof.items">Your tokens</h2>
 
-      <aside class="filters glass" id="filters">
-        <div class="filters-head">
-          <h2 data-i18n="col.traits">Traits</h2>
-          <button type="button" class="pill" id="clear" data-i18n="col.clear">Clear</button>
-        </div>
-        <div id="filter-groups"></div>
-      </aside>
+    <p class="empty" id="p-connect" hidden>
+      <span data-i18n="prof.connect"></span>
+      <button type="button" class="pill" id="p-connect-btn" data-i18n="prof.connectCta">Connect</button>
+    </p>
 
-      <div class="col-main">
-        <div class="col-bar">
-          <span class="scene-note" id="showing">—</span>
-          <label class="sort">
-            <span data-i18n="col.sort">Sort</span>
-            <select id="sort" class="price-input">
-              <option value="id" data-i18n="col.sortId">Token id</option>
-              <option value="rare" data-i18n="col.sortRare">Rarest first</option>
-              <option value="price" data-i18n="col.sortPrice">Price</option>
-            </select>
-          </label>
-        </div>
+    <p class="empty" id="p-nowallet" hidden data-i18n="prof.noWallet"></p>
 
-        <div class="grid" id="grid"></div>
-        <p class="empty" id="empty" hidden data-i18n="col.none"></p>
-      </div>
+    <p class="empty" id="p-empty" hidden>
+      <span data-i18n="prof.empty"></span>
+      <a href="./index.html#mine" data-i18n="prof.emptyCta">Mint one on the market</a>
+    </p>
 
-    </div>
+    <div class="grid" id="p-grid"></div>
+
+    <p class="col-bar" id="p-withdraw-row" hidden>
+      <span class="scene-note" id="p-withdraw-note">—</span>
+      <button type="button" class="pill" id="p-withdraw" data-i18n="prof.withdraw">Withdraw</button>
+    </p>
+
+    <p class="scene-note" data-i18n="prof.privacy"></p>
   </section>
 
 </main>
-
-<!-- One token, opened from the grid. A dialog rather than a third page: the
-     URL still carries the id so it can be shared and reloaded, and going back
-     returns you to the grid where you were rather than to the top of it. -->
-<dialog class="token-dialog glass" id="token">
-  <button type="button" class="token-close" id="token-close" aria-label="Close">&times;</button>
-  <div class="token-body">
-    <div class="token-art" id="t-art"></div>
-    <div class="token-meta">
-      <p class="eyebrow" data-i18n="col.name">Plinth Cats</p>
-      <h2 id="t-name">—</h2>
-      <p class="t-owner"><span data-i18n="tok.owner">Owned by</span> <span id="t-owner">—</span></p>
-
-      <div class="t-price glass">
-        <span class="k" data-i18n="tok.price">Price</span>
-        <span class="v" id="t-price">—</span>
-        <button type="button" class="btn btn-primary" id="t-action" hidden></button>
-      </div>
-
-      <h3 data-i18n="tok.traits">Traits</h3>
-      <div class="t-traits" id="t-traits"></div>
-
-      <h3 data-i18n="tok.details">Details</h3>
-      <dl class="t-details" id="t-details"></dl>
-    </div>
-  </div>
-</dialog>
 
 <footer class="foot">
   <span><span data-i18n="foot.built">Built by</span>
@@ -172,6 +136,6 @@
   <span>MIT</span>
 </footer>
 
-<script type="module" src="./collection.js"></script>
+<script type="module" src="./profile.js"></script>
 </body>
 </html>
