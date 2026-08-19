@@ -54,7 +54,7 @@ export const CHAIN = {
  */
 export const CONTRACTS = {
   market: "0x2e24d151283c5b5da36db089be1a1c6eab70cbcf",
-  collection: "0xa4a3cbcd73d1709cb1db4d7a45fd35ff2f149af7",
+  collection: "0x62a11d9bf24f568489d1779c66d04d0212731f1e",
 
   /**
    * The faucet. Null until it is deployed, and the page handles that: the
