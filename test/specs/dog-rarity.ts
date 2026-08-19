@@ -75,7 +75,9 @@ describe("dog rarity", () => {
   it("agrees with itself about how rare a token's rarest trait is", () => {
     for (const id of [1, 500, 1234, 4999]) {
       const traits = traitsOf(id);
-      const lowest = Math.min(...traits.map((value, i) => percentOf(i, value)));
+      assert.ok(traits, `token ${id} unpacked to nothing`);
+
+      const lowest = Math.min(...traits.map((value: string, i: number) => percentOf(i, value)));
 
       assert.equal(rarestOf(id), lowest, `token ${id} disagrees about its rarest trait`);
     }
