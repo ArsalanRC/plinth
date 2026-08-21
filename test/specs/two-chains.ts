@@ -175,3 +175,28 @@ describe("both rarity modules answer the same way", () => {
     }
   });
 });
+
+/**
+ * The deploy script and the site must agree on what a collection is called.
+ *
+ * This is not hypothetical. The cats deploy as `Plinth Demo` with symbol
+ * `PLNTH` and the site calls them "Plinth Cats", so every wallet and explorer
+ * shows a name the page never mentions. The contract is deployed and the name
+ * is a constructor argument, so that one is permanent.
+ *
+ * The dogs go to mainnet, where the same mistake would be permanent and public.
+ */
+describe("the chain and the page agree on names", () => {
+  it("deploys the dogs under the name the site shows", async () => {
+    const { readFileSync } = await import("node:fs");
+    const script = readFileSync("scripts/deploy-dogs.ts", "utf8");
+
+    const name = /name:\s*"([^"]+)"/.exec(script)?.[1];
+    const symbol = /symbol:\s*"([^"]+)"/.exec(script)?.[1];
+    const dogs = COLLECTIONS.find((c) => c.id === "dogs");
+
+    assert.ok(dogs, "no dogs in the registry");
+    assert.equal(name, dogs.name, "deploy-dogs.ts would deploy a name the site does not show");
+    assert.equal(symbol, dogs.symbol, "deploy-dogs.ts would deploy a symbol the site does not show");
+  });
+});
