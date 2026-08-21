@@ -12,7 +12,7 @@
 
 import { STRINGS } from "./i18n.js";
 import { initChrome, prefersReduced } from "./chrome.js";
-import { CHAIN, isDeployed } from "./config.js";
+import { CHAIN, COLLECTIONS, chainOf, isDeployed, isLive } from "./config.js";
 import * as chain from "./chain.js";
 
 const chrome = initChrome(STRINGS, { prefix: "plinth" });
@@ -20,6 +20,17 @@ const $ = (id) => document.getElementById(id);
 const t = (key) => (STRINGS[chrome.lang()] ?? STRINGS.en)[key] ?? key;
 
 let account = null;
+
+/*
+ * The two routes each need their own chain, so each names its own rather than
+ * relying on whatever the module was last pointed at.
+ *
+ * Route 03 sends people to the testnet and route 04 to mainnet, and they share
+ * one `chain.js`. Leaving the target wherever the last click put it is how the
+ * Amoy button ends up asking a wallet to switch to Polygon.
+ */
+const testnet = COLLECTIONS.find((c) => chainOf(c).testnet) ?? null;
+const mainnet = COLLECTIONS.find((c) => isLive(c) && !chainOf(c).testnet) ?? null;
 
 /*
  * No `.reveal` on this page, and that is deliberate rather than an omission.
@@ -62,32 +73,63 @@ function paintAccount() {
  * and this is the one screen where the visitor is already being asked to trust
  * a series of popups they do not yet understand.
  */
-function report(key, bad = false) {
-  const box = $("add-result");
+function report(id, key, bad = false) {
+  const box = $(id);
   box.textContent = t(key);
   box.classList.toggle("is-bad", bad);
   box.hidden = false;
 }
 
-$("add-chain").addEventListener("click", async () => {
+/**
+ * Put the wallet on one named chain, and report what the wallet said.
+ *
+ * Both routes do the same three things and differ only in which chain and which
+ * three strings, so they share this. `ensureChain` switches, and adds the
+ * network when the wallet answers 4902 because it has never heard of it, which
+ * is exactly the one-click behaviour both routes want.
+ */
+async function switchTo(collection, { into, keys }) {
   if (!chain.hasWallet()) {
-    report("start.s3.nowallet", true);
+    report(into, "start.s3.nowallet", true);
     return;
   }
+  if (!collection) return;
+
+  const wasShowing = chain.current();
 
   try {
-    // `ensureChain` already switches, and adds the network when the wallet
-    // answers 4902 because it has never heard of Amoy. That is exactly the
-    // one-click behaviour wanted here, so it is reused rather than written
-    // twice and left to drift.
+    chain.use(collection);
     await chain.ensureChain();
-    report("start.s3.added");
+    report(into, keys.added);
   } catch {
     // Refusing is a normal answer, not a fault. Somebody who clicks Cancel in
     // MetaMask should not be told the site is broken.
-    report("start.s3.failed", true);
+    report(into, keys.failed, true);
+  } finally {
+    chain.use(wasShowing);
   }
-});
+}
+
+$("add-chain").addEventListener("click", () =>
+  switchTo(testnet, {
+    into: "add-result",
+    keys: { added: "start.s3.added", failed: "start.s3.failed" },
+  }));
+
+$("add-mainnet").addEventListener("click", () =>
+  switchTo(mainnet, {
+    into: "mainnet-result",
+    keys: { added: "start.s4.added", failed: "start.s4.failed" },
+  }));
+
+/** Route 04 points at whichever collection is actually on a real chain. */
+function paintMainnet() {
+  const link = $("mainnet-link");
+  if (!mainnet) return;
+
+  link.href = `./collection.html?c=${mainnet.id}`;
+  link.textContent = t("col.open").replace("{name}", mainnet.name);
+}
 
 $("connect").addEventListener("click", async () => {
   if (!chain.hasWallet() || !isDeployed()) return;
@@ -105,7 +147,10 @@ $("signout").addEventListener("click", async () => {
   paintAccount();
 });
 
-chrome.onLangChange(paintAccount);
+chrome.onLangChange(() => {
+  paintAccount();
+  paintMainnet();
+});
 
 async function boot() {
   if (isDeployed() && chain.hasWallet()) {
@@ -113,6 +158,7 @@ async function boot() {
     if (existing && (await chain.currentChainId()) === CHAIN.hex) account = existing;
   }
   paintAccount();
+  paintMainnet();
   onScroll();
 }
 

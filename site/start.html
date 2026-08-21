@@ -148,10 +148,27 @@
     </ol>
   </section>
 
+  <!-- Route 04 told every visitor that nothing was live on Polygon mainnet,
+       and went on telling them for weeks after the dogs were deployed there.
+       It is the one route somebody takes to find the mainnet collection, so
+       the page's own guide was the reason it looked like a testnet site. -->
   <section class="band" id="mainnet">
     <p class="eyebrow">04</p>
     <h2 data-i18n="start.s4.title">Use real Polygon</h2>
     <p class="body" data-i18n="start.s4.body"></p>
+
+    <ol class="guide-steps">
+      <li>
+        <button type="button" class="pill" id="add-mainnet" data-i18n="start.s4.add">Switch MetaMask to Polygon</button>
+        <span class="scene-note" id="mainnet-result" hidden></span>
+      </li>
+      <li>
+        <span data-i18n="start.s4.step2"></span>
+        <!-- Both the link and its label come from the registry, so this cannot
+             end up pointing at a collection that is not the mainnet one. -->
+        <a id="mainnet-link" href="./collection.html"></a>
+      </li>
+    </ol>
   </section>
 
 </main>

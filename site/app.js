@@ -85,6 +85,7 @@ function explain(error) {
   ].find((name) => text.includes(name));
 
   if (named) return t(`err.${named}`) ?? named;
+  if (text.includes("wrong-chain")) return t("err.wrongChain");
   if (text.includes("no-wallet")) return t("err.noWallet");
   if (text.includes("own-listing")) return t("err.ownListing");
   if (text.includes("demo-sold-out")) return t("err.demoSoldOut");
@@ -260,31 +261,47 @@ async function render() {
   $("connect-2").disabled = !state.isDemo;
   $("signout").hidden = state.isDemo;
 
-  $("supply").textContent = `${state.tokens.length} / ${state.supply ?? state.tokens.length}`;
+  // Named, because the count belongs to one collection and the page shows two.
+  $("supply").textContent =
+    `${chain.current().name} · ${state.tokens.length} / ${state.supply ?? state.tokens.length}`;
   $("split-note").textContent = `${t("split.fee")} ${state.feeBps / 100}%`;
 
   renderFaucet();
+  paintChains();
   paintMintOthers();
   paintSplit();
 }
 
-// ------------------------------------------------------------------- actions
+/**
+ * Say which chains this site is on, everywhere it says anything about one.
+ *
+ * All of it derived from the registry rather than written into the copy. Every
+ * one of these lines named Polygon Amoy and only Amoy, for weeks after the dogs
+ * went live on Polygon mainnet, which is exactly what a visitor saw: a site
+ * about cats on a testnet, with the mainnet collection nowhere in the words.
+ */
+function paintChains() {
+  const live = COLLECTIONS.filter(isLive);
+  const names = [...new Set(live.map((c) => chainOf(c).shortName))];
 
-async function doMint() {
-  if (state.isDemo) {
-    const token = state.mint();
-    say(`${t("ok.minted")} #${token.id}`, "is-good");
-    return;
+  document.querySelector(".kicker").textContent = [t("hero.kicker"), ...names].join(" · ");
+
+  // What this page's own grid is, and where the rest of it lives.
+  const shown = chain.current();
+  const which = $("market-which");
+  which.textContent = t("market.which")
+    .replace("{name}", shown.name)
+    .replace("{chain}", chainOf(shown).shortName);
+
+  for (const other of live.filter((c) => c.id !== shown.id)) {
+    const link = document.createElement("a");
+    link.href = `./collection.html?c=${other.id}`;
+    link.textContent = t("col.open").replace("{name}", other.name);
+    which.append(document.createTextNode(" "), link);
   }
-
-  say(t("busy.sign"), "", { busy: true });
-  const { hash } = await chain.send({ ...chain.tx.mint(account), from: account }, () =>
-    say(t("busy.mining"), "", { busy: true }),
-  );
-
-  say(t("ok.minted"), "is-good", { href: chain.explorerTx(hash) });
-  await loadLive();
 }
+
+// ------------------------------------------------------------------- actions
 
 async function doList(token, priceText) {
   const price = parseUnits(priceText);
@@ -658,18 +675,17 @@ $("signout").addEventListener("click", async () => {
   await chain.disconnect();
   location.reload();
 });
-$("mint").addEventListener("click", () => run($("mine"), doMint));
-
 /**
- * Mint any collection from here, not only the one this page trades.
+ * One mint button per collection, each naming its collection and its chain.
  *
- * Each button points `chain` at its own collection and switches the wallet's
- * network before signing. The two share contract addresses on different chains,
- * so minting on the wrong network is not a visible error: it is a transaction
- * that succeeds against the other contract.
+ * There is no generic mint button any more, and that is the point. A "Mint a
+ * token" button sat above this row for weeks: it minted the cats on Amoy and
+ * said neither, next to buttons that named both. Two mint mechanisms on one
+ * page and only one of them honest.
  *
- * The page trades the cats, so after minting elsewhere it puts the target back
- * rather than leaving every later read pointed at whatever was minted last.
+ * The demo path the generic button carried lives in `mintFrom` now, so nothing
+ * was lost by deleting it. Built from COLLECTIONS, so a third collection
+ * appears here without touching this function.
  */
 function paintMintOthers() {
   const box = $("mint-others");
@@ -681,18 +697,48 @@ function paintMintOthers() {
     const net = chainOf(c);
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "btn";
+
+    // Both are primary. One of these was the plain outline button under an
+    // orange one, which read as the afterthought it was not: the dogs are the
+    // collection on real Polygon.
+    button.className = "btn btn-primary";
     button.innerHTML = `<span></span><small></small>`;
     button.querySelector("span").textContent = `${t("mine.mintOne")} ${c.name}`;
+
+    // What it costs, not only where it happens. Both chains price in POL and
+    // only one of the two is money.
     button.querySelector("small").textContent = net.testnet
-      ? `${net.shortName} · ${t("col.testnet")}`
-      : net.shortName;
+      ? `${net.shortName} · ${t("col.testnet")} · ${t("chain.free")}`
+      : `${net.shortName} · ${t("chain.real")}`;
 
     button.addEventListener("click", () => mintFrom(c, button));
     box.append(button);
   }
 }
 
+/*
+ * A deliberate network switch must not reload the page out from under the mint.
+ *
+ * This is what broke minting the dogs from this page, and it broke it silently.
+ * `ensureChain` asks the wallet to switch to Polygon, MetaMask emits
+ * `chainChanged`, the handler below reloads, and the mint that was about to be
+ * signed never happens. Nothing errors. The page simply starts again, on the
+ * cats, and the visitor concludes the button does nothing.
+ */
+let switching = false;
+
+/**
+ * Mint one of a named collection, from a page that trades a different one.
+ *
+ * The chain switch is the part that matters. The two collections share contract
+ * addresses on different networks, so a mint signed on the wrong one is not a
+ * visible error: it is a transaction that succeeds against the other contract.
+ * `ensureChain` moves the wallet first, and `chain.send` refuses outright if it
+ * is somehow still elsewhere.
+ *
+ * Afterwards the target goes back to whatever this page trades, so later reads
+ * are not pointed at whichever collection was minted last.
+ */
 async function mintFrom(collection, button) {
   const note = $("mint-others-note");
   const show = (key, bad = false) => {
@@ -701,13 +747,14 @@ async function mintFrom(collection, button) {
     note.hidden = false;
   };
 
-  if (!chain.hasWallet() || state.isDemo) {
-    show("col.mintConnect", true);
+  if (state.isDemo) {
+    await mintInDemo(collection, note, show);
     return;
   }
 
   button.disabled = true;
   const wasShowing = chain.current();
+  switching = true;
 
   try {
     chain.use(collection);
@@ -726,11 +773,47 @@ async function mintFrom(collection, button) {
     link.textContent = `${t("col.mintDone")} ${collection.name}`;
     note.append(link);
   } catch (error) {
-    show(String(error?.message ?? "").includes("SoldOut") ? "col.mintSoldOut" : "col.mintRefused", true);
+    const message = String(error?.message ?? "");
+    show(message.includes("SoldOut") ? "col.mintSoldOut" : "col.mintRefused", true);
   } finally {
     chain.use(wasShowing);
+    switching = false;
     button.disabled = false;
   }
+}
+
+/**
+ * The same click with nobody connected.
+ *
+ * The demo market is this page's own collection, so minting that one is honest
+ * and is exactly what the old generic button did. Minting any other one is not:
+ * the dogs are on mainnet, there is no free version of that, and a demo dog
+ * appearing in a cat market would teach the visitor something untrue about
+ * what just happened.
+ *
+ * So the other collections get the fact and a way through, which is their own
+ * page, rather than a refusal with nowhere to go.
+ */
+async function mintInDemo(collection, note, show) {
+  if (collection.id !== chain.current().id) {
+    show("mine.mintReal");
+
+    const link = document.createElement("a");
+    link.href = `./collection.html?c=${collection.id}`;
+    link.textContent = t("col.open").replace("{name}", collection.name);
+    note.append(document.createTextNode(" "), link);
+    return;
+  }
+
+  try {
+    const token = state.mint();
+    say(`${t("ok.minted")} #${token.id}`, "is-good");
+    show("mine.mintDemo");
+  } catch (error) {
+    say(explain(error), "is-bad");
+  }
+
+  await render();
 }
 $("withdraw").addEventListener("click", () => run($("wallet"), doWithdraw));
 $("drip").addEventListener("click", () => run($("faucet"), doDrip));
@@ -746,7 +829,11 @@ chrome.onLangChange(() => {
 // showing none.
 if (chain.hasWallet()) {
   globalThis.ethereum.on?.("accountsChanged", () => location.reload());
-  globalThis.ethereum.on?.("chainChanged", () => location.reload());
+
+  // Except while this page is the one doing the switching. See `switching`.
+  globalThis.ethereum.on?.("chainChanged", () => {
+    if (!switching) location.reload();
+  });
 }
 
 /** Reconnect silently if this browser has already granted access. */

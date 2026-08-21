@@ -299,6 +299,24 @@ export async function balanceOf(address) {
 export async function send({ to, data, value = 0n, from }, onSent) {
   if (!hasWallet()) throw new Error("no-wallet");
 
+  /*
+   * Refuse rather than sign, when the wallet is not on the chain this write is
+   * for. The write-side twin of `walletIsHere` above, and the more expensive
+   * half of the same mistake.
+   *
+   * A read against the wrong chain returns empty and the page reports nothing
+   * held. A *write* against the wrong chain is signed, mined and paid for. The
+   * two chains here share contract addresses, so there is no invalid-address
+   * error to save anybody: listing a cat while the wallet sits on mainnet is a
+   * real transaction against the dogs' marketplace, in real POL.
+   *
+   * `ensureChain` is what callers use to move the wallet first. This is what
+   * catches the case where nobody did, or where the user switched networks
+   * between the click and the signature.
+   */
+  const on = await provider().request({ method: "eth_chainId" });
+  if (on !== chain().hex) throw new Error("wrong-chain");
+
   const params = { from, to, data };
   if (value > 0n) params.value = `0x${value.toString(16)}`;
 

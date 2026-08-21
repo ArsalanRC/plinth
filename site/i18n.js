@@ -35,7 +35,7 @@ export const STRINGS = {
     "start.pick3": "Get on the test network",
     "start.pick3sub": "One click here, then free test coins.",
     "start.pick4": "Use real Polygon",
-    "start.pick4sub": "Real money. Not live yet.",
+    "start.pick4sub": "Real money. The dogs are live.",
 
     "start.s1.title": "Just look around",
     "start.s1.body":
@@ -67,7 +67,11 @@ export const STRINGS = {
 
     "start.s4.title": "Use real Polygon",
     "start.s4.body":
-      "Not live yet. The contracts run on the test network only, so there is nothing on Polygon mainnet to connect to. When that changes it will say so here plainly.",
+      "Plinth Dogs runs on Polygon mainnet. The POL there is real money, so a mint costs real gas. Your wallet shows the exact amount before you sign. The cats stay on Amoy, where everything is free.",
+    "start.s4.add": "Switch MetaMask to Polygon",
+    "start.s4.added": "Done. Your wallet is on Polygon now.",
+    "start.s4.failed": "MetaMask turned that down. You can switch by hand instead.",
+    "start.s4.step2": "Open the dogs and mint one. Your wallet shows the cost.",
 
     "prof.metaTitle": "Your wallet · plinth",
     "prof.title": "Your wallet",
@@ -92,10 +96,10 @@ export const STRINGS = {
     "prof.privacy":
       "Whatever address you connect is the one shown. Nothing about the owner is stored anywhere, because there is nowhere to store it.",
 
-    "col.metaTitle": "Plinth Cats · the collection",
-    "col.name": "Plinth Cats",
+    "col.metaTitle": "The collection · plinth",
     "col.by": "Created by",
     "col.testnet": "testnet",
+    "col.open": "Open {name}",
     "col.mint": "Mint one",
     "col.mintConnect": "Connect a wallet to mint.",
     "col.mintSwitch": "Approve the network switch in your wallet.",
@@ -109,9 +113,6 @@ export const STRINGS = {
       "500 cats, each drawn by the contract itself from seven weighted layers. No IPFS, no pinning service, no server. The rarity below is counted across the whole supply, not estimated.",
     "col.desc.dogs":
       "5000 dogs, drawn by the contract from nine weighted layers. Two more layers than the cats, which is close to what fits inside a contract at all. The rarity below is counted across the whole supply.",
-    "col.chain": "Polygon Amoy",
-    "col.desc":
-      "500 cats, each drawn by the contract itself from seven weighted layers. No IPFS, no pinning service, no server. The rarity below is counted across the whole supply, not estimated.",
     "col.items": "Minted",
     "col.supply": "Supply",
     "col.owners": "Owners",
@@ -155,7 +156,15 @@ export const STRINGS = {
     "theme.toLight": "Switch to the light theme",
     "theme.toDark": "Switch to the dark theme",
 
-    "hero.kicker": "Solidity · ERC-721 · ERC-2981 · Polygon Amoy",
+    /*
+     * The chains are appended by the page, from the registry.
+     *
+     * This line named Polygon Amoy and nothing else for weeks after the dogs
+     * went live on mainnet, which made the first thing anybody reads the one
+     * thing that was out of date. Written out, it goes stale on the next
+     * deploy. Derived, it cannot.
+     */
+    "hero.kicker": "Solidity · ERC-721 · ERC-2981",
     "hero.title": "A marketplace<br />that keeps <em>nothing</em>.",
     "hero.lede":
       "Mint a token, list it, buy somebody else's. The art is generated on chain, the seller keeps custody until it sells, and nobody is paid during the sale. No server, no account, no data stored anywhere.",
@@ -195,14 +204,22 @@ export const STRINGS = {
     "market.body":
       "Each token stays with whoever listed it. This contract never takes custody, so a listing can go stale, and buying one checks that the seller still owns it before a single wei moves.",
     "market.empty": "Nothing is listed right now.",
+    "market.which": "This market trades {name} on {chain}.",
 
     "mine.eyebrow": "Your side",
     "mine.title": "Mint one, then put it up",
     "mine.body":
       "Minting is open to anyone and the art is built from the token id, so no two look alike and none of it is stored off chain. Listing grants an approval rather than handing the token over.",
-    "mine.mint": "Mint a token",
+    "mine.chains": "Two collections on two chains. One is free to try, the other is real money.",
     "mine.mintOne": "Mint",
+    "mine.mintDemo": "Minted in the demo. Connect a wallet to do it on Amoy.",
+    "mine.mintReal": "The dogs live on Polygon, so a mint costs real POL. Connect a wallet first.",
     "mine.empty": "You do not hold any tokens yet.",
+
+    // What a mint on that chain costs the person pressing the button. The two
+    // are priced in the same ticker and not in the same money.
+    "chain.free": "POL is free",
+    "chain.real": "real POL",
 
     "item.token": "Token",
     "item.unlisted": "Not listed",
@@ -251,6 +268,7 @@ export const STRINGS = {
     "ok.withdrew": "Withdrew",
 
     "err.rejected": "You cancelled that in your wallet.",
+    "err.wrongChain": "Your wallet is on another network. Switch it back and try again.",
     "err.noWallet": "No wallet found. Install MetaMask, or keep browsing the demo.",
     "err.notDeployed": "Nothing is deployed yet, so the demo is all there is to show.",
     "err.ownListing": "That is your own listing.",
@@ -312,7 +330,7 @@ export const STRINGS = {
     "start.pick3": "Ins Testnetz",
     "start.pick3sub": "Ein Klick hier, danach kostenlose Test-Coins.",
     "start.pick4": "Echtes Polygon",
-    "start.pick4sub": "Echtes Geld. Noch nicht live.",
+    "start.pick4sub": "Echtes Geld. Die Hunde sind live.",
 
     "start.s1.title": "Nur umsehen",
     "start.s1.body":
@@ -344,7 +362,11 @@ export const STRINGS = {
 
     "start.s4.title": "Echtes Polygon",
     "start.s4.body":
-      "Noch nicht live. Die Verträge laufen nur im Testnetz, auf Polygon Mainnet gibt es also nichts zu verbinden. Sobald sich das ändert, steht es hier deutlich.",
+      "Plinth Dogs läuft auf Polygon Mainnet. Das POL dort ist echtes Geld, ein Mint kostet also echtes Gas. Dein Wallet zeigt den genauen Betrag, bevor du signierst. Die Katzen bleiben auf Amoy, dort ist alles gratis.",
+    "start.s4.add": "MetaMask auf Polygon umstellen",
+    "start.s4.added": "Fertig. Dein Wallet ist jetzt auf Polygon.",
+    "start.s4.failed": "MetaMask hat abgelehnt. Du kannst auch von Hand wechseln.",
+    "start.s4.step2": "Die Hunde öffnen und einen minten. Die Kosten zeigt dein Wallet.",
 
     "prof.metaTitle": "Dein Wallet · plinth",
     "prof.title": "Dein Wallet",
@@ -369,10 +391,10 @@ export const STRINGS = {
     "prof.privacy":
       "Gezeigt wird die Adresse, die du verbindest. Über den Besitzer wird nichts gespeichert, denn es gibt keinen Ort dafür.",
 
-    "col.metaTitle": "Plinth Cats · die Collection",
-    "col.name": "Plinth Cats",
+    "col.metaTitle": "Die Collection · plinth",
     "col.by": "Erstellt von",
     "col.testnet": "Testnetz",
+    "col.open": "Zu {name}",
     "col.mint": "Einen minten",
     "col.mintConnect": "Verbinde ein Wallet zum Minten.",
     "col.mintSwitch": "Bestätige den Netzwerkwechsel im Wallet.",
@@ -386,9 +408,6 @@ export const STRINGS = {
       "500 Katzen, jede vom Vertrag selbst aus sieben gewichteten Ebenen gezeichnet. Kein IPFS, kein Pinning-Dienst, kein Server. Die Rarität unten ist über die gesamte Supply gezählt, nicht geschätzt.",
     "col.desc.dogs":
       "5000 Hunde, vom Vertrag aus neun gewichteten Ebenen gezeichnet. Zwei Ebenen mehr als die Katzen, und damit nahe an dem, was in einen Vertrag überhaupt passt. Die Rarität unten ist über die gesamte Supply gezählt.",
-    "col.chain": "Polygon Amoy",
-    "col.desc":
-      "500 Katzen, jede vom Vertrag selbst aus sieben gewichteten Ebenen gezeichnet. Kein IPFS, kein Pinning-Dienst, kein Server. Die Rarität unten ist über die gesamte Supply gezählt, nicht geschätzt.",
     "col.items": "Geminted",
     "col.supply": "Supply",
     "col.owners": "Besitzer",
@@ -432,7 +451,8 @@ export const STRINGS = {
     "theme.toLight": "Zum hellen Design wechseln",
     "theme.toDark": "Zum dunklen Design wechseln",
 
-    "hero.kicker": "Solidity · ERC-721 · ERC-2981 · Polygon Amoy",
+    // Die Chains hängt die Seite selbst an, aus der Registry. Siehe oben.
+    "hero.kicker": "Solidity · ERC-721 · ERC-2981",
     "hero.title": "Ein Marktplatz,<br />der <em>nichts</em> behält.",
     "hero.lede":
       "Token minten, einstellen, den von jemand anderem kaufen. Die Grafik entsteht on chain, der Verkäufer behält den Token bis zum Verkauf, und während des Verkaufs wird niemand ausgezahlt. Kein Server, kein Konto, nirgends gespeicherte Daten.",
@@ -472,14 +492,20 @@ export const STRINGS = {
     "market.body":
       "Jeder Token bleibt bei dem, der ihn eingestellt hat. Dieser Vertrag übernimmt nie die Verwahrung. Ein Listing kann also veralten, und ein Kauf prüft erst, ob der Verkäufer den Token noch besitzt, bevor sich ein einziger Wei bewegt.",
     "market.empty": "Gerade steht nichts zum Verkauf.",
+    "market.which": "Hier wird {name} auf {chain} gehandelt.",
 
     "mine.eyebrow": "Deine Seite",
     "mine.title": "Einen minten, dann anbieten",
     "mine.body":
       "Minten kann jeder, und die Grafik entsteht aus der Token-ID. Keine zwei sehen gleich aus, und nichts davon liegt off chain. Ein Listing erteilt ein Approval, statt den Token aus der Hand zu geben.",
-    "mine.mint": "Token minten",
+    "mine.chains": "Zwei Collections, zwei Chains. Die eine ist gratis, die andere kostet echtes Geld.",
     "mine.mintOne": "Minten:",
+    "mine.mintDemo": "Im Demo geminted. Verbinde ein Wallet, dann geht es auf Amoy.",
+    "mine.mintReal": "Die Hunde liegen auf Polygon, ein Mint kostet also echtes POL. Verbinde zuerst ein Wallet.",
     "mine.empty": "Du hältst noch keine Token.",
+
+    "chain.free": "POL gratis",
+    "chain.real": "echtes POL",
 
     "item.token": "Token",
     "item.unlisted": "Nicht gelistet",
@@ -528,6 +554,7 @@ export const STRINGS = {
     "ok.withdrew": "Abgeholt",
 
     "err.rejected": "Du hast das in deiner Wallet abgebrochen.",
+    "err.wrongChain": "Deine Wallet ist auf einem anderen Netzwerk. Wechsle zurück und probier es nochmal.",
     "err.noWallet": "Keine Wallet gefunden. Installiere MetaMask, oder sieh dir die Demo an.",
     "err.notDeployed": "Es ist noch nichts deployt, also gibt es nur die Demo zu sehen.",
     "err.ownListing": "Das ist dein eigenes Listing.",

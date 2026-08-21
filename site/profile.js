@@ -83,6 +83,16 @@ function artFor(token) {
 function paintIdentity() {
   const link = $("p-address");
 
+  /*
+   * Which chains this page actually reads, named rather than assumed.
+   *
+   * Written into the markup as "Polygon Amoy", it survived the move to two
+   * chains and told anybody holding a mainnet dog that they were looking at a
+   * testnet. Derived from the registry, a third collection names itself.
+   */
+  $("p-chain-names").textContent = [...new Set(COLLECTIONS.map((c) => chainOf(c).shortName))]
+    .join(" · ");
+
   if (!account) {
     link.textContent = "—";
     link.removeAttribute("href");
