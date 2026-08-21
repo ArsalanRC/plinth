@@ -15,10 +15,21 @@
 
 import { STRINGS } from "./i18n.js";
 import { initChrome, prefersReduced } from "./chrome.js";
-import { CHAIN, CONTRACTS, isDeployed } from "./config.js";
+import { CHAINS, COLLECTIONS, chainOf, collectionById, DEFAULT_COLLECTION, isLive } from "./config.js";
 import { createDemo } from "./demo.js";
 import { formatUnits } from "./abi.js";
-import { RARITY, LAYERS, SUPPLY, TOKEN_TRAITS, rarestOf, percentOf } from "./rarity.js";
+/*
+ * The rarity table is chosen at boot, not imported, because which one it is
+ * depends on the collection in the URL. Both modules answer the same six
+ * names; the dogs pack their tokens into index strings because 5000 spelled
+ * out is 484 KB, and that difference stays inside the module.
+ */
+let RARITY = [];
+let LAYERS = [];
+let SUPPLY = 0;
+let traitsOf = () => null;
+let rarestOf = () => 100;
+let percentOf = () => 0;
 import * as chain from "./chain.js";
 
 const chrome = initChrome(STRINGS, { prefix: "plinth" });
@@ -30,7 +41,20 @@ const pol = (wei) =>
   `${Number(formatUnits(wei)).toLocaleString(locale(), { maximumFractionDigits: 4 })} POL`;
 const pct = (n) => `${n.toLocaleString(locale(), { maximumFractionDigits: 1 })}%`;
 
-let state = createDemo();
+/**
+ * Which collection this page is showing.
+ *
+ * From `?c=`, falling back to the default rather than erroring, because a
+ * mistyped link should land somewhere real. `chain.use` points every read at
+ * that collection's chain, which is the whole reason this page can serve one
+ * collection on a testnet and another on mainnet.
+ */
+const shown = collectionById(new URLSearchParams(location.search).get("c") ?? "")
+  ?? collectionById(DEFAULT_COLLECTION);
+
+chain.use(shown);
+
+let state = null;
 let account = null;
 
 /** Selected filters: layer index -> Set of values. */
@@ -76,7 +100,7 @@ function paintFilters() {
     details.open = chosen.has(layerIndex);
 
     const summary = document.createElement("summary");
-    summary.textContent = t(`layer.${layerIndex}`) ?? group.layer;
+    summary.textContent = t(`layer.${LAYERS[layerIndex]}`) ?? group.layer;
 
     const picked = chosen.get(layerIndex);
     if (picked?.size) {
@@ -126,7 +150,7 @@ function paintFilters() {
 
 /** Does this token pass every active filter? */
 function matches(id) {
-  const traits = TOKEN_TRAITS[String(id)];
+  const traits = traitsOf(id);
   if (!traits) return false;
 
   for (const [layerIndex, values] of chosen) {
@@ -223,14 +247,14 @@ function openToken(id) {
   const traits = $("t-traits");
   traits.innerHTML = "";
 
-  const values = TOKEN_TRAITS[String(token.id)] ?? [];
+  const values = traitsOf(token.id) ?? [];
   values.forEach((value, layerIndex) => {
     const cell = document.createElement("div");
     cell.className = "t-trait glass";
 
     const k = document.createElement("span");
     k.className = "k";
-    k.textContent = t(`layer.${layerIndex}`) ?? LAYERS[layerIndex];
+    k.textContent = t(`layer.${LAYERS[layerIndex]}`);
 
     const v = document.createElement("span");
     v.className = "v";
@@ -251,10 +275,10 @@ function openToken(id) {
   details.innerHTML = "";
 
   const rows = [
-    [t("tok.contract"), CONTRACTS.collection ? chain.shortAddress(CONTRACTS.collection) : t("tok.demoOnly")],
+    [t("tok.contract"), shown.collection ? chain.shortAddress(shown.collection) : t("tok.demoOnly")],
     [t("tok.tokenId"), String(token.id)],
     [t("tok.standard"), "ERC-721"],
-    [t("tok.chain"), CHAIN.name],
+    [t("tok.chain"), chainOf(shown).name],
     [t("tok.royalty"), token.royalty],
   ];
 
@@ -281,24 +305,86 @@ $("token").addEventListener("click", (event) => {
 
 // -------------------------------------------------------------------- stats
 
+/**
+ * Links to every collection, with each one's chain on the label.
+ *
+ * Built from the registry rather than written into the markup, so adding a
+ * third collection is a config change. The chain is on the pill because these
+ * two are not the same kind of thing: one is a testnet you can try for free.
+ */
+function paintSwitch() {
+  const nav = $("col-switch");
+  nav.innerHTML = "";
+
+  for (const c of COLLECTIONS) {
+    const link = document.createElement("a");
+    link.href = `./collection.html?c=${c.id}`;
+    link.className = "col-switch-item" + (c.id === shown.id ? " is-here" : "");
+    if (c.id === shown.id) link.setAttribute("aria-current", "page");
+
+    const net = CHAINS[c.chain];
+    link.innerHTML = `<strong></strong><span></span>`;
+    link.querySelector("strong").textContent = c.name;
+    link.querySelector("span").textContent = net.testnet
+      ? `${net.shortName} · ${t("col.testnet")}`
+      : net.shortName;
+
+    nav.append(link);
+  }
+}
+
 function paintStats() {
   const minted = state.tokens.length;
   const listed = state.tokens.filter((tk) => tk.listed);
   const owners = new Set(state.tokens.map((tk) => tk.owner)).size;
 
-  $("s-items").textContent = String(minted);
+  /*
+   * A collection with nothing on chain has no market, and must not appear to.
+   *
+   * The demo builds invented listings so the marketplace page has something to
+   * try. Shown against an undeployed collection that becomes a floor price and
+   * a listing count for something nobody can buy, in a currency that is real
+   * money on that chain. The artwork is honest because the contract drew it;
+   * the market is not, so it reads as dashes.
+   */
+  const trading = isLive(shown);
+
+  $("s-items").textContent = trading ? String(minted) : "—";
   $("s-supply").textContent = String(state.supply ?? SUPPLY);
-  $("s-owners").textContent = String(owners);
-  $("s-listed").textContent = String(listed.length);
+  $("s-owners").textContent = trading ? String(owners) : "—";
+  $("s-listed").textContent = trading ? String(listed.length) : "—";
 
   // Floor is the cheapest thing actually for sale. With nothing listed there is
   // no floor, and a dash says that better than a zero does.
   const floor = listed.reduce((low, tk) => (low === null || tk.price < low ? tk.price : low), null);
-  $("s-floor").textContent = floor === null ? "—" : pol(floor);
+  $("s-floor").textContent = !trading || floor === null ? "—" : pol(floor);
 
   const creator = $("col-creator");
   creator.textContent = state.isDemo ? t("wallet.demoAccount") : chain.shortAddress(state.address);
-  creator.href = state.isDemo ? "#" : `${CHAIN.explorer}/address/${state.address}`;
+  creator.href = state.isDemo ? "#" : `${chainOf(shown).explorer}/address/${state.address}`;
+
+  // The collection's own identity, so one page can serve both.
+  $("col-title").textContent = shown.name;
+  $("col-desc").textContent = t(`col.desc.${shown.id}`);
+  document.title = `${shown.name} · plinth`;
+
+  /*
+   * Which chain, said plainly, and whether it is a testnet.
+   *
+   * The two collections are priced in currencies that are not comparable: POL
+   * on Amoy is free from a faucet, POL on Polygon is money. A floor of 0.5
+   * means two entirely different things depending on this label, so it is not
+   * a decoration and it is never omitted.
+   */
+  const net = chainOf(shown);
+  const badge = $("col-chain");
+  badge.textContent = net.testnet ? `${net.shortName} · ${t("col.testnet")}` : net.shortName;
+  badge.classList.toggle("is-testnet", net.testnet);
+
+  // Nothing deployed yet is a fact about the collection, not a failure.
+  $("col-pending").hidden = isLive(shown);
+
+  paintSwitch();
 
   // The avatar is token 1's artwork, so the collection is represented by
   // something the contract actually produced.
@@ -326,7 +412,7 @@ function paintAccount() {
 }
 
 $("connect").addEventListener("click", async () => {
-  if (!chain.hasWallet() || !isDeployed()) return;
+  if (!chain.hasWallet() || !isLive(shown)) return;
   try {
     account = await chain.connect();
     await loadLive();
@@ -383,10 +469,40 @@ function paintAll() {
   if (wanted) openToken(wanted);
 }
 
+/**
+ * Load the rarity table and the artwork this collection needs.
+ *
+ * Both are per-collection and both are large enough that shipping the pair to
+ * a visitor looking at the other one would be waste: the dog rarity table is
+ * 63 KB and its artwork another 39. A dynamic import fetches only the one in
+ * the URL.
+ */
+async function loadCollection() {
+  const rarity = await import(shown.rarity);
+
+  RARITY = rarity.RARITY;
+  LAYERS = rarity.LAYERS;
+  SUPPLY = rarity.SUPPLY;
+  traitsOf = rarity.traitsOf;
+  rarestOf = rarity.rarestOf;
+  percentOf = rarity.percentOf;
+
+  // Artwork the contract drew. The dogs are not deployed, so for them this is
+  // the only source there is, and the page says so rather than implying a
+  // market that does not exist yet.
+  const art = shown.id === "cats"
+    ? (await import("./demo-art.js")).DEMO_ART
+    : (await import("./dog-demo-art.js")).DOG_DEMO_ART;
+
+  state = createDemo(art);
+}
+
 async function boot() {
-  if (isDeployed() && chain.hasWallet()) {
+  await loadCollection();
+
+  if (isLive(shown) && chain.hasWallet()) {
     const existing = await chain.currentAccount();
-    if (existing && (await chain.currentChainId()) === CHAIN.hex) {
+    if (existing && (await chain.currentChainId()) === chainOf(shown).hex) {
       account = existing;
       try {
         await loadLive();

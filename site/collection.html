@@ -91,16 +91,24 @@
     <div class="col-head glass reveal">
       <div class="col-avatar" id="col-avatar" aria-hidden="true"></div>
       <div class="col-id">
-        <h1 data-i18n="col.name">Plinth Cats</h1>
+        <h1 id="col-title">Plinth Cats</h1>
         <p class="col-by">
           <span data-i18n="col.by">Created by</span>
           <a id="col-creator" href="#" target="_blank" rel="noopener">—</a>
           <span class="sep">·</span>
-          <span data-i18n="col.chain">Polygon Amoy</span>
+          <!-- Which chain, and whether its coins are real. Never omitted: a
+               floor of 0.5 means different things on the two. -->
+          <span class="chain-badge" id="col-chain">Amoy</span>
           <span class="sep">·</span>
           <span>ERC-721</span>
         </p>
-        <p class="col-desc" data-i18n="col.desc"></p>
+        <p class="col-desc" id="col-desc"></p>
+        <p class="col-pending" id="col-pending" hidden data-i18n="col.pending"></p>
+
+        <!-- Both collections, always visible, so neither is reachable only by
+             knowing the query string. Built by the script from COLLECTIONS so
+             a third one appears here without touching this file. -->
+        <nav class="col-switch" id="col-switch" aria-label="Collections"></nav>
       </div>
     </div>
 

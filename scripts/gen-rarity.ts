@@ -73,6 +73,18 @@ export const RARITY = ${JSON.stringify(table, null, 2)};
 /** Token id to its seven trait values, in LAYERS order. */
 export const TOKEN_TRAITS = ${JSON.stringify(tokens)};
 
+/**
+ * One token's trait values, in LAYERS order.
+ *
+ * The same signature \`dog-rarity.js\` exposes, so the collection page can load
+ * either module and read it the same way. The dogs pack their tokens into
+ * index strings because 5000 of them spelled out is 484 KB; the cats do not
+ * need to and still answer the same question.
+ */
+export function traitsOf(id) {
+  return TOKEN_TRAITS[String(id)] ?? null;
+}
+
 /** How rare one token's rarest trait is, as a percentage. Lower is rarer. */
 export function rarestOf(id) {
   const traits = TOKEN_TRAITS[String(id)];

@@ -405,3 +405,46 @@ h2 {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Which chain a collection lives on, said in the header rather than implied.
+   The two are priced in currencies that are not comparable: POL on a testnet
+   is free from a faucet and POL on mainnet is money, so a floor figure means
+   different things depending on this label. */
+.chain-badge {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.chain-badge.is-testnet { border-color: var(--warn); color: var(--warn); }
+
+.col-pending {
+  margin: 0.8rem 0 0;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--warn);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+/* Every collection, reachable from any of them. Without this the dogs exist
+   only to somebody who knows to type ?c=dogs. */
+.col-switch { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.1rem; }
+
+.col-switch-item {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.col-switch-item:hover { transform: translateY(-1px); border-color: var(--accent); }
+.col-switch-item.is-here { border-color: var(--accent); background: var(--panel); }
+.col-switch-item strong { font-size: 0.92rem; }
+.col-switch-item span { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }

@@ -38,8 +38,13 @@ const ether = (n) => BigInt(Math.round(n * 1000)) * 10n ** 15n;
 /** Prices that look like a real market rather than a price list. */
 const PRICES = [0.4, 1.2, 0.85, 2.5, 0.6, 3.1, 0.95, 1.75, 0.5, 4.2, 1.1, 0.7];
 
-export function createDemo() {
-  const tokens = DEMO_ART.map((art, i) => ({
+/**
+ * @param {Array<{id:number,svg:string,royalty:string}>} [art] artwork to build
+ *        the invented market from. Defaults to the cats, which is what this
+ *        page showed before there was a second collection to show.
+ */
+export function createDemo(art_ = DEMO_ART) {
+  const tokens = art_.map((art, i) => ({
     id: BigInt(art.id),
     svg: art.svg,
     royalty: art.royalty,
