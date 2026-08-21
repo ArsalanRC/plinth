@@ -11,7 +11,7 @@
  * there is not, so the market is browsable before anybody connects anything.
  */
 
-import { CHAIN, CONTRACTS } from "./config.js";
+import { chainOf, collectionById, DEFAULT_COLLECTION } from "./config.js";
 import {
   encode,
   decodeUint,
@@ -22,6 +22,42 @@ import {
   decodeListing,
   decodeCheck,
 } from "./abi.js";
+
+/*
+ * Which collection this document is talking to, and therefore which chain.
+ *
+ * Module state rather than a parameter on forty functions. Each page is one
+ * document showing one collection, so the target is set once at boot and does
+ * not change under anybody. Threading a chain argument through `call`, `send`,
+ * `listingOf` and the rest would touch every line here to express something no
+ * page actually varies mid-life.
+ *
+ * The cats are the default because they are what the marketplace page has
+ * always shown, and a bookmarked link should not find a different collection
+ * under it.
+ */
+let target = collectionById(DEFAULT_COLLECTION);
+
+/**
+ * Point this module at a collection. Call it before anything else.
+ *
+ * Takes null rather than refusing it at the type level, because the only way
+ * to get one here is `collectionById` answering for a name that does not
+ * exist. Throwing on it is the whole job: the alternative is a page silently
+ * talking to whichever collection happened to be set last.
+ *
+ * @param {object|null} collection an entry from `COLLECTIONS`
+ */
+export function use(collection) {
+  if (!collection) throw new Error("No such collection");
+  target = collection;
+}
+
+/** The collection currently being talked to. */
+export const current = () => target;
+
+/** The chain that collection lives on. */
+export const chain = () => chainOf(target);
 
 export const hasWallet = () => typeof globalThis.ethereum !== "undefined";
 
@@ -52,7 +88,7 @@ export async function call(to, data) {
 async function rpcCall(method, params) {
   let last = null;
 
-  for (const url of CHAIN.rpc) {
+  for (const url of chain().rpc) {
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -165,7 +201,13 @@ export async function currentChainId() {
 }
 
 /**
- * Put the wallet on Amoy, adding the network first if it has never seen it.
+ * Put the wallet on this collection's chain, adding it first if the wallet has
+ * never seen it.
+ *
+ * Which chain that is depends on what `use()` was called with, and the two are
+ * not interchangeable: one is a testnet with free coins and the other is real
+ * money. Sending a mint to the wrong one is not an error anybody sees, it is a
+ * transaction that succeeds against the wrong contract.
  *
  * 4902 is "unrecognised chain", which is the normal answer the first time
  * anybody tries this, not an error worth showing. Anything else is real and
@@ -177,7 +219,7 @@ export async function ensureChain() {
   try {
     await provider().request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: CHAIN.hex }],
+      params: [{ chainId: chain().hex }],
     });
   } catch (error) {
     if (error?.code !== 4902) throw error;
@@ -186,11 +228,11 @@ export async function ensureChain() {
       method: "wallet_addEthereumChain",
       params: [
         {
-          chainId: CHAIN.hex,
-          chainName: CHAIN.name,
-          nativeCurrency: CHAIN.currency,
-          rpcUrls: CHAIN.rpc,
-          blockExplorerUrls: [CHAIN.explorer],
+          chainId: chain().hex,
+          chainName: chain().name,
+          nativeCurrency: chain().currency,
+          rpcUrls: chain().rpc,
+          blockExplorerUrls: [chain().explorer],
         },
       ],
     });
@@ -248,8 +290,8 @@ async function waitFor(hash, tries = 90) {
 
 // ------------------------------------------------------------------- reading
 
-const market = () => CONTRACTS.market;
-const collection = () => CONTRACTS.collection;
+const market = () => target.market;
+const collection = () => target.collection;
 
 export async function totalMinted() {
   return decodeUint(await call(collection(), encode("totalMinted()")));
@@ -299,7 +341,7 @@ export async function isApprovedForAll(owner) {
 
 // -------------------------------------------------------------------- faucet
 
-const drip = () => CONTRACTS.drip;
+const drip = () => target.drip;
 
 /**
  * The faucet's whole state for one address, in a single call.
@@ -379,4 +421,4 @@ export const tx = {
 export const shortAddress = (address) =>
   `${address.slice(0, 6)}…${address.slice(-4)}`;
 
-export const explorerTx = (hash) => `${CHAIN.explorer}/tx/${hash}`;
+export const explorerTx = (hash) => `${chain().explorer}/tx/${hash}`;
