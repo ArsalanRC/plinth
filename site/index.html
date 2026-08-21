@@ -167,6 +167,13 @@
     <h2 data-i18n="market.title"></h2>
     <p class="body" data-i18n="market.body"></p>
 
+    <!-- Which collection this grid is, and where the other one lives. The grid
+         below is one collection on one chain, and without this line a visitor
+         reasonably reads it as the whole site. -->
+    <!-- `.caption`, not `.scene-note`: that one is a monospace chip and a
+         block-level sentence in it renders as a full-width bar. -->
+    <p class="caption" id="market-which"></p>
+
     <div class="grid" id="market-grid"></div>
     <p class="empty" id="market-empty" hidden data-i18n="market.empty"></p>
   </section>
@@ -177,17 +184,24 @@
     <h2 data-i18n="mine.title"></h2>
     <p class="body" data-i18n="mine.body"></p>
 
+    <!-- The two chains, said before the buttons rather than after. One of
+         these mints is free and one of them spends real money, and that is
+         not a detail to leave to a small grey line under a button. -->
+    <p class="body" data-i18n="mine.chains"></p>
+
+    <!-- One button per collection, and deliberately no generic one.
+         There used to be a "Mint a token" button above this row. It minted the
+         cats on Amoy and said neither, while the buttons beside it named both,
+         so the page had two mint mechanisms and only one of them was honest.
+         Built from COLLECTIONS, so a third collection needs no markup here. -->
+    <div class="mint-others" id="mint-others"></div>
+    <p class="caption" id="mint-others-note" hidden></p>
+
+    <!-- In a flex row, because `.scene-note` is a bordered chip and a block
+         one stretches into a full-width bar. Visible only once rendered. -->
     <div class="hero-actions">
-      <button type="button" class="btn btn-primary" id="mint" data-i18n="mine.mint"></button>
       <span class="scene-note" id="supply">—</span>
     </div>
-
-    <!-- One button per collection, because there is more than one now and they
-         are on different chains. Built from COLLECTIONS so a third needs no
-         markup. The button above stays: it mints the collection this page
-         trades, which is the one the grid below shows. -->
-    <div class="mint-others" id="mint-others"></div>
-    <p class="scene-note" id="mint-others-note" hidden></p>
 
     <div class="grid" id="mine-grid"></div>
     <p class="empty" id="mine-empty" hidden data-i18n="mine.empty"></p>

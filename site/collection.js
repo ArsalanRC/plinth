@@ -167,7 +167,7 @@ function artFor(token) {
 
   const img = document.createElement("img");
   img.loading = "lazy";
-  img.alt = `Plinth Cat #${token.id}`;
+  img.alt = `${shown.name} #${token.id}`;
   img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(token.svg)))}`;
 
   wrap.append(img);
@@ -234,7 +234,11 @@ function openToken(id) {
 
   $("t-art").innerHTML = "";
   $("t-art").append(artFor(token));
-  $("t-name").textContent = `Plinth Cat #${token.id}`;
+
+  // From the collection being shown, never written out. Both of these named a
+  // cat on every page, so opening any dog gave it the wrong collection's name.
+  $("t-collection").textContent = shown.name;
+  $("t-name").textContent = `${shown.name} #${token.id}`;
   $("t-owner").textContent = state.isDemo
     ? token.owner === state.address
       ? t("tok.you")
@@ -546,9 +550,10 @@ async function loadCollection() {
   rarestOf = rarity.rarestOf;
   percentOf = rarity.percentOf;
 
-  // Artwork the contract drew. The dogs are not deployed, so for them this is
-  // the only source there is, and the page says so rather than implying a
-  // market that does not exist yet.
+  // Artwork the contract drew, rendered once and committed, because browsers
+  // cannot compute keccak256. It is what the grid shows before anybody
+  // connects, on both collections. Nothing is minted on the dogs yet, so for
+  // them it is currently the only artwork there is to show.
   const art = shown.id === "cats"
     ? (await import("./demo-art.js")).DEMO_ART
     : (await import("./dog-demo-art.js")).DOG_DEMO_ART;
