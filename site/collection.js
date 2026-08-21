@@ -339,15 +339,21 @@ function paintStats() {
   const owners = new Set(state.tokens.map((tk) => tk.owner)).size;
 
   /*
-   * A collection with nothing on chain has no market, and must not appear to.
+   * Market figures are shown only when they were read from the chain.
    *
-   * The demo builds invented listings so the marketplace page has something to
-   * try. Shown against an undeployed collection that becomes a floor price and
-   * a listing count for something nobody can buy, in a currency that is real
-   * money on that chain. The artwork is honest because the contract drew it;
-   * the market is not, so it reads as dashes.
+   * The first version of this gated on whether the collection was *deployed*,
+   * which is the wrong question and was wrong within the hour: the dogs went
+   * live on mainnet, `isLive` flipped true, and the page immediately reported
+   * a floor of 0.5 POL and seven listings for a contract with nothing minted
+   * on it. In a currency that is real money on that chain.
+   *
+   * The demo builds invented listings so the marketplace has something to try,
+   * and that is fine where it is labelled. It is not fine as a price. So the
+   * question is whether these numbers came from the chain, and nothing else.
+   *
+   * The artwork stays either way, because the contract really drew it.
    */
-  const trading = isLive(shown);
+  const trading = !state.isDemo;
 
   $("s-items").textContent = trading ? String(minted) : "—";
   $("s-supply").textContent = String(state.supply ?? SUPPLY);
