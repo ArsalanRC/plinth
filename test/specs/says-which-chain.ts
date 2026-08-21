@@ -210,6 +210,150 @@ describe("a write refuses the wrong chain", () => {
 });
 
 /**
+ * A read must answer about the chain it was asked about.
+ *
+ * `call` was fixed when the dogs went live. `balanceOf` was not, and it was the
+ * last read that went through the wallet unconditionally. A wallet sits on one
+ * network, so it answered about that one whatever the page had asked for.
+ *
+ * The profile shows a balance row per collection, precisely because POL on Amoy
+ * is free and POL on Polygon is money. Every row was reporting the same
+ * wallet-side number.
+ */
+describe("a balance comes from the chain it is a balance on", () => {
+  const realFetch = globalThis.fetch;
+  const ADDRESS = "0x1111111111111111111111111111111111111111";
+
+  let asked: string[] = [];
+  let announce: ((id: string) => void) | null = null;
+
+  function walletOn(chainId: string) {
+    asked = [];
+    (globalThis as Record<string, unknown>).ethereum = {
+      request: async ({ method }: { method: string }) => {
+        asked.push(`wallet:${method}`);
+        if (method === "eth_chainId") return chainId;
+        return "0xde0b6b3a7640000";
+      },
+      // The real wallet's own event, which is the only thing that corrects the
+      // cached chain id. Captured so a test can switch networks the way a
+      // person does.
+      on: (event: string, fn: (id: string) => void) => {
+        if (event === "chainChanged") announce = fn;
+      },
+    };
+
+    globalThis.fetch = (async (url: string) => {
+      asked.push(`rpc:${url}`);
+      return { json: async () => ({ jsonrpc: "2.0", id: 1, result: "0x1" }) };
+    }) as unknown as typeof fetch;
+  }
+
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>).ethereum;
+    globalThis.fetch = realFetch;
+    chain.use(collectionById("cats"));
+  });
+
+  it("uses the chain's own RPC when the wallet is on the other one", async () => {
+    chain.use(collectionById("cats"));
+    walletOn(CHAINS.polygon.hex);
+
+    await chain.balanceOf(ADDRESS);
+
+    const rpc = asked.find((a) => a.startsWith("rpc:"));
+    assert.ok(rpc, "it asked the wallet, which is parked on the other chain");
+    assert.ok(
+      CHAINS.amoy.rpc.some((url) => rpc === `rpc:${url}`),
+      `asked ${rpc}, which is not an Amoy endpoint`,
+    );
+    assert.ok(!asked.includes("wallet:eth_getBalance"), "it read the balance through the wallet");
+  });
+
+  /**
+   * And it follows the wallet when the wallet moves.
+   *
+   * The chain id is cached, so without this the answer is frozen at whatever
+   * the wallet was doing on the first read. Announcing the switch is what a
+   * real wallet does, and subscribing to it is the whole reason the cache is
+   * safe to keep.
+   */
+  it("uses the wallet once the wallet arrives on this chain", async () => {
+    chain.use(collectionById("cats"));
+    walletOn(CHAINS.polygon.hex);
+
+    await chain.balanceOf(ADDRESS);
+    assert.ok(announce, "chain.js never subscribed, so the cache could never be corrected");
+
+    announce(CHAINS.amoy.hex);
+    asked = [];
+
+    await chain.balanceOf(ADDRESS);
+    assert.ok(asked.includes("wallet:eth_getBalance"), "it went to an RPC with the wallet right here");
+  });
+});
+
+/**
+ * What a wallet holds spans every collection. What is for sale on this page
+ * does not.
+ *
+ * He reported this: connected on the market page, his minted dogs missing,
+ * while the profile listed them correctly. The market page read one collection
+ * for everything, so the answer was honest and narrower than the question.
+ *
+ * The market grid, the supply count and the split stay on this page's own
+ * collection deliberately. Those are one chain's figures and mixing another
+ * chain's into them would produce numbers in no currency at all.
+ */
+describe("the market page shows everything the wallet holds", () => {
+  const app = read("app.js");
+
+  it("sweeps the other collections for what is held", () => {
+    assert.match(app, /async function heldElsewhere/, "there is no cross-collection sweep");
+
+    const sweep = app.slice(app.indexOf("async function heldElsewhere"));
+    assert.match(sweep, /for \(const c of COLLECTIONS\)/, "the sweep is not built from the registry");
+    assert.match(sweep, /c\.id === home\.id/, "the sweep does not skip this page's own collection");
+  });
+
+  it("keeps the market grid on this page's own collection", () => {
+    const live = app.slice(app.indexOf("async function loadLive"));
+    const body = live.slice(0, live.indexOf("async function heldElsewhere"));
+
+    assert.match(body, /mine: \(\) => held/, "what you hold is not the cross-collection list");
+    assert.match(
+      body, /listings: \(\) => tokens\.filter/,
+      "the market grid is no longer this page's own collection",
+    );
+    assert.match(body, /chain\.use\(home\)/, "the sweep leaves the page pointed at another chain");
+  });
+
+  /**
+   * A card for the other chain has to act on the other chain. The two share
+   * contract addresses, so listing a dog with the wallet on Amoy would be a
+   * real transaction against the cats' marketplace.
+   */
+  it("acts on each token's own chain", () => {
+    assert.match(app, /async function onItsOwnChain/, "there is no per-token chain switch");
+
+    const wrap = app.slice(app.indexOf("async function onItsOwnChain"));
+    const body = wrap.slice(0, wrap.indexOf("async function doList"));
+
+    assert.match(body, /switching = true/, "the switch would trip the page's own reload");
+    assert.match(body, /ensureChain/, "it never moves the wallet");
+    assert.match(body, /finally[\s\S]*chain\.use\(home\)/, "the target is never restored");
+
+    for (const action of ["doList", "doCancel"]) {
+      const fn = app.slice(app.indexOf(`async function ${action}`));
+      assert.match(
+        fn.slice(0, fn.indexOf("\n}")), /onItsOwnChain/,
+        `${action} does not follow the token to its chain`,
+      );
+    }
+  });
+});
+
+/**
  * The market page switches networks to mint the other collection, and its own
  * `chainChanged` handler used to reload the page in the middle of doing it.
  *

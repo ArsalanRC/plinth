@@ -96,9 +96,27 @@ export async function call(to, data) {
  * permission, so nobody has to switch networks to look at a page.
  */
 let walletChain = null;
+let watching = false;
 
 async function walletIsHere() {
   if (!hasWallet()) return false;
+
+  /*
+   * The cached answer stops being true the moment the user switches network,
+   * so the wallet is asked to say when that happens.
+   *
+   * Subscribed here rather than at import, because at import there may be no
+   * wallet yet. An extension that injects a moment late would leave this file
+   * with a cached chain id and nothing to ever correct it, which is the worst
+   * of both: every read goes confidently to whichever network the wallet
+   * happened to be on when the page loaded.
+   */
+  if (!watching) {
+    watching = true;
+    provider().on?.("chainChanged", (id) => {
+      walletChain = id;
+    });
+  }
 
   if (walletChain === null) {
     try {
@@ -108,15 +126,6 @@ async function walletIsHere() {
     }
   }
   return walletChain === chain().hex;
-}
-
-// The cached answer stops being true the moment the user switches network in
-// MetaMask, and pages that care reload anyway. Clearing it is what makes the
-// reload unnecessary for reads.
-if (typeof globalThis.ethereum !== "undefined") {
-  globalThis.ethereum.on?.("chainChanged", (id) => {
-    walletChain = id;
-  });
 }
 
 /**
@@ -280,12 +289,25 @@ export async function ensureChain() {
   }
 }
 
-/** Native balance, in wei. */
+/**
+ * Native balance, in wei, on the chain this module is pointed at.
+ *
+ * The last read that preferred the wallet unconditionally, and therefore the
+ * last one that answered about whichever network the wallet happened to be
+ * parked on. With two chains that is not a small inaccuracy: the profile shows
+ * a balance row per collection precisely because POL on Amoy is free and POL on
+ * Polygon is money, and every row was reporting the same wallet-side number.
+ *
+ * Same rule as `call`: the wallet only when it is already here, the chain's own
+ * public RPC otherwise. A balance is a public read and needs no permission.
+ */
 export async function balanceOf(address) {
-  if (!hasWallet()) return 0n;
+  if (await walletIsHere()) {
+    const hex = await provider().request({ method: "eth_getBalance", params: [address, "latest"] });
+    return BigInt(hex);
+  }
 
-  const hex = await provider().request({ method: "eth_getBalance", params: [address, "latest"] });
-  return BigInt(hex);
+  return BigInt(await rpcCall("eth_getBalance", [address, "latest"]));
 }
 
 /**

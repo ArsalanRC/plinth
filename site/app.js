@@ -164,6 +164,14 @@ function button(label, className, onClick) {
   return el;
 }
 
+/**
+ * Is this token from a collection other than the one this page trades?
+ *
+ * Demo tokens carry no collection at all, and they are always this page's own,
+ * so a missing one is not foreign.
+ */
+const isForeign = (token) => Boolean(token.collection) && token.collection.id !== chain.current().id;
+
 /** One card. `mine` decides which actions it offers. */
 function card(token, { mine }) {
   const el = document.createElement("article");
@@ -186,9 +194,20 @@ function card(token, { mine }) {
 
   row.append(id, price);
 
+  /*
+   * The royalty line carries the collection and chain, but only when they are
+   * not this page's own.
+   *
+   * Without it a dog and a cat sit in one grid priced in the same ticker, and
+   * one of those prices is real money. Only the foreign ones are labelled, so
+   * the common case stays quiet: the market grid is all one collection and
+   * repeating that on every card would be noise.
+   */
   const owner = document.createElement("span");
   owner.className = "owner";
-  owner.textContent = `${t("item.royalty")} ${token.royalty}`;
+  owner.textContent = isForeign(token)
+    ? `${token.collection.name} · ${chainOf(token.collection).shortName} · ${t("item.royalty")} ${token.royalty}`
+    : `${t("item.royalty")} ${token.royalty}`;
 
   const actions = document.createElement("div");
   actions.className = "actions";
@@ -303,6 +322,36 @@ function paintChains() {
 
 // ------------------------------------------------------------------- actions
 
+/**
+ * Do something to a token on the chain that token actually lives on.
+ *
+ * The grid of what you hold spans both collections, so a card in it may belong
+ * to the other chain. Every write here goes through this: point `chain` at the
+ * token's own collection, move the wallet there, act, then put the target back.
+ *
+ * Nothing about the wrong chain fails loudly. The two share contract addresses,
+ * so listing a dog while the wallet sits on Amoy would be a real transaction
+ * against the cats' marketplace. `chain.send` refuses that outright now, and
+ * this is what stops it ever coming up.
+ *
+ * `switching` keeps the page's own `chainChanged` reload from firing in the
+ * middle, which is the bug that made minting the dogs do nothing.
+ */
+async function onItsOwnChain(token, action) {
+  const home = chain.current();
+  if (!isForeign(token)) return action();
+
+  switching = true;
+  try {
+    chain.use(token.collection);
+    await chain.ensureChain();
+    return await action();
+  } finally {
+    chain.use(home);
+    switching = false;
+  }
+}
+
 async function doList(token, priceText) {
   const price = parseUnits(priceText);
   if (price <= 0n) throw new Error("PriceIsZero");
@@ -313,22 +362,28 @@ async function doList(token, priceText) {
     return;
   }
 
-  // The marketplace has to be allowed to move the token before it can be
-  // listed. Asking every time would be two signatures per listing, so this
-  // checks first and only asks when it has to.
-  if (!(await chain.isApprovedForAll(account))) {
-    say(t("busy.approve"), "", { busy: true });
-    await chain.send({ ...chain.tx.approveAll(), from: account }, () =>
+  const href = await onItsOwnChain(token, async () => {
+    // The marketplace has to be allowed to move the token before it can be
+    // listed. Asking every time would be two signatures per listing, so this
+    // checks first and only asks when it has to.
+    if (!(await chain.isApprovedForAll(account))) {
+      say(t("busy.approve"), "", { busy: true });
+      await chain.send({ ...chain.tx.approveAll(), from: account }, () =>
+        say(t("busy.mining"), "", { busy: true }),
+      );
+    }
+
+    say(t("busy.sign"), "", { busy: true });
+    const sent = await chain.send({ ...chain.tx.list(token.id, price), from: account }, () =>
       say(t("busy.mining"), "", { busy: true }),
     );
-  }
 
-  say(t("busy.sign"), "", { busy: true });
-  const { hash } = await chain.send({ ...chain.tx.list(token.id, price), from: account }, () =>
-    say(t("busy.mining"), "", { busy: true }),
-  );
+    // Built inside, while `chain` still points at the token's own chain, or the
+    // link would go to the wrong explorer.
+    return chain.explorerTx(sent.hash);
+  });
 
-  say(t("ok.listed"), "is-good", { href: chain.explorerTx(hash) });
+  say(t("ok.listed"), "is-good", { href });
   await loadLive();
 }
 
@@ -339,12 +394,15 @@ async function doCancel(token) {
     return;
   }
 
-  say(t("busy.sign"), "", { busy: true });
-  const { hash } = await chain.send({ ...chain.tx.cancel(token.id), from: account }, () =>
-    say(t("busy.mining"), "", { busy: true }),
-  );
+  const href = await onItsOwnChain(token, async () => {
+    say(t("busy.sign"), "", { busy: true });
+    const sent = await chain.send({ ...chain.tx.cancel(token.id), from: account }, () =>
+      say(t("busy.mining"), "", { busy: true }),
+    );
+    return chain.explorerTx(sent.hash);
+  });
 
-  say(t("ok.cancelled"), "is-good", { href: chain.explorerTx(hash) });
+  say(t("ok.cancelled"), "is-good", { href });
   await loadLive();
 }
 
@@ -516,8 +574,24 @@ async function doDrip() {
 
 // ---------------------------------------------------------------------- live
 
-/** Read the whole market off the chain. */
+/**
+ * Read the whole market off the chain.
+ *
+ * `home` is the collection this page trades, and it is the only one the market
+ * grid, the supply count and the split are built from. Those are one chain's
+ * figures and adding another chain's to them would produce a number in no
+ * currency at all.
+ *
+ * **What you hold is different, and it spans every collection.** It read one
+ * chain, so a wallet that had minted dogs on mainnet was shown an empty "your
+ * side" on a page it was connected to, while the profile listed them correctly.
+ * That is the same shape as the read bug the dogs' launch found: honest,
+ * confident and wrong, because the question asked was narrower than the one the
+ * page appeared to be answering.
+ */
 async function loadLive() {
+  const home = chain.current();
+
   const minted = await chain.totalMinted();
   const supply = await chain.maxSupply();
   const owned = await chain.tokensOf(account);
@@ -526,11 +600,12 @@ async function loadLive() {
   const tokens = [];
   for (let id = 1n; id <= minted; id++) {
     const listing = await chain.listingOf(id);
-    const listed = listing.seller !== "0x0000000000000000000000000000000000000000";
+    const listed = listing.seller !== ZERO;
     const meta = chain.metaFrom(await chain.tokenURI(id));
 
     tokens.push({
       id,
+      collection: home,
       svg: atob(meta.image.split(";base64,")[1]),
       royalty: meta.attributes?.find((a) => /royalty/i.test(a.trait_type))?.value ?? "",
       owner: listed ? listing.seller : await chain.ownerOf(id),
@@ -540,20 +615,83 @@ async function loadLive() {
     });
   }
 
+  const balance = await chain.balanceOf(account);
+  const proceeds = await chain.proceedsOf(account);
+  const feeBps = await chain.feeBps();
+
+  const held = [...tokens.filter((tk) => tk.mineFlag), ...(await heldElsewhere(home))];
+
+  // Whatever the sweep did, this page trades `home` and every later read has to
+  // go there. Restored before the state is published, not after.
+  chain.use(home);
+
   state = {
     isDemo: false,
     address: account,
-    balance: await chain.balanceOf(account),
-    proceeds: await chain.proceedsOf(account),
-    feeBps: await chain.feeBps(),
+    balance,
+    proceeds,
+    feeBps,
     supply,
     tokens,
     listings: () => tokens.filter((tk) => tk.listed && !tk.mineFlag),
-    mine: () => tokens.filter((tk) => tk.mineFlag),
+    mine: () => held,
   };
 
   await loadFaucet();
   await render();
+}
+
+/**
+ * What this wallet holds in the collections this page does not trade.
+ *
+ * Reads go through each chain's own public RPC unless the wallet is already
+ * there, so nobody is asked to switch networks to see what they own. One
+ * unreachable chain costs its own collection and not the page.
+ */
+async function heldElsewhere(home) {
+  const found = [];
+
+  for (const c of COLLECTIONS) {
+    if (!isLive(c) || c.id === home.id) continue;
+
+    try {
+      chain.use(c);
+      const owned = await chain.tokensOf(account);
+      const ids = owned.map(String);
+
+      /*
+       * A listed token is transferred to the marketplace, so `tokensOf` stops
+       * reporting it. Reading only that shows an empty grid to somebody who
+       * listed everything, which the profile page already had to solve.
+       */
+      const minted = await chain.totalMinted();
+      for (let id = 1n; id <= minted; id++) {
+        if (ids.includes(String(id))) continue;
+        const listing = await chain.listingOf(id);
+        if (listing.seller.toLowerCase() === account.toLowerCase()) owned.push(id);
+      }
+
+      for (const id of owned) {
+        const listing = await chain.listingOf(id);
+        const meta = chain.metaFrom(await chain.tokenURI(id));
+
+        found.push({
+          id,
+          collection: c,
+          svg: atob(meta.image.split(";base64,")[1]),
+          royalty: meta.attributes?.find((a) => /royalty/i.test(a.trait_type))?.value ?? "",
+          owner: account,
+          mineFlag: true,
+          listed: listing.seller !== ZERO,
+          price: listing.price,
+        });
+      }
+    } catch {
+      // An RPC that is down should cost this collection, not the whole page.
+    }
+  }
+
+  return found;
 }
 
 async function doConnect() {
@@ -847,11 +985,23 @@ async function boot() {
   row.querySelector("em").dataset.i18n = deployed ? "status.done" : "status.next";
   row.querySelector("em").textContent = t(deployed ? "status.done" : "status.next");
 
+  /*
+   * Reconnect silently, whatever network the wallet is parked on.
+   *
+   * This used to require the wallet to be on this page's chain, and that turned
+   * into a trap the moment there were two: mint a dog, which leaves the wallet
+   * on Polygon, come back to the market, and the page quietly dropped to the
+   * demo while MetaMask still showed it as connected.
+   *
+   * It is safe now because no read needs the wallet. Every one of them goes to
+   * the right chain's public RPC when the wallet is elsewhere. Writes are the
+   * part that cares, and they switch the wallet first and refuse if it is
+   * somehow still wrong.
+   */
   if (isDeployed() && chain.hasWallet()) {
     const existing = await chain.currentAccount();
-    const onChain = (await chain.currentChainId()) === CHAIN.hex;
 
-    if (existing && onChain) {
+    if (existing) {
       account = existing;
       try {
         await loadLive();
