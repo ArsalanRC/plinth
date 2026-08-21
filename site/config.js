@@ -120,8 +120,23 @@ export const COLLECTIONS = [
     name: "Plinth Dogs",
     symbol: "PDOG",
     chain: "polygon",
-    market: null,
-    collection: null,
+
+    /*
+     * Deployed 21 August 2026, 1.77 POL at 279 gwei.
+     *
+     * **These are the same two addresses the Amoy deployment has**, and that is
+     * arithmetic rather than a mistake: a contract address comes from the
+     * deployer and the nonce, so the same wallet's first two deployments land
+     * on the same addresses on every EVM chain. Different chains, different
+     * contracts.
+     *
+     * It is a real trap all the same. `0xa4a3cb…` is Plinth Dogs here and the
+     * old superseded cat collection on Amoy, so an address read without its
+     * chain means nothing. Verified from the chain rather than the deploy log:
+     * 22,060 bytes, name "Plinth Dogs", maxSupply 5000.
+     */
+    market: "0x2e24d151283c5b5da36db089be1a1c6eab70cbcf",
+    collection: "0xa4a3cbcd73d1709cb1db4d7a45fd35ff2f149af7",
     supply: 5000,
     layers: 9,
     rarity: "./dog-rarity.js",

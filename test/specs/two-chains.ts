@@ -72,9 +72,29 @@ describe("two chains", () => {
     }
   });
 
-  it("knows the cats are live and the dogs are not yet", () => {
+  it("has both collections live", () => {
     assert.equal(isLive(collectionById("cats")), true);
-    assert.equal(isLive(collectionById("dogs")), false, "dogs look deployed; update this when they are");
+    assert.equal(isLive(collectionById("dogs")), true);
+  });
+
+  /**
+   * The two collections share both their addresses, and that is arithmetic
+   * rather than a mistake: an address comes from the deployer and the nonce, so
+   * one wallet's first two deployments land identically on every EVM chain.
+   *
+   * Pinned because it looks exactly like a copy-paste error, and the day
+   * somebody "fixes" it by pasting the Amoy cat address over the mainnet dog
+   * one, everything still parses and the page reads the wrong chain's contract.
+   */
+  it("expects the shared addresses, because nonces are deterministic", () => {
+    const cats = collectionById("cats");
+    const dogs = collectionById("dogs");
+    assert.ok(cats && dogs);
+
+    assert.equal(cats.market, dogs.market, "the marketplaces are both nonce 0 and should match");
+    assert.notEqual(cats.chain, dogs.chain, "identical addresses are only safe on different chains");
+    assert.notEqual(cats.collection, dogs.collection,
+      "the cats were redeployed, so their collection is nonce 2 and the dogs' is nonce 1");
   });
 
   it("has a default collection that exists", () => {
