@@ -264,6 +264,7 @@ async function render() {
   $("split-note").textContent = `${t("split.fee")} ${state.feeBps / 100}%`;
 
   renderFaucet();
+  paintMintOthers();
   paintSplit();
 }
 
@@ -658,6 +659,79 @@ $("signout").addEventListener("click", async () => {
   location.reload();
 });
 $("mint").addEventListener("click", () => run($("mine"), doMint));
+
+/**
+ * Mint any collection from here, not only the one this page trades.
+ *
+ * Each button points `chain` at its own collection and switches the wallet's
+ * network before signing. The two share contract addresses on different chains,
+ * so minting on the wrong network is not a visible error: it is a transaction
+ * that succeeds against the other contract.
+ *
+ * The page trades the cats, so after minting elsewhere it puts the target back
+ * rather than leaving every later read pointed at whatever was minted last.
+ */
+function paintMintOthers() {
+  const box = $("mint-others");
+  box.innerHTML = "";
+
+  for (const c of COLLECTIONS) {
+    if (!isLive(c)) continue;
+
+    const net = chainOf(c);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn";
+    button.innerHTML = `<span></span><small></small>`;
+    button.querySelector("span").textContent = `${t("mine.mintOne")} ${c.name}`;
+    button.querySelector("small").textContent = net.testnet
+      ? `${net.shortName} · ${t("col.testnet")}`
+      : net.shortName;
+
+    button.addEventListener("click", () => mintFrom(c, button));
+    box.append(button);
+  }
+}
+
+async function mintFrom(collection, button) {
+  const note = $("mint-others-note");
+  const show = (key, bad = false) => {
+    note.textContent = t(key);
+    note.classList.toggle("is-bad", bad);
+    note.hidden = false;
+  };
+
+  if (!chain.hasWallet() || state.isDemo) {
+    show("col.mintConnect", true);
+    return;
+  }
+
+  button.disabled = true;
+  const wasShowing = chain.current();
+
+  try {
+    chain.use(collection);
+    show("col.mintSwitch");
+    await chain.ensureChain();
+
+    show("col.mintSigning");
+    const { hash } = await chain.send({ ...chain.tx.mint(account), from: account }, () =>
+      show("col.mintMining"));
+
+    note.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = chain.explorerTx(hash);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = `${t("col.mintDone")} ${collection.name}`;
+    note.append(link);
+  } catch (error) {
+    show(String(error?.message ?? "").includes("SoldOut") ? "col.mintSoldOut" : "col.mintRefused", true);
+  } finally {
+    chain.use(wasShowing);
+    button.disabled = false;
+  }
+}
 $("withdraw").addEventListener("click", () => run($("wallet"), doWithdraw));
 $("drip").addEventListener("click", () => run($("faucet"), doDrip));
 $("pay-replay").addEventListener("click", runPay);

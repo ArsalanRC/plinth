@@ -448,3 +448,31 @@ h2 {
 .col-switch-item.is-here { border-color: var(--accent); background: var(--panel); }
 .col-switch-item strong { font-size: 0.92rem; }
 .col-switch-item span { font-family: var(--mono); font-size: 0.72rem; color: var(--dim); }
+
+/* One row per chain. Balances are never summed across them: POL on a testnet
+   is free and POL on mainnet is money, so a total would be a number in no
+   currency at all. */
+.wallets { display: grid; gap: 0.5rem; margin: 0 0 1.6rem; }
+
+.wallet-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.wallet-row strong { font-family: var(--mono); font-size: 0.95rem; }
+.wallet-row .wallet-held { color: var(--dim); font-size: 0.88rem; }
+.wallet-row a { margin-left: auto; font-size: 0.85rem; }
+
+.col-mint { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin: 1.1rem 0 0; }
+
+/* A button per collection. Each carries its chain, because minting on the
+   wrong network is not a visible error here: the two share addresses, so the
+   transaction succeeds against the other contract. */
+.mint-others { display: flex; flex-wrap: wrap; gap: 0.7rem; margin: 1rem 0 0.4rem; }
+.mint-others .btn { display: grid; gap: 0.1rem; text-align: left; }
+.mint-others .btn small { font-family: var(--mono); font-size: 0.7rem; opacity: 0.75; }

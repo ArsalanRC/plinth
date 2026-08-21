@@ -182,6 +182,13 @@
       <span class="scene-note" id="supply">—</span>
     </div>
 
+    <!-- One button per collection, because there is more than one now and they
+         are on different chains. Built from COLLECTIONS so a third needs no
+         markup. The button above stays: it mints the collection this page
+         trades, which is the one the grid below shows. -->
+    <div class="mint-others" id="mint-others"></div>
+    <p class="scene-note" id="mint-others-note" hidden></p>
+
     <div class="grid" id="mine-grid"></div>
     <p class="empty" id="mine-empty" hidden data-i18n="mine.empty"></p>
   </section>

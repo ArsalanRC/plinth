@@ -109,6 +109,14 @@
              knowing the query string. Built by the script from COLLECTIONS so
              a third one appears here without touching this file. -->
         <nav class="col-switch" id="col-switch" aria-label="Collections"></nav>
+
+        <!-- Mint whichever collection this page is showing. Hidden until the
+             collection is actually deployed, because a button that cannot work
+             is worse than no button. -->
+        <p class="col-mint" id="col-mint" hidden>
+          <button type="button" class="btn btn-primary" id="mint-here" data-i18n="col.mint">Mint one</button>
+          <span class="scene-note" id="mint-note" hidden></span>
+        </p>
       </div>
     </div>
 

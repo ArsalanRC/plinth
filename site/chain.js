@@ -71,11 +71,52 @@ const provider = () => globalThis.ethereum;
  * user has connected and safe to do on their behalf afterwards.
  */
 export async function call(to, data) {
-  if (hasWallet()) {
+  if (await walletIsHere()) {
     return provider().request({ method: "eth_call", params: [{ to, data }, "latest"] });
   }
 
   return rpcCall("eth_call", [{ to, data }, "latest"]);
+}
+
+/*
+ * Is the wallet on the chain we are asking about?
+ *
+ * This used to ask only whether a wallet existed, which was right while there
+ * was one chain and silently wrong the moment there were two. A wallet sits on
+ * exactly one network. Reading the mainnet dog collection through a wallet
+ * parked on Amoy does not fail: `eth_call` runs against Amoy, finds no contract
+ * at that address, and returns empty. The page then reports, honestly and
+ * incorrectly, that the wallet holds nothing.
+ *
+ * That is worse here than anywhere else in this file, because the two chains
+ * share contract addresses. The same address is a real contract on both.
+ *
+ * So a read goes through the wallet only when the wallet is already there, and
+ * through the chain's own public RPC otherwise. Reads cost nothing and need no
+ * permission, so nobody has to switch networks to look at a page.
+ */
+let walletChain = null;
+
+async function walletIsHere() {
+  if (!hasWallet()) return false;
+
+  if (walletChain === null) {
+    try {
+      walletChain = await provider().request({ method: "eth_chainId" });
+    } catch {
+      return false;
+    }
+  }
+  return walletChain === chain().hex;
+}
+
+// The cached answer stops being true the moment the user switches network in
+// MetaMask, and pages that care reload anyway. Clearing it is what makes the
+// reload unnecessary for reads.
+if (typeof globalThis.ethereum !== "undefined") {
+  globalThis.ethereum.on?.("chainChanged", (id) => {
+    walletChain = id;
+  });
 }
 
 /**
