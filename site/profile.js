@@ -18,7 +18,7 @@
 
 import { STRINGS } from "./i18n.js";
 import { initChrome, prefersReduced } from "./chrome.js";
-import { CHAIN, isDeployed } from "./config.js";
+import { COLLECTIONS, chainOf, isLive } from "./config.js";
 import { formatUnits } from "./abi.js";
 import * as chain from "./chain.js";
 
@@ -34,8 +34,15 @@ const ZERO = "0x0000000000000000000000000000000000000000";
 
 let account = null;
 let held = [];
-let proceeds = 0n;
-let balance = 0n;
+
+/**
+ * Balance and proceeds, one row per chain, never summed.
+ *
+ * POL on Amoy is free from a faucet and POL on Polygon is money. Adding them
+ * produces a figure in no currency at all, which is exactly the kind of number
+ * that looks authoritative and means nothing.
+ */
+let perChain = [];
 
 // ------------------------------------------------------------------ backdrop
 
@@ -85,7 +92,7 @@ function paintIdentity() {
   }
 
   link.textContent = chain.shortAddress(account);
-  link.href = `${CHAIN.explorer}/address/${account}`;
+  link.href = `${chainOf(COLLECTIONS[0]).explorer}/address/${account}`;
   link.title = t("prof.explorer");
 
   // The avatar is the first token this wallet holds, so the page is
@@ -102,14 +109,66 @@ function paintStats() {
 
   $("p-owned").textContent = account ? String(held.length) : "—";
   $("p-listed").textContent = account ? String(listed) : "—";
-  $("p-proceeds").textContent = account ? pol(proceeds) : "—";
-  $("p-balance").textContent = account ? pol(balance) : "—";
+
+  // Across how many collections, which is the honest cross-chain summary. A
+  // total balance is not, so it is a row per chain further down instead.
+  const across = new Set(held.map((tk) => tk.collection.id)).size;
+  $("p-across").textContent = account ? String(across) : "—";
+  $("p-chains").textContent = account ? String(perChain.length) : "—";
+
+  paintWallets();
 
   // Only offered when there is something to take. A withdraw button that is
   // always there invites a transaction that reverts and costs gas anyway.
+  // Nothing to withdraw is the common case and an always-present button
+  // invites a transaction that reverts and costs gas anyway.
+  const owed = perChain.filter((w) => w.proceeds > 0n);
   const row = $("p-withdraw-row");
-  row.hidden = !account || proceeds === 0n;
-  if (!row.hidden) $("p-withdraw-note").textContent = pol(proceeds);
+  row.hidden = !account || owed.length === 0;
+  if (!row.hidden) {
+    $("p-withdraw-note").textContent = owed
+      .map((w) => `${pol(w.proceeds)} · ${w.chain.shortName}`)
+      .join("   ");
+  }
+}
+
+/**
+ * One row per chain: what this wallet holds there and what it is owed.
+ *
+ * Separate rows rather than a total, because the two currencies share a ticker
+ * and nothing else. A single "18.10 POL" spanning a testnet and mainnet would
+ * be a number nobody could act on.
+ */
+function paintWallets() {
+  const box = $("p-wallets");
+  box.innerHTML = "";
+  box.hidden = !account || perChain.length === 0;
+
+  for (const w of perChain) {
+    const row = document.createElement("div");
+    row.className = "wallet-row";
+
+    const net = document.createElement("span");
+    net.className = "chain-badge" + (w.chain.testnet ? " is-testnet" : "");
+    net.textContent = w.chain.testnet ? `${w.chain.shortName} · ${t("col.testnet")}` : w.chain.shortName;
+
+    const bal = document.createElement("strong");
+    bal.textContent = pol(w.balance);
+
+    const held_ = document.createElement("span");
+    held_.className = "wallet-held";
+    const n = held.filter((tk) => tk.collection.id === w.collection.id).length;
+    held_.textContent = `${n} × ${w.collection.name}`;
+
+    const link = document.createElement("a");
+    link.href = `${w.chain.explorer}/token/${w.collection.collection}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = t("prof.viewContract");
+
+    row.append(net, bal, held_, link);
+    box.append(row);
+  }
 }
 
 function paintGrid() {
@@ -125,7 +184,7 @@ function paintGrid() {
     // how to open one token in detail and can be reached by its own URL.
     const card = document.createElement("a");
     card.className = "item glass";
-    card.href = `./collection.html?id=${token.id}`;
+    card.href = `./collection.html?c=${token.collection.id}&id=${token.id}`;
 
     const meta = document.createElement("figcaption");
     const name = document.createElement("strong");
@@ -154,55 +213,92 @@ function paintAll() {
 
 // ---------------------------------------------------------------------- live
 
+/**
+ * What this wallet holds, across every collection, on every chain.
+ *
+ * One sweep per collection, each one pointing `chain` at that collection first.
+ * Reads go through the chain's own public RPC unless the wallet happens to be
+ * there already, so a wallet parked on Amoy still sees its mainnet dogs and
+ * nobody is asked to switch networks to look at a page.
+ *
+ * Balance and proceeds are per chain and not addable. POL on a testnet is free
+ * and POL on mainnet is money, so summing them would produce a number that
+ * means nothing. They are kept per collection and shown per collection.
+ */
 async function loadLive() {
-  const owned = await chain.tokensOf(account);
+  const rows = [];
+  const wallets = [];
 
-  const tokens = [];
-  for (const id of owned) {
-    const listing = await chain.listingOf(id);
-    const meta = chain.metaFrom(await chain.tokenURI(id));
+  for (const c of COLLECTIONS) {
+    if (!isLive(c)) continue;
+    chain.use(c);
 
-    tokens.push({
-      id,
-      svg: atob(meta.image.split(";base64,")[1]),
-      listed: listing.seller !== ZERO,
-      price: listing.price,
+    let owned = [];
+    try {
+      owned = await chain.tokensOf(account);
+    } catch {
+      // One unreachable chain should cost its own row, not the whole page.
+      continue;
+    }
+
+    const tokens = [];
+    for (const id of owned) {
+      const listing = await chain.listingOf(id);
+      const meta = chain.metaFrom(await chain.tokenURI(id));
+
+      tokens.push({
+        id, collection: c,
+        svg: atob(meta.image.split(";base64,")[1]),
+        listed: listing.seller !== ZERO,
+        price: listing.price,
+      });
+    }
+
+    /*
+     * A listed token has been transferred to the marketplace, so `tokensOf` no
+     * longer reports it as the seller's. Reading only that would show somebody
+     * who listed everything an empty profile, which is exactly the wrong answer.
+     * The seller of a live listing still owns it in every sense that matters.
+     */
+    const minted = await chain.totalMinted();
+    for (let id = 1n; id <= minted; id++) {
+      if (tokens.some((tk) => String(tk.id) === String(id))) continue;
+
+      const listing = await chain.listingOf(id);
+      if (listing.seller.toLowerCase() !== account.toLowerCase()) continue;
+
+      const meta = chain.metaFrom(await chain.tokenURI(id));
+      tokens.push({
+        id, collection: c,
+        svg: atob(meta.image.split(";base64,")[1]),
+        listed: true,
+        price: listing.price,
+      });
+    }
+
+    rows.push(...tokens);
+    wallets.push({
+      collection: c,
+      chain: chainOf(c),
+      balance: await chain.balanceOf(account),
+      proceeds: await chain.proceedsOf(account),
     });
   }
 
-  /*
-   * A listed token has been transferred to the marketplace, so `tokensOf` no
-   * longer reports it as the seller's. Reading only that would show somebody
-   * who listed everything an empty profile, which is exactly the wrong answer.
-   * The seller of a live listing still owns it in every sense that matters.
-   */
-  const minted = await chain.totalMinted();
-  for (let id = 1n; id <= minted; id++) {
-    if (tokens.some((tk) => String(tk.id) === String(id))) continue;
+  held = rows.sort((a, b) =>
+    a.collection.id === b.collection.id
+      ? Number(a.id) - Number(b.id)
+      : a.collection.id.localeCompare(b.collection.id));
 
-    const listing = await chain.listingOf(id);
-    if (listing.seller.toLowerCase() !== account.toLowerCase()) continue;
-
-    const meta = chain.metaFrom(await chain.tokenURI(id));
-    tokens.push({
-      id,
-      svg: atob(meta.image.split(";base64,")[1]),
-      listed: true,
-      price: listing.price,
-    });
-  }
-
-  held = tokens.sort((a, b) => Number(a.id) - Number(b.id));
-  proceeds = await chain.proceedsOf(account);
-  balance = await chain.balanceOf(account);
-
+  perChain = wallets;
   paintAll();
 }
+
 
 // ------------------------------------------------------------------- wiring
 
 async function doConnect() {
-  if (!chain.hasWallet() || !isDeployed()) return;
+  if (!chain.hasWallet() || !COLLECTIONS.some(isLive)) return;
   try {
     account = await chain.connect();
     await loadLive();
@@ -245,9 +341,9 @@ if (chain.hasWallet()) {
 }
 
 async function boot() {
-  if (isDeployed() && chain.hasWallet()) {
+  if (COLLECTIONS.some(isLive) && chain.hasWallet()) {
     const existing = await chain.currentAccount();
-    if (existing && (await chain.currentChainId()) === CHAIN.hex) {
+    if (existing && true) {
       account = existing;
       try {
         await loadLive();

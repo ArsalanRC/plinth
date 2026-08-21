@@ -389,6 +389,7 @@ function paintStats() {
 
   // Nothing deployed yet is a fact about the collection, not a failure.
   $("col-pending").hidden = isLive(shown);
+  $("col-mint").hidden = !isLive(shown);
 
   paintSwitch();
 
@@ -427,6 +428,58 @@ $("connect").addEventListener("click", async () => {
     /* the marketplace page reports connection errors; here it just stays demo */
   }
 });
+
+/**
+ * Mint one of whichever collection this page is showing.
+ *
+ * The chain switch is the part that matters. The two collections live on
+ * different networks and share contract addresses, so a mint signed while the
+ * wallet is on the wrong one is not an error anybody sees: it is a transaction
+ * that succeeds against a different contract. `ensureChain` moves the wallet
+ * first and the mint only goes out afterwards.
+ */
+async function doMint() {
+  const note = $("mint-note");
+  const show = (key, bad = false) => {
+    note.textContent = t(key);
+    note.classList.toggle("is-bad", bad);
+    note.hidden = false;
+  };
+
+  if (!chain.hasWallet() || !account) {
+    show("col.mintConnect", true);
+    return;
+  }
+
+  const button = $("mint-here");
+  button.disabled = true;
+
+  try {
+    show("col.mintSwitch");
+    await chain.ensureChain();
+
+    show("col.mintSigning");
+    const { hash } = await chain.send({ ...chain.tx.mint(account), from: account }, () =>
+      show("col.mintMining"));
+
+    note.innerHTML = "";
+    const link = document.createElement("a");
+    link.href = chain.explorerTx(hash);
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = t("col.mintDone");
+    note.append(link);
+
+    await loadLive();
+  } catch (error) {
+    // Sold out is a real answer from the contract, not a fault.
+    show(String(error?.message ?? "").includes("SoldOut") ? "col.mintSoldOut" : "col.mintRefused", true);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+$("mint-here").addEventListener("click", doMint);
 
 $("signout").addEventListener("click", async () => {
   await chain.disconnect();

@@ -20,7 +20,8 @@
     "deploy:drip": "hardhat run scripts/deploy-drip.ts --network amoy",
     "topup": "hardhat run scripts/topup.ts --network amoy",
     "deploy:dogs": "hardhat run scripts/deploy-dogs.ts --network polygon",
-    "rarity:dogs": "hardhat run scripts/gen-dog-rarity.ts"
+    "rarity:dogs": "hardhat run scripts/gen-dog-rarity.ts",
+    "mint:dogs": "hardhat run scripts/mint-dogs.ts --network polygon"
   },
   "keywords": [
     "solidity",
