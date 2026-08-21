@@ -53,6 +53,22 @@ const config: HardhatUserConfig = {
       accounts: [configVariable("AMOY_PRIVATE_KEY")],
       chainId: 80002,
     },
+    /*
+     * Polygon mainnet. Real money, and it reads its own key on purpose.
+     *
+     * Reusing `AMOY_PRIVATE_KEY` here would mean one slip of the `--network`
+     * flag spends real POL on what was meant to be a rehearsal, and the
+     * failure is silent because the transaction succeeds. A separate variable
+     * makes a mainnet deploy something the operator set up deliberately rather
+     * than something a typo can reach.
+     */
+    polygon: {
+      type: "http",
+      chainType: "l1",
+      url: configVariable("POLYGON_RPC_URL"),
+      accounts: [configVariable("POLYGON_PRIVATE_KEY")],
+      chainId: 137,
+    },
   },
 };
 
