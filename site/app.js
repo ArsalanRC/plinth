@@ -16,7 +16,7 @@
 
 import { STRINGS, SCENES } from "./i18n.js";
 import { initChrome, prefersReduced, sleep } from "./chrome.js";
-import { CHAIN, isDeployed, hasDrip } from "./config.js";
+import { CHAIN, COLLECTIONS, chainOf, isDeployed, isLive, hasDrip } from "./config.js";
 import { createDemo } from "./demo.js";
 import { formatUnits, parseUnits } from "./abi.js";
 import * as chain from "./chain.js";
