@@ -39,8 +39,9 @@ describe("two chains", () => {
 
   it("gives every chain what a wallet needs to add it", () => {
     for (const [key, c] of Object.entries(CHAINS)) {
+      const fields = c as unknown as Record<string, unknown>;
       for (const field of ["hex", "name", "currency", "rpc", "explorer"]) {
-        assert.ok(c[field], `${key} has no ${field}, so wallet_addEthereumChain would fail`);
+        assert.ok(fields[field], `${key} has no ${field}, so wallet_addEthereumChain would fail`);
       }
       assert.ok(c.rpc.length > 0, `${key} has no RPC endpoint`);
       assert.equal(typeof c.testnet, "boolean", `${key} does not say whether it is a testnet`);
@@ -49,8 +50,9 @@ describe("two chains", () => {
 
   it("puts every collection on a chain that exists", () => {
     for (const c of COLLECTIONS) {
-      assert.ok(CHAINS[c.chain], `${c.id} names chain "${c.chain}", which is not defined`);
-      assert.equal(chainOf(c), CHAINS[c.chain]);
+      const named = CHAINS[c.chain as keyof typeof CHAINS];
+      assert.ok(named, `${c.id} names chain "${c.chain}", which is not defined`);
+      assert.equal(chainOf(c), named);
     }
   });
 
@@ -88,6 +90,7 @@ describe("two chains", () => {
    */
   it("derives the single-collection view from the registry", () => {
     const def = collectionById(DEFAULT_COLLECTION);
+    assert.ok(def, `default "${DEFAULT_COLLECTION}" is not a collection`);
 
     assert.equal(CHAIN, chainOf(def));
     assert.equal(CONTRACTS.market, def.market);
@@ -96,18 +99,18 @@ describe("two chains", () => {
   });
 
   it("points at the default until something says otherwise", () => {
-    assert.equal(chain.current().id, DEFAULT_COLLECTION);
+    assert.equal(chain.current()?.id, DEFAULT_COLLECTION);
     assert.equal(chain.chain().id, CHAINS.amoy.id);
   });
 
   it("follows use() onto the other chain, and back", () => {
     chain.use(collectionById("dogs"));
-    assert.equal(chain.current().id, "dogs");
+    assert.equal(chain.current()?.id, "dogs");
     assert.equal(chain.chain().id, 137);
     assert.equal(chain.chain().testnet, false);
 
     chain.use(collectionById("cats"));
-    assert.equal(chain.current().id, "cats");
+    assert.equal(chain.current()?.id, "cats");
     assert.equal(chain.chain().id, 80002);
     assert.equal(chain.chain().testnet, true);
   });
@@ -117,6 +120,6 @@ describe("two chains", () => {
 
     // And the target is unchanged, so a bad call cannot leave the page talking
     // to whatever happened to be last.
-    assert.equal(chain.current().id, "cats");
+    assert.equal(chain.current()?.id, "cats");
   });
 });

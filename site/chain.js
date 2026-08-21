@@ -41,7 +41,12 @@ let target = collectionById(DEFAULT_COLLECTION);
 /**
  * Point this module at a collection. Call it before anything else.
  *
- * @param {object} collection an entry from `COLLECTIONS`
+ * Takes null rather than refusing it at the type level, because the only way
+ * to get one here is `collectionById` answering for a name that does not
+ * exist. Throwing on it is the whole job: the alternative is a page silently
+ * talking to whichever collection happened to be set last.
+ *
+ * @param {object|null} collection an entry from `COLLECTIONS`
  */
 export function use(collection) {
   if (!collection) throw new Error("No such collection");
