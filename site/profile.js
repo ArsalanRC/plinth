@@ -73,7 +73,9 @@ function artFor(token) {
 
   const img = document.createElement("img");
   img.loading = "lazy";
-  img.alt = `Plinth Cat #${token.id}`;
+  // From the token's own collection. This said "Plinth Cat" on every image,
+  // including the dogs, which is what a screen reader announced.
+  img.alt = `${token.collection?.name ?? "Plinth"} #${token.id}`;
   img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(token.svg)))}`;
 
   wrap.append(img);
@@ -93,8 +95,19 @@ function paintIdentity() {
   $("p-chain-names").textContent = [...new Set(COLLECTIONS.map((c) => chainOf(c).shortName))]
     .join(" · ");
 
-  if (!account) {
-    link.textContent = "—";
+  /*
+   * Nothing connected is a state, not a failure, and it has to look like one.
+   * This used to leave a dash where the address goes, next to the separator
+   * that belongs between the address and the chains, so the line read
+   * "— · Amoy · Polygon" above four more dashes. Every part of that was
+   * accurate and the whole of it read as a page that had broken.
+   */
+  const connected = Boolean(account);
+  link.hidden = !connected;
+  $("p-sep").hidden = !connected;
+  $("p-head-cta").hidden = connected || !chain.hasWallet();
+
+  if (!connected) {
     link.removeAttribute("href");
     $("p-avatar").innerHTML = "";
     $("p-avatar").hidden = true;
@@ -102,7 +115,17 @@ function paintIdentity() {
   }
 
   link.textContent = chain.shortAddress(account);
-  link.href = `${chainOf(COLLECTIONS[0]).explorer}/address/${account}`;
+
+  /*
+   * The explorer for a chain this wallet is actually on.
+   *
+   * It was always the first collection's, which is the cats on Amoy, so an
+   * address holding nothing but mainnet dogs was linked to a testnet explorer
+   * that would show it empty. An address exists on both chains, so nothing
+   * errors and the page looks right; it just sends you to the wrong ledger.
+   */
+  const home = held[0]?.collection ?? COLLECTIONS[0];
+  link.href = `${chainOf(home).explorer}/address/${account}`;
   link.title = t("prof.explorer");
 
   // The avatar is the first token this wallet holds, so the page is
@@ -320,6 +343,7 @@ async function doConnect() {
 
 $("connect").addEventListener("click", doConnect);
 $("p-connect-btn").addEventListener("click", doConnect);
+$("p-connect-head").addEventListener("click", doConnect);
 
 $("signout").addEventListener("click", async () => {
   await chain.disconnect();
