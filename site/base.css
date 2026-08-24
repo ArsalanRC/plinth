@@ -104,6 +104,99 @@ html[data-i18n-pending] body { visibility: hidden; }
 .choice .k { font-weight: 600; font-size: 0.98rem; }
 .choice .v { font-size: 0.86rem; color: var(--dim); }
 
+/* The three facts under each route, so the choice can be made from the card
+   rather than by reading three sections first. Mono labels, because they are
+   labels and not prose. */
+.choice .facts {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.choice .facts > span {
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.choice .facts b {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.choice .facts i { font-style: normal; font-size: 0.84rem; }
+
+/* An illustrated step. Every drawing here is drawn here, in the markup, as a
+   handful of strokes: no screenshots of somebody else's product, which would be
+   theirs rather than ours and would rot the next time they redesign. The point
+   of each one is the shape of the step, not a picture of a button. */
+.route-steps {
+  list-style: none;
+  counter-reset: step var(--step-from, 0);
+  margin: 0 0 1.6rem;
+  padding: 0;
+  max-width: 72ch;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.route-steps > li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 1.4rem 3.1rem 1fr;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  line-height: 1.55;
+}
+
+.route-steps > li::before {
+  content: counter(step);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: right;
+}
+
+.step-art { display: block; width: 3.1rem; color: var(--dim); }
+
+.step-art svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The step's words, and whatever it asks you to do, stacked rather than run
+   together: a button sitting inline after a sentence reads as part of it. */
+.step-body { display: grid; gap: 0.45rem; justify-items: start; }
+.step-body > a { justify-self: start; }
+.step-do { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+
+/* The one-click route. Same art, no number, because there is no sequence. */
+.route-lead { display: flex; align-items: center; gap: 0.9rem; margin: 0 0 1.6rem; }
+
+@media (max-width: 560px) {
+  .route-steps > li { grid-template-columns: 1.2rem 1fr; }
+  .route-steps .step-art { display: none; }
+  .choice .facts > span { grid-template-columns: 1fr; gap: 0.1rem; }
+}
+
 /* A numbered how-to. The `.steps` list is a different thing entirely: it is the
    payment-flow animation, monospace and faded until a script switches each line
    on, so a static guide using it renders greyed out and one word wide. */
