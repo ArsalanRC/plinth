@@ -12,7 +12,7 @@
 
 import { STRINGS } from "./i18n.js";
 import { initChrome, prefersReduced } from "./chrome.js";
-import { CHAIN, COLLECTIONS, chainOf, isDeployed, isLive } from "./config.js";
+import { CHAIN, COLLECTIONS, chainOf, hasFaucet, isDeployed, isLive } from "./config.js";
 import * as chain from "./chain.js";
 
 const chrome = initChrome(STRINGS, { prefix: "plinth" });
@@ -90,7 +90,7 @@ function report(id, key, bad = false) {
  */
 async function switchTo(collection, { into, keys }) {
   if (!chain.hasWallet()) {
-    report(into, "start.s3.nowallet", true);
+    report(into, "start.free.nowallet", true);
     return;
   }
   if (!collection) return;
@@ -110,21 +110,40 @@ async function switchTo(collection, { into, keys }) {
   }
 }
 
-$("add-chain").addEventListener("click", () =>
+$("free-add").addEventListener("click", () =>
   switchTo(testnet, {
-    into: "add-result",
-    keys: { added: "start.s3.added", failed: "start.s3.failed" },
+    into: "free-result",
+    keys: { added: "start.free.added", failed: "start.free.failed" },
   }));
 
-$("add-mainnet").addEventListener("click", () =>
+$("main-add").addEventListener("click", () =>
   switchTo(mainnet, {
-    into: "mainnet-result",
-    keys: { added: "start.s4.added", failed: "start.s4.failed" },
+    into: "main-result",
+    keys: { added: "start.main.added", failed: "start.main.failed" },
   }));
 
-/** Route 04 points at whichever collection is actually on a real chain. */
+/**
+ * Step five, pointed at whichever tap actually exists.
+ *
+ * The public faucet is what the markup ships with, because it is the one that
+ * is always there. This project's own tap is a contract, and until somebody
+ * deploys it the honest answer is the public one. The moment the registry has a
+ * drip address, the one-click panel on the market page is the better route and
+ * this switches to it without the copy having to be rewritten.
+ */
+function paintFaucet() {
+  if (!testnet || !hasFaucet(testnet)) return;
+
+  const link = $("free-faucet");
+  link.href = "./index.html#faucet";
+  link.textContent = t("faucet.get");
+  link.removeAttribute("target");
+  link.removeAttribute("rel");
+}
+
+/** The mainnet route points at whichever collection is on a real chain. */
 function paintMainnet() {
-  const link = $("mainnet-link");
+  const link = $("main-link");
   if (!mainnet) return;
 
   link.href = `./collection.html?c=${mainnet.id}`;
@@ -149,6 +168,7 @@ $("signout").addEventListener("click", async () => {
 
 chrome.onLangChange(() => {
   paintAccount();
+  paintFaucet();
   paintMainnet();
 });
 
@@ -158,6 +178,7 @@ async function boot() {
     if (existing && (await chain.currentChainId()) === CHAIN.hex) account = existing;
   }
   paintAccount();
+  paintFaucet();
   paintMainnet();
   onScroll();
 }

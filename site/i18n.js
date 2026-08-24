@@ -26,52 +26,70 @@ export const STRINGS = {
 
     "start.metaTitle": "Start here · plinth",
     "start.title": "New to all this? Start here.",
-    "start.sub": "Four ways in. Pick the one that matches where you are.",
+    "start.sub": "Three routes in. One needs nothing, one is free with a wallet, one spends real money.",
 
+    /*
+     * Named for what they are rather than numbered, because the numbers moved.
+     * There were four routes and one of them was a prerequisite rather than a
+     * destination, which is the confusion this rewrite was asked to fix.
+     */
     "start.pick1": "Just look around",
     "start.pick1sub": "No wallet, nothing installed, nothing at risk.",
-    "start.pick2": "Make a wallet",
-    "start.pick2sub": "About ten minutes. MetaMask is the usual first one.",
-    "start.pick3": "Get on the test network",
-    "start.pick3sub": "One click here, then free test coins.",
-    "start.pick4": "Use real Polygon",
-    "start.pick4sub": "Real money. The dogs are live.",
+    "start.pick2": "Play for free on Amoy",
+    "start.pick2sub": "A wallet, a test network, and coins that cost nothing.",
+    "start.pick3": "Mint on real Polygon",
+    "start.pick3sub": "A wallet with real POL. Cents, not euros.",
 
-    "start.s1.title": "Just look around",
-    "start.s1.body":
+    "start.need": "You need",
+    "start.cost": "It costs",
+    "start.get": "You get",
+
+    "start.look.need": "Nothing at all",
+    "start.look.cost": "Nothing",
+    "start.look.get": "The whole market, on invented data",
+    "start.free.need": "MetaMask, and about two minutes",
+    "start.free.cost": "Nothing. The coins are free",
+    "start.free.get": "Mint a cat, list it, buy one",
+    "start.main.need": "MetaMask holding real POL",
+    "start.main.cost": "A few cents of gas",
+    "start.main.get": "A dog on Polygon mainnet",
+
+    "start.look.title": "Just look around",
+    "start.look.body":
       "The market and the collection both work with nothing installed. You get invented listings and real artwork, drawn by the contract itself. Nothing you click can cost anything, because there is no wallet there to charge.",
-    "start.s1.cta": "Open the market",
+    "start.look.cta": "Open the market",
 
-    "start.s2.title": "Make a wallet",
-    "start.s2.body":
-      "A wallet is a key, not an account. Nobody signs you up, and nobody can reset it for you later.",
-    "start.s2.step1": "Install MetaMask from its own site. Never from a search advert.",
-    "start.s2.step2": "Choose Create a new wallet. The password is for this browser only.",
-    "start.s2.step3": "Write the twelve words on paper. Not a photo, not a notes app.",
-    "start.s2.step4": "Confirm them. MetaMask asks for a few of the words back.",
-    "start.s2.warn":
-      "Anybody holding those twelve words owns everything in the wallet. No support desk can undo it. This site never asks for them and could not use them.",
-    "start.s2.docs": "MetaMask's own guide",
-    "start.s2.dl": "metamask.io/download",
-
-    "start.s3.title": "Get on the test network",
-    "start.s3.body":
+    "start.free.title": "Play for free on Amoy",
+    "start.free.body":
       "Amoy is Polygon's test network. The coins are free and worth nothing, which is exactly the point. You can mint, list and buy here without spending anything real.",
-    "start.s3.add": "Add Amoy to MetaMask",
-    "start.s3.added": "Done. Amoy is in your network list now.",
-    "start.s3.failed": "MetaMask turned that down. You can add it by hand instead.",
-    "start.s3.nowallet": "Install a wallet first and this button starts working.",
-    "start.s3.step2": "Get free test POL from the faucet. It takes about a minute.",
-    "start.s3.step3": "Come back, press Connect, and mint one.",
-    "start.s3.faucet": "Open the faucet",
+    "start.free.step1": "Install MetaMask from its own site. Never from a search advert.",
+    "start.free.dl": "metamask.io/download",
+    "start.free.step2": "Choose Create a new wallet. The password is for this browser only.",
+    "start.free.step3": "Write the twelve words on paper. Not a photo, not a notes app.",
+    "start.free.warn":
+      "Anybody holding those twelve words owns everything in the wallet. No support desk can undo it. This site never asks for them and could not use them.",
+    "start.free.step4": "Add Amoy with this button. Your wallet asks you first.",
+    "start.free.step5": "Get free test POL. One claim is enough for a mint.",
+    "start.free.step6": "Come back, press Connect, and mint a cat.",
+    "start.free.add": "Add Amoy to MetaMask",
+    "start.free.added": "Done. Amoy is in your network list now.",
+    "start.free.failed": "MetaMask turned that down. You can add it by hand instead.",
+    "start.free.nowallet": "Install a wallet first and this button starts working.",
+    "start.free.faucet": "Open the faucet",
+    "start.free.mint": "Mint a cat",
+    "start.free.docs": "MetaMask's own guide",
 
-    "start.s4.title": "Use real Polygon",
-    "start.s4.body":
+    "start.main.title": "Mint on real Polygon",
+    "start.main.body":
       "Plinth Dogs runs on Polygon mainnet. The POL there is real money, so a mint costs real gas. Your wallet shows the exact amount before you sign. The cats stay on Amoy, where everything is free.",
-    "start.s4.add": "Switch MetaMask to Polygon",
-    "start.s4.added": "Done. Your wallet is on Polygon now.",
-    "start.s4.failed": "MetaMask turned that down. You can switch by hand instead.",
-    "start.s4.step2": "Open the dogs and mint one. Your wallet shows the cost.",
+    "start.main.step1": "Use the same wallet. No wallet yet? Start at step one above.",
+    "start.main.back": "back to step one",
+    "start.main.step2": "Switch to Polygon with this button.",
+    "start.main.step3": "Put real POL in that wallet. You buy it on an exchange and send it to your own address.",
+    "start.main.step4": "Open the dogs and mint one. The wallet shows the cost first.",
+    "start.main.add": "Switch MetaMask to Polygon",
+    "start.main.added": "Done. Your wallet is on Polygon now.",
+    "start.main.failed": "MetaMask turned that down. You can switch by hand instead.",
 
     "prof.metaTitle": "Your wallet · plinth",
     "prof.title": "Your wallet",
@@ -321,52 +339,65 @@ export const STRINGS = {
 
     "start.metaTitle": "Hier starten · plinth",
     "start.title": "Neu bei alldem? Fang hier an.",
-    "start.sub": "Vier Wege hinein. Nimm den, der zu dir passt.",
+    "start.sub": "Drei Wege hinein. Einer braucht nichts, einer ist gratis mit Wallet, einer kostet echtes Geld.",
 
     "start.pick1": "Nur umsehen",
     "start.pick1sub": "Kein Wallet, nichts installiert, kein Risiko.",
-    "start.pick2": "Wallet anlegen",
-    "start.pick2sub": "Etwa zehn Minuten. MetaMask ist meist das erste.",
-    "start.pick3": "Ins Testnetz",
-    "start.pick3sub": "Ein Klick hier, danach kostenlose Test-Coins.",
-    "start.pick4": "Echtes Polygon",
-    "start.pick4sub": "Echtes Geld. Die Hunde sind live.",
+    "start.pick2": "Gratis auf Amoy spielen",
+    "start.pick2sub": "Ein Wallet, ein Testnetz, und Coins ohne Wert.",
+    "start.pick3": "Auf echtem Polygon minten",
+    "start.pick3sub": "Ein Wallet mit echtem POL. Cent, nicht Euro.",
 
-    "start.s1.title": "Nur umsehen",
-    "start.s1.body":
+    "start.need": "Du brauchst",
+    "start.cost": "Es kostet",
+    "start.get": "Du bekommst",
+
+    "start.look.need": "Gar nichts",
+    "start.look.cost": "Nichts",
+    "start.look.get": "Den ganzen Markt, mit erfundenen Daten",
+    "start.free.need": "MetaMask und etwa zwei Minuten",
+    "start.free.cost": "Nichts. Die Coins sind gratis",
+    "start.free.get": "Eine Katze minten, einstellen, kaufen",
+    "start.main.need": "MetaMask mit echtem POL",
+    "start.main.cost": "Ein paar Cent Gas",
+    "start.main.get": "Einen Hund auf Polygon Mainnet",
+
+    "start.look.title": "Nur umsehen",
+    "start.look.body":
       "Markt und Collection laufen ohne alles. Du siehst erfundene Listings und echte Grafik, vom Vertrag selbst gezeichnet. Klicken kostet nichts, weil es kein Wallet gibt, das zahlen könnte.",
-    "start.s1.cta": "Zum Markt",
+    "start.look.cta": "Zum Markt",
 
-    "start.s2.title": "Wallet anlegen",
-    "start.s2.body":
-      "Ein Wallet ist ein Schlüssel, kein Konto. Niemand meldet dich an, und niemand kann es später zurücksetzen.",
-    "start.s2.step1": "MetaMask von der eigenen Seite installieren. Nie über eine Suchanzeige.",
-    "start.s2.step2": "Neues Wallet erstellen wählen. Das Passwort gilt nur für diesen Browser.",
-    "start.s2.step3": "Die zwölf Wörter auf Papier schreiben. Kein Foto, keine Notiz-App.",
-    "start.s2.step4": "Bestätigen. MetaMask fragt ein paar der Wörter wieder ab.",
-    "start.s2.warn":
-      "Wer diese zwölf Wörter hat, besitzt alles im Wallet. Kein Support macht das rückgängig. Diese Seite fragt nie danach und könnte damit nichts anfangen.",
-    "start.s2.docs": "Die Anleitung von MetaMask",
-    "start.s2.dl": "metamask.io/download",
-
-    "start.s3.title": "Ins Testnetz",
-    "start.s3.body":
+    "start.free.title": "Gratis auf Amoy spielen",
+    "start.free.body":
       "Amoy ist das Testnetz von Polygon. Die Coins sind gratis und wertlos, und genau darum geht es. Du kannst hier minten, listen und kaufen, ohne echtes Geld auszugeben.",
-    "start.s3.add": "Amoy zu MetaMask hinzufügen",
-    "start.s3.added": "Fertig. Amoy steht jetzt in deiner Netzwerkliste.",
-    "start.s3.failed": "MetaMask hat abgelehnt. Du kannst es auch von Hand eintragen.",
-    "start.s3.nowallet": "Erst ein Wallet installieren, dann geht dieser Button.",
-    "start.s3.step2": "Kostenloses Test-POL vom Faucet holen. Dauert etwa eine Minute.",
-    "start.s3.step3": "Zurückkommen, Verbinden drücken, einen Token minten.",
-    "start.s3.faucet": "Faucet öffnen",
+    "start.free.step1": "MetaMask von der eigenen Seite installieren. Nie über eine Suchanzeige.",
+    "start.free.dl": "metamask.io/download",
+    "start.free.step2": "Neues Wallet erstellen wählen. Das Passwort gilt nur für diesen Browser.",
+    "start.free.step3": "Die zwölf Wörter auf Papier schreiben. Kein Foto, keine Notiz-App.",
+    "start.free.warn":
+      "Wer diese zwölf Wörter hat, besitzt alles im Wallet. Kein Support macht das rückgängig. Diese Seite fragt nie danach und könnte damit nichts anfangen.",
+    "start.free.step4": "Amoy mit diesem Button hinzufügen. Dein Wallet fragt vorher.",
+    "start.free.step5": "Kostenloses Test-POL holen. Eine Abholung reicht für einen Mint.",
+    "start.free.step6": "Zurückkommen, Verbinden drücken, eine Katze minten.",
+    "start.free.add": "Amoy zu MetaMask hinzufügen",
+    "start.free.added": "Fertig. Amoy steht jetzt in deiner Netzwerkliste.",
+    "start.free.failed": "MetaMask hat abgelehnt. Du kannst es auch von Hand eintragen.",
+    "start.free.nowallet": "Erst ein Wallet installieren, dann geht dieser Button.",
+    "start.free.faucet": "Faucet öffnen",
+    "start.free.mint": "Katze minten",
+    "start.free.docs": "Die Anleitung von MetaMask",
 
-    "start.s4.title": "Echtes Polygon",
-    "start.s4.body":
+    "start.main.title": "Auf echtem Polygon minten",
+    "start.main.body":
       "Plinth Dogs läuft auf Polygon Mainnet. Das POL dort ist echtes Geld, ein Mint kostet also echtes Gas. Dein Wallet zeigt den genauen Betrag, bevor du signierst. Die Katzen bleiben auf Amoy, dort ist alles gratis.",
-    "start.s4.add": "MetaMask auf Polygon umstellen",
-    "start.s4.added": "Fertig. Dein Wallet ist jetzt auf Polygon.",
-    "start.s4.failed": "MetaMask hat abgelehnt. Du kannst auch von Hand wechseln.",
-    "start.s4.step2": "Die Hunde öffnen und einen minten. Die Kosten zeigt dein Wallet.",
+    "start.main.step1": "Dasselbe Wallet nehmen. Noch keins? Dann oben bei Schritt eins anfangen.",
+    "start.main.back": "zurück zu Schritt eins",
+    "start.main.step2": "Mit diesem Button auf Polygon wechseln.",
+    "start.main.step3": "Echtes POL ins Wallet legen. Man kauft es an einer Börse und schickt es an die eigene Adresse.",
+    "start.main.step4": "Die Hunde öffnen und einen minten. Die Kosten zeigt das Wallet vorher.",
+    "start.main.add": "MetaMask auf Polygon umstellen",
+    "start.main.added": "Fertig. Dein Wallet ist jetzt auf Polygon.",
+    "start.main.failed": "MetaMask hat abgelehnt. Du kannst auch von Hand wechseln.",
 
     "prof.metaTitle": "Dein Wallet · plinth",
     "prof.title": "Dein Wallet",

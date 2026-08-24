@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title data-i18n="start.metaTitle">Start here · plinth</title>
-<meta name="description" content="No wallet and no crypto experience needed. Four ways into plinth, from looking around with nothing installed to minting on the test network for free." />
+<meta name="description" content="No wallet and no crypto experience needed. Three routes into plinth: look around with nothing installed, mint free on the Amoy test network, or mint for real on Polygon." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -87,87 +87,128 @@
     <h1 class="hero-title" data-i18n="start.title">New to all this? Start here.</h1>
     <p class="lede" data-i18n="start.sub"></p>
 
-    <!-- Four doors, and each one is honest about what it costs. Plain anchors
-         rather than a scripted chooser, so the page works before any module
-         loads and every option is linkable. -->
+    <!-- Three doors, and each one says up front what it needs, what it costs
+         and what you end up with. There were four before, and one of them was
+         "make a wallet", which is a step inside two of the others rather than
+         a place to go. That is the confusion this rewrite was asked to fix.
+
+         Plain anchors, so the page works before any module loads. -->
     <div class="choices" id="picker">
-      <a class="choice" href="#look"><span class="k" data-i18n="start.pick1"></span><span class="v" data-i18n="start.pick1sub"></span></a>
-      <a class="choice" href="#wallet"><span class="k" data-i18n="start.pick2"></span><span class="v" data-i18n="start.pick2sub"></span></a>
-      <a class="choice" href="#testnet"><span class="k" data-i18n="start.pick3"></span><span class="v" data-i18n="start.pick3sub"></span></a>
-      <a class="choice" href="#mainnet"><span class="k" data-i18n="start.pick4"></span><span class="v" data-i18n="start.pick4sub"></span></a>
+      <a class="choice" href="#look">
+        <span class="k" data-i18n="start.pick1"></span>
+        <span class="v" data-i18n="start.pick1sub"></span>
+        <span class="facts">
+            <span><b data-i18n="start.need"></b><i data-i18n="start.look.need"></i></span>
+            <span><b data-i18n="start.cost"></b><i data-i18n="start.look.cost"></i></span>
+            <span><b data-i18n="start.get"></b><i data-i18n="start.look.get"></i></span>
+        </span>
+      </a>
+      <a class="choice" href="#free">
+        <span class="k" data-i18n="start.pick2"></span>
+        <span class="v" data-i18n="start.pick2sub"></span>
+        <span class="facts">
+            <span><b data-i18n="start.need"></b><i data-i18n="start.free.need"></i></span>
+            <span><b data-i18n="start.cost"></b><i data-i18n="start.free.cost"></i></span>
+            <span><b data-i18n="start.get"></b><i data-i18n="start.free.get"></i></span>
+        </span>
+      </a>
+      <a class="choice" href="#main">
+        <span class="k" data-i18n="start.pick3"></span>
+        <span class="v" data-i18n="start.pick3sub"></span>
+        <span class="facts">
+            <span><b data-i18n="start.need"></b><i data-i18n="start.main.need"></i></span>
+            <span><b data-i18n="start.cost"></b><i data-i18n="start.main.cost"></i></span>
+            <span><b data-i18n="start.get"></b><i data-i18n="start.main.get"></i></span>
+        </span>
+      </a>
     </div>
   </section>
 
+  <!-- 01: nothing installed ------------------------------------------------ -->
   <section class="band" id="look">
     <p class="eyebrow">01</p>
-    <h2 data-i18n="start.s1.title">Just look around</h2>
-    <p class="body" data-i18n="start.s1.body"></p>
-    <p><a class="pill" href="./index.html" data-i18n="start.s1.cta">Open the market</a></p>
+    <h2 data-i18n="start.look.title">Just look around</h2>
+    <p class="body" data-i18n="start.look.body"></p>
+
+    <!-- No numbered steps here on purpose. This route is one click, and a list
+         of one reads as a step somebody forgot to finish. -->
+    <p class="route-lead">
+      <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="5" y="9" width="38" height="30" rx="3"/><path d="M5 17h38"/><circle cx="10" cy="13" r="1.1"/><circle cx="14" cy="13" r="1.1"/><rect x="10" y="22" width="12" height="12" rx="2"/><rect x="26" y="22" width="12" height="12" rx="2"/></svg></span>
+      <a class="pill" href="./index.html" data-i18n="start.look.cta">Open the market</a>
+    </p>
   </section>
 
-  <section class="band" id="wallet">
+  <!-- 02: free, on the test network ---------------------------------------- -->
+  <section class="band" id="free">
     <p class="eyebrow">02</p>
-    <h2 data-i18n="start.s2.title">Make a wallet</h2>
-    <p class="body" data-i18n="start.s2.body"></p>
+    <h2 data-i18n="start.free.title">Play for free on Amoy</h2>
+    <p class="body" data-i18n="start.free.body"></p>
 
-    <ol class="guide-steps">
-      <li>
-        <span data-i18n="start.s2.step1"></span>
-        <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"
-           data-i18n="start.s2.dl">metamask.io/download</a>
-      </li>
-      <li data-i18n="start.s2.step2"></li>
-      <li data-i18n="start.s2.step3"></li>
-      <li data-i18n="start.s2.step4"></li>
+    <ol class="route-steps">
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M18 8h6a3 3 0 0 1 0 6h6v6a3 3 0 0 0 6 0v6h-6v6a3 3 0 0 1-6 0h-6v-6a3 3 0 0 0-6 0h-6v-6h6a3 3 0 0 0 0-6h-6V8z"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step1"></span><a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer" data-i18n="start.free.dl">metamask.io/download</a></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="16" cy="17" r="7.5"/><path d="M21.5 22.5 38 39"/><path d="M31 32l4-4"/><path d="M35 36l4-4"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step2"></span></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="9" y="7" width="26" height="34" rx="2"/><path d="M14 15h16M14 21h16M14 27h16M14 33h10"/><path d="M33 30l6-6 4 4-6 6h-4z"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step3"></span></span>
+        </li>
     </ol>
 
-    <!-- The one thing on this page that can actually hurt somebody, so it is
-         not a footnote. -->
-    <p class="callout-bad" data-i18n="start.s2.warn"></p>
+    <!-- The one thing on this page that can actually cost somebody their money,
+         so it sits with the step it belongs to rather than in a footnote. -->
+    <p class="callout-bad" data-i18n="start.free.warn"></p>
+
+    <!-- The warning splits this route's list in two, so the second half has to
+         be told where to resume. `start` alone is not enough: the markers are
+         styled, so they come from a CSS counter, and a counter does not read
+         the attribute. Both are set, so it is right with or without CSS. -->
+    <ol class="route-steps" start="4" style="--step-from: 3">
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="7" y="10" width="34" height="28" rx="3"/><path d="M13 19h14M13 25h14M13 31h8"/><path d="M31 24.5l2.6 2.6 5.4-5.4"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step4"></span><span class="step-do"><button type="button" class="pill" id="free-add" data-i18n="start.free.add"></button><span class="scene-note" id="free-result" hidden></span></span></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="7" y="15" width="9" height="7" rx="1"/><path d="M21 12h8M25 12v6"/><path d="M16 18.5h11a4 4 0 0 1 4 4v3.5"/><path d="M34 33.5c0 1.7-1.3 3-3 3s-3-1.3-3-3 3-5.5 3-5.5 3 3.8 3 5.5z"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step5"></span><a id="free-faucet" href="https://faucet.polygon.technology" target="_blank" rel="noopener noreferrer" data-i18n="start.free.faucet">Open the faucet</a></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="9" y="13" width="22" height="22" rx="3"/><path d="M14 30l5-6 4 4 3-3 4 5"/><circle cx="19" cy="20" r="1.6"/><path d="M37 15v10M32 20h10"/></svg></span>
+          <span class="step-body"><span data-i18n="start.free.step6"></span><a href="./collection.html?c=cats" data-i18n="start.free.mint">Mint a cat</a></span>
+        </li>
+    </ol>
 
     <p><a class="pill" href="https://support.metamask.io/start/getting-started-with-metamask/"
-          target="_blank" rel="noopener noreferrer" data-i18n="start.s2.docs">MetaMask's own guide</a></p>
+          target="_blank" rel="noopener noreferrer" data-i18n="start.free.docs">MetaMask's own guide</a></p>
   </section>
 
-  <section class="band" id="testnet">
+  <!-- 03: real money, on mainnet ------------------------------------------- -->
+  <section class="band" id="main">
     <p class="eyebrow">03</p>
-    <h2 data-i18n="start.s3.title">Get on the test network</h2>
-    <p class="body" data-i18n="start.s3.body"></p>
+    <h2 data-i18n="start.main.title">Mint on real Polygon</h2>
+    <p class="body" data-i18n="start.main.body"></p>
 
-    <ol class="guide-steps">
-      <li>
-        <button type="button" class="pill" id="add-chain" data-i18n="start.s3.add">Add Amoy to MetaMask</button>
-        <span class="scene-note" id="add-result" hidden></span>
-      </li>
-      <li>
-        <span data-i18n="start.s3.step2"></span>
-        <a href="https://faucet.polygon.technology" target="_blank" rel="noopener noreferrer"
-           data-i18n="start.s3.faucet">Open the faucet</a>
-      </li>
-      <li data-i18n="start.s3.step3"></li>
-    </ol>
-  </section>
-
-  <!-- Route 04 told every visitor that nothing was live on Polygon mainnet,
-       and went on telling them for weeks after the dogs were deployed there.
-       It is the one route somebody takes to find the mainnet collection, so
-       the page's own guide was the reason it looked like a testnet site. -->
-  <section class="band" id="mainnet">
-    <p class="eyebrow">04</p>
-    <h2 data-i18n="start.s4.title">Use real Polygon</h2>
-    <p class="body" data-i18n="start.s4.body"></p>
-
-    <ol class="guide-steps">
-      <li>
-        <button type="button" class="pill" id="add-mainnet" data-i18n="start.s4.add">Switch MetaMask to Polygon</button>
-        <span class="scene-note" id="mainnet-result" hidden></span>
-      </li>
-      <li>
-        <span data-i18n="start.s4.step2"></span>
-        <!-- Both the link and its label come from the registry, so this cannot
-             end up pointing at a collection that is not the mainnet one. -->
-        <a id="mainnet-link" href="./collection.html"></a>
-      </li>
+    <ol class="route-steps">
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="16" cy="17" r="7.5"/><path d="M21.5 22.5 38 39"/><path d="M31 32l4-4"/><path d="M35 36l4-4"/></svg></span>
+          <span class="step-body"><span data-i18n="start.main.step1"></span><a href="#free" data-i18n="start.main.back">back to step one</a></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="14" cy="16" r="6"/><circle cx="34" cy="32" r="6"/><path d="M23 16h9a4 4 0 0 1 4 4v6"/><path d="M33 23l3 3 3-3"/><path d="M25 32h-9a4 4 0 0 1-4-4v-6"/><path d="M15 25l-3-3-3 3"/></svg></span>
+          <span class="step-body"><span data-i18n="start.main.step2"></span><span class="step-do"><button type="button" class="pill" id="main-add" data-i18n="start.main.add"></button><span class="scene-note" id="main-result" hidden></span></span></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="15" rx="12" ry="5"/><path d="M12 15v12c0 2.8 5.4 5 12 5s12-2.2 12-5V15"/><path d="M12 21c0 2.8 5.4 5 12 5s12-2.2 12-5"/><path d="M24 36v6M21 39l3 3 3-3"/></svg></span>
+          <span class="step-body"><span data-i18n="start.main.step3"></span></span>
+        </li>
+        <li>
+          <span class="step-art" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="9" y="13" width="22" height="22" rx="3"/><path d="M14 30l5-6 4 4 3-3 4 5"/><circle cx="19" cy="20" r="1.6"/><path d="M37 15v10M32 20h10"/></svg></span>
+          <span class="step-body"><span data-i18n="start.main.step4"></span><a id="main-link" href="./collection.html"></a></span>
+        </li>
     </ol>
   </section>
 

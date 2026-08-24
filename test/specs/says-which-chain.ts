@@ -80,23 +80,23 @@ describe("the site says which chain", () => {
     assert.ok(mainnet);
 
     for (const [lang, dict] of Object.entries(STRINGS)) {
-      const body = (dict as Record<string, string>)["start.s4.body"];
-      assert.ok(body, `${lang} has no start.s4.body`);
+      const body = (dict as Record<string, string>)["start.main.body"];
+      assert.ok(body, `${lang} has no start.main.body`);
 
       assert.doesNotMatch(
         body, /not live|nothing on Polygon|noch nicht live|nichts zu verbinden/i,
-        `${lang}: route 04 says mainnet is not live, and ${mainnet.name} is on it`,
+        `${lang}: the mainnet route says mainnet is not live, and ${mainnet.name} is on it`,
       );
       assert.ok(
         body.includes(mainnet.name),
-        `${lang}: route 04 never names ${mainnet.name}, which is the collection it is about`,
+        `${lang}: the mainnet route never names ${mainnet.name}, which is the collection it is about`,
       );
     }
 
-    assert.match(read("start.html"), /id="mainnet-link"/, "route 04 has no way through to the collection");
+    assert.match(read("start.html"), /id="main-link"/, "the mainnet route has no way through to the collection");
     assert.match(
       read("start.js"), /collection\.html\?c=\$\{mainnet\.id\}/,
-      "route 04 links to a collection written out rather than the mainnet one",
+      "the mainnet route links to a collection written out rather than the mainnet one",
     );
   });
 
