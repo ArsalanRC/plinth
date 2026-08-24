@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { STRINGS } from "../../site/i18n.js";
@@ -135,4 +135,30 @@ describe("the guide", () => {
     assert.equal((html.match(/class="step-art"/g) ?? []).length, 11);
     assert.doesNotMatch(html, /<img/, "the guide pulls in an image from somewhere");
   });
+});
+
+/**
+ * Every page carries the same way out to the portfolio.
+ *
+ * Added because the profile page had no route back to anything of his, and a
+ * link that exists on three pages out of four is the kind of thing nobody
+ * notices until it is the page somebody landed on.
+ */
+describe("the nav", () => {
+  const pages = readdirSync(SITE).filter((f) => f.endsWith(".html"));
+
+  it("has pages to check at all", () => {
+    assert.ok(pages.length >= 4, `expected at least four pages, found ${pages.length}`);
+  });
+
+  for (const page of pages) {
+    it(`${page} links to the portfolio, once`, () => {
+      const src = readFileSync(join(SITE, page), "utf8");
+      assert.equal(
+        (src.match(/data-i18n="nav\.portfolio"/g) ?? []).length, 1,
+        `${page} does not carry exactly one portfolio link`,
+      );
+      assert.match(src, /href="https:\/\/arsalanrc\.github\.io"/, `${page} points somewhere else`);
+    });
+  }
 });

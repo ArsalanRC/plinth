@@ -126,6 +126,16 @@ describe("the site says which chain", () => {
   it("does not label the profile with a single chain", () => {
     assert.doesNotMatch(read("profile.html"), /Polygon Amoy/, "the profile still names one chain in markup");
     assert.match(read("profile.js"), /p-chain-names/, "the profile never fills its chain label");
+
+    // Same defect as the token dialog had: a name written out, on a page that
+    // serves both collections.
+    assert.doesNotMatch(read("profile.js"), /Plinth Cat #/, "the profile alt text hardcodes a cat");
+
+    // And the explorer link, which was always the first collection's.
+    assert.doesNotMatch(
+      read("profile.js"), /chainOf\(COLLECTIONS\[0\]\)\.explorer/,
+      "the address links to one fixed chain's explorer whatever the wallet holds",
+    );
   });
 
   /**
